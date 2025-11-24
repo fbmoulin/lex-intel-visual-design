@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FileDown, Eye, EyeOff } from "lucide-react";
+import { FileDown, Eye, EyeOff, Save } from "lucide-react";
 import { useState, useRef } from "react";
 import { useParams } from "wouter";
 import { toast } from "sonner";
@@ -11,13 +11,21 @@ import { generatePetitionPDF, prepareElementForPDF } from "@/lib/pdfGenerator";
 import { PetitionPreview } from "@/components/PetitionPreview";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function Editor() {
   const params = useParams();
   const templateId = params.templateId || "civil";
   const [showPreview, setShowPreview] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedPetitionId, setSavedPetitionId] = useState<number | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  const { user, isAuthenticated } = useAuth();
+  
+  const createPetitionMutation = trpc.petitions.create.useMutation();
+  const updatePetitionMutation = trpc.petitions.update.useMutation();
   
   const [formData, setFormData] = useState({
     numeroProcesso: "",
@@ -74,6 +82,56 @@ export default function Editor() {
     }
   };
 
+  const handleSavePetition = async () => {
+    if (!isAuthenticated) {
+      toast.error("Você precisa estar logado para salvar petições.");
+      return;
+    }
+
+    if (!formData.numeroProcesso && !formData.autor) {
+      toast.error("Preencha pelo menos o número do processo ou o nome do autor.");
+      return;
+    }
+
+    setIsSaving(true);
+    toast.loading("Salvando petição...", { id: "save-petition" });
+
+    try {
+      const petitionData = {
+        templateType: templateId,
+        title: formData.numeroProcesso || `Petição ${templateId} - ${new Date().toLocaleDateString()}`,
+        numeroProcesso: formData.numeroProcesso,
+        tribunal: formData.tribunal,
+        autor: formData.autor,
+        reu: formData.reu,
+        fatos: formData.fatos,
+        fundamentosJuridicos: formData.fundamentosJuridicos,
+        pedidos: formData.pedidos,
+        valorCausa: formData.valorCausa,
+        status: "rascunho" as const,
+      };
+
+      if (savedPetitionId) {
+        // Atualizar petição existente
+        await updatePetitionMutation.mutateAsync({
+          id: savedPetitionId,
+          ...petitionData,
+        });
+        toast.success("Petição atualizada com sucesso!", { id: "save-petition" });
+      } else {
+        // Criar nova petição
+        const result = await createPetitionMutation.mutateAsync(petitionData);
+        setSavedPetitionId(result.id);
+        toast.success("Petição salva com sucesso!", { id: "save-petition" });
+      }
+    } catch (error) {
+      console.error("Erro ao salvar petição:", error);
+      toast.error("Erro ao salvar petição. Tente novamente.", { id: "save-petition" });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const getTemplateTitle = () => {
     const titles: Record<string, string> = {
       civil: "Petição Civil",
@@ -100,6 +158,14 @@ export default function Editor() {
               <Button variant="outline" onClick={() => setShowPreview(!showPreview)}>
                 {showPreview ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
                 {showPreview ? "Ocultar" : "Mostrar"} Preview
+              </Button>
+              <Button 
+                variant="default" 
+                onClick={handleSavePetition} 
+                disabled={isSaving || !isAuthenticated}
+              >
+                <Save className="mr-2 h-4 w-4" />
+                {isSaving ? "Salvando..." : savedPetitionId ? "Atualizar" : "Salvar"}
               </Button>
               <Button onClick={handleGeneratePDF} disabled={isGeneratingPDF || !showPreview}>
                 <FileDown className="mr-2 h-4 w-4" />

@@ -16,8 +16,11 @@
 - [ ] Integrar autenticação no frontend
 - [ ] Proteger rotas que requerem autenticação
 - [ ] Criar interface de histórico de petições salvas
-- [ ] Implementar funcionalidade de salvar petição
-- [ ] Implementar funcionalidade de carregar petição salva
+- [x] Adicionar botão "Salvar Petição" no editor
+- [x] Implementar lógica de salvamento com API tRPC
+- [x] Adicionar feedback visual (loading, sucesso, erro)
+- [ ] Implementar carregamento de petições salvas no editor
+- [x] Adicionar atualização automática (update vs create)
 - [ ] Adicionar controle de acesso (usuário só vê suas próprias petições)
 
 ## Fase 1: Configuração e Componentes Básicos
