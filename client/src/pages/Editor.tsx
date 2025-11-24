@@ -4,9 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FileDown, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams } from "wouter";
 import { toast } from "sonner";
+import { generatePetitionPDF, prepareElementForPDF } from "@/lib/pdfGenerator";
 import { PetitionPreview } from "@/components/PetitionPreview";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -15,6 +16,8 @@ export default function Editor() {
   const params = useParams();
   const templateId = params.templateId || "civil";
   const [showPreview, setShowPreview] = useState(true);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
   
   const [formData, setFormData] = useState({
     numeroProcesso: "",
@@ -34,8 +37,41 @@ export default function Editor() {
     });
   };
 
-  const handleGeneratePDF = () => {
-    toast.info("Funcionalidade de geração de PDF em desenvolvimento");
+  const handleGeneratePDF = async () => {
+    if (!previewRef.current) {
+      toast.error("Preview não encontrado. Ative o preview para gerar o PDF.");
+      return;
+    }
+
+    setIsGeneratingPDF(true);
+    toast.loading("Gerando PDF...", { id: "pdf-generation" });
+
+    try {
+      // Prepara o elemento para exportação
+      prepareElementForPDF(previewRef.current);
+
+      // Aguarda um momento para garantir que tudo foi renderizado
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Gera o PDF
+      await generatePetitionPDF(previewRef.current, {
+        processNumber: formData.numeroProcesso,
+        court: formData.tribunal,
+        plaintiff: formData.autor,
+        defendant: formData.reu,
+        facts: formData.fatos,
+        legalBasis: formData.fundamentosJuridicos,
+        requests: formData.pedidos,
+        templateId,
+      });
+
+      toast.success("PDF gerado com sucesso!", { id: "pdf-generation" });
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast.error("Erro ao gerar PDF. Tente novamente.", { id: "pdf-generation" });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const getTemplateTitle = () => {
@@ -65,9 +101,9 @@ export default function Editor() {
                 {showPreview ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
                 {showPreview ? "Ocultar" : "Mostrar"} Preview
               </Button>
-              <Button onClick={handleGeneratePDF}>
+              <Button onClick={handleGeneratePDF} disabled={isGeneratingPDF || !showPreview}>
                 <FileDown className="mr-2 h-4 w-4" />
-                Gerar PDF
+                {isGeneratingPDF ? "Gerando..." : "Gerar PDF"}
               </Button>
             </div>
           </div>
@@ -179,7 +215,7 @@ export default function Editor() {
           {showPreview && (
             <div className="lg:sticky lg:top-8 h-fit">
               <h3 className="text-xl font-semibold mb-4">Preview da Petição</h3>
-              <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
+              <div ref={previewRef} className="max-h-[calc(100vh-12rem)] overflow-y-auto bg-white rounded-lg shadow-lg p-8">
                 <PetitionPreview formData={formData} templateId={templateId} />
               </div>
             </div>
