@@ -3,11 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, FileDown, Eye, EyeOff } from "lucide-react";
+import { FileDown, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import { Link, useParams } from "wouter";
+import { useParams } from "wouter";
 import { toast } from "sonner";
 import { PetitionPreview } from "@/components/PetitionPreview";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
 export default function Editor() {
   const params = useParams();
@@ -48,21 +50,17 @@ export default function Editor() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container py-6">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <Header />
+      
+      <div className="border-b bg-card/30">
+        <div className="container py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Editor de Petição</h1>
-              <p className="text-muted-foreground mt-1">{getTemplateTitle()}</p>
+              <h2 className="text-2xl font-bold text-foreground">Editor de Petição</h2>
+              <p className="text-sm text-muted-foreground mt-1">{getTemplateTitle()}</p>
             </div>
             <div className="flex gap-3">
-              <Link href="/templates">
-                <Button variant="outline">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Voltar
-                </Button>
-              </Link>
               <Button variant="outline" onClick={() => setShowPreview(!showPreview)}>
                 {showPreview ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
                 {showPreview ? "Ocultar" : "Mostrar"} Preview
@@ -74,7 +72,7 @@ export default function Editor() {
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       <main className="container py-8">
         <div className={`grid gap-8 ${showPreview ? 'lg:grid-cols-2' : 'max-w-4xl mx-auto'}`}>
@@ -188,6 +186,8 @@ export default function Editor() {
           )}
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 }

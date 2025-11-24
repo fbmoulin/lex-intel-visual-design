@@ -1,4 +1,22 @@
-# Visual Law - TODO
+# Lex Intel Visual Design - TODO
+
+## Fase 0: Atualização de Branding
+- [x] Atualizar título do projeto para "Lex Intel Visual Design"
+- [ ] Adicionar referência "Desenvolvido por Lex Intelligentia"
+- [x] Atualizar logo no código
+- [ ] Atualizar documentação do projeto
+- [x] Implementar modo escuro configurável
+- [x] Padronizar design em todas as páginas (benchmark visual)
+- [x] Criar estimativa de custo escalonável para primeiro mês
+
+## Integração SaaS
+- [ ] Planejar arquitetura de integração robusta
+- [ ] Implementar autenticação de usuários
+- [ ] Criar API backend para petições
+- [ ] Integrar banco de dados PostgreSQL
+- [ ] Implementar geração de PDF server-side
+- [ ] Adicionar controle de acesso e permissões
+- [ ] Implementar salvamento e histórico de petições
 
 ## Fase 1: Configuração e Componentes Básicos
 - [x] Configurar Design System (cores, tipografia, espaçamento)

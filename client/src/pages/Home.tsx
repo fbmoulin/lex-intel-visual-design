@@ -2,18 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Scale, FileText, Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <header className="border-b bg-card/50 backdrop-blur-sm">
-        <div className="container py-6">
-          <div className="flex items-center gap-3">
-            <Scale className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">Visual Law</h1>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main>
         <section className="container py-20">
@@ -99,11 +94,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t mt-20">
-        <div className="container py-8 text-center text-muted-foreground">
-          <p>Visual Law - Gerador de Petições Jurídicas</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

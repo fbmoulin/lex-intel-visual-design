@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Scale, Briefcase, Gavel, FileText, ShoppingCart } from "lucide-react";
 import { Link } from "wouter";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
 const templates = [
   {
@@ -43,20 +45,8 @@ const templates = [
 
 export default function Templates() {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Visual Law</h1>
-              <p className="text-muted-foreground mt-1">Gerador de Petições Jurídicas</p>
-            </div>
-            <Link href="/">
-              <Button variant="outline">Voltar</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <Header />
 
       <main className="container py-12">
         <div className="max-w-5xl mx-auto">
@@ -90,6 +80,8 @@ export default function Templates() {
           </div>
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 }
