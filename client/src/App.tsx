@@ -9,6 +9,7 @@ import Editor from "./pages/Editor";
 import Templates from "./pages/Templates";
 
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />

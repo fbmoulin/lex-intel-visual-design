@@ -1,3 +1,4 @@
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Scale, FileText, Sparkles, ArrowRight } from "lucide-react";
@@ -6,6 +7,10 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
 export default function Home() {
+  // The userAuth hooks provides authentication state
+  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
+  let { user, loading, error, isAuthenticated, logout } = useAuth();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <Header />

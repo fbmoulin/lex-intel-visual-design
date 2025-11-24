@@ -10,13 +10,15 @@
 - [x] Criar estimativa de custo escalonável para primeiro mês
 
 ## Integração SaaS
-- [ ] Planejar arquitetura de integração robusta
-- [ ] Implementar autenticação de usuários
-- [ ] Criar API backend para petições
-- [ ] Integrar banco de dados PostgreSQL
-- [ ] Implementar geração de PDF server-side
-- [ ] Adicionar controle de acesso e permissões
-- [ ] Implementar salvamento e histórico de petições
+- [x] Fazer upgrade do projeto para web-db-user
+- [x] Criar schema do banco de dados (users, petitions)
+- [x] Implementar rotas de API para CRUD de petições
+- [ ] Integrar autenticação no frontend
+- [ ] Proteger rotas que requerem autenticação
+- [ ] Criar interface de histórico de petições salvas
+- [ ] Implementar funcionalidade de salvar petição
+- [ ] Implementar funcionalidade de carregar petição salva
+- [ ] Adicionar controle de acesso (usuário só vê suas próprias petições)
 
 ## Fase 1: Configuração e Componentes Básicos
 - [x] Configurar Design System (cores, tipografia, espaçamento)
