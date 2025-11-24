@@ -21,9 +21,9 @@
 - [ ] Criar template de Petição de Direito do Consumidor
 
 ## Fase 4: Funcionalidades do Editor
-- [ ] Criar editor de petições com formulário dinâmico
-- [ ] Implementar seletor de templates
-- [ ] Implementar preview em tempo real
+- [x] Criar editor de petições com formulário dinâmico
+- [x] Implementar seletor de templates
+- [x] Implementar preview em tempo real
 - [ ] Implementar geração de PDF
 
 ## Fase 5: Testes e Otimização

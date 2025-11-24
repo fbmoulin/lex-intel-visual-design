@@ -3,14 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, FileDown } from "lucide-react";
+import { ArrowLeft, FileDown, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "wouter";
 import { toast } from "sonner";
+import { PetitionPreview } from "@/components/PetitionPreview";
 
 export default function Editor() {
   const params = useParams();
   const templateId = params.templateId || "civil";
+  const [showPreview, setShowPreview] = useState(true);
   
   const [formData, setFormData] = useState({
     numeroProcesso: "",
@@ -61,6 +63,10 @@ export default function Editor() {
                   Voltar
                 </Button>
               </Link>
+              <Button variant="outline" onClick={() => setShowPreview(!showPreview)}>
+                {showPreview ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
+                {showPreview ? "Ocultar" : "Mostrar"} Preview
+              </Button>
               <Button onClick={handleGeneratePDF}>
                 <FileDown className="mr-2 h-4 w-4" />
                 Gerar PDF
@@ -71,8 +77,8 @@ export default function Editor() {
       </header>
 
       <main className="container py-8">
-        <div className="max-w-4xl mx-auto">
-          <Card>
+        <div className={`grid gap-8 ${showPreview ? 'lg:grid-cols-2' : 'max-w-4xl mx-auto'}`}>
+          <Card className="h-fit">
             <CardHeader>
               <CardTitle>Informações da Petição</CardTitle>
             </CardHeader>
@@ -171,6 +177,15 @@ export default function Editor() {
               </div>
             </CardContent>
           </Card>
+          
+          {showPreview && (
+            <div className="lg:sticky lg:top-8 h-fit">
+              <h3 className="text-xl font-semibold mb-4">Preview da Petição</h3>
+              <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                <PetitionPreview formData={formData} templateId={templateId} />
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
