@@ -19,7 +19,11 @@
 - [x] Adicionar botão "Salvar Petição" no editor
 - [x] Implementar lógica de salvamento com API tRPC
 - [x] Adicionar feedback visual (loading, sucesso, erro)
-- [ ] Implementar carregamento de petições salvas no editor
+- [x] Implementar carregamento de petições salvas no editor
+- [x] Adicionar suporte para parâmetro de URL ?id=<petition_id>
+- [x] Implementar useEffect para carregar petição ao montar componente
+- [x] Preencher formulário com dados da petição carregada
+- [x] Testar fluxo completo: salvar → recarregar página com ID → verificar dados
 - [x] Adicionar atualização automática (update vs create)
 - [ ] Adicionar controle de acesso (usuário só vê suas próprias petições)
 

@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FileDown, Eye, EyeOff, Save } from "lucide-react";
-import { useState, useRef } from "react";
-import { useParams } from "wouter";
+import { useState, useRef, useEffect } from "react";
+import { useParams, useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import { generatePetitionPDF, prepareElementForPDF } from "@/lib/pdfGenerator";
 import { PetitionPreview } from "@/components/PetitionPreview";
@@ -27,6 +27,16 @@ export default function Editor() {
   const createPetitionMutation = trpc.petitions.create.useMutation();
   const updatePetitionMutation = trpc.petitions.update.useMutation();
   
+  // Obter ID da petição da URL
+  const searchParams = new URLSearchParams(useSearch());
+  const petitionIdFromUrl = searchParams.get('id');
+  
+  // Query para carregar petição
+  const { data: loadedPetition, isLoading: isLoadingPetition } = trpc.petitions.getById.useQuery(
+    { id: parseInt(petitionIdFromUrl || '0') },
+    { enabled: !!petitionIdFromUrl && isAuthenticated }
+  );
+  
   const [formData, setFormData] = useState({
     numeroProcesso: "",
     tribunal: "",
@@ -37,6 +47,24 @@ export default function Editor() {
     pedidos: "",
     valorCausa: ""
   });
+
+  // Carregar dados da petição quando disponível
+  useEffect(() => {
+    if (loadedPetition) {
+      setFormData({
+        numeroProcesso: loadedPetition.numeroProcesso || "",
+        tribunal: loadedPetition.tribunal || "",
+        autor: loadedPetition.autor || "",
+        reu: loadedPetition.reu || "",
+        fatos: loadedPetition.fatos || "",
+        fundamentosJuridicos: loadedPetition.fundamentosJuridicos || "",
+        pedidos: loadedPetition.pedidos || "",
+        valorCausa: loadedPetition.valorCausa || ""
+      });
+      setSavedPetitionId(loadedPetition.id);
+      toast.success(`Petição "${loadedPetition.title}" carregada com sucesso!`);
+    }
+  }, [loadedPetition]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
