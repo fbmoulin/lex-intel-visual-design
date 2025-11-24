@@ -20,6 +20,12 @@ export function Header() {
             </div>
           </Link>
           <div className="flex items-center gap-4">
+            <Link href="/templates" className="text-sm font-medium hover:text-primary transition-colors hidden md:block">
+              Templates
+            </Link>
+            <Link href="/my-petitions" className="text-sm font-medium hover:text-primary transition-colors hidden md:block">
+              Minhas Petições
+            </Link>
             <Button variant="ghost" size="icon" onClick={toggleTheme} title={`Alternar para modo ${theme === "dark" ? "claro" : "escuro"}`}>
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>

@@ -15,7 +15,14 @@
 - [x] Implementar rotas de API para CRUD de petições
 - [ ] Integrar autenticação no frontend
 - [ ] Proteger rotas que requerem autenticação
-- [ ] Criar interface de histórico de petições salvas
+- [x] Criar interface de histórico de petições salvas
+- [x] Criar página Minhas Petições e adicionar rota
+- [x] Implementar listagem de petições com cards visuais
+- [x] Adicionar busca por número/autor/título
+- [x] Implementar filtros por tipo de petição
+- [x] Adicionar botão Editar que redireciona para editor com ID
+- [x] Implementar exclusão de petições com confirmação
+- [x] Adicionar estados vazios (sem petições salvas)
 - [x] Adicionar botão "Salvar Petição" no editor
 - [x] Implementar lógica de salvamento com API tRPC
 - [x] Adicionar feedback visual (loading, sucesso, erro)
