@@ -23,6 +23,16 @@
 - [x] Adicionar botão Editar que redireciona para editor com ID
 - [x] Implementar exclusão de petições com confirmação
 - [x] Adicionar estados vazios (sem petições salvas)
+
+## Frontend Profissional e Integração
+- [x] Planejar arquitetura de integração do ecossistema Lex Intelligentia
+- [ ] Criar templates pré-preenchidos para todas as áreas do direito
+- [ ] Implementar editor de timeline interativo no formulário
+- [ ] Adicionar recursos avançados de UX (transições, micro-interações)
+- [ ] Preparar APIs de integração com outros apps
+- [ ] Criar documentação de integração para desenvolvedores
+- [ ] Definir padrões de comunicação entre apps
+- [ ] Implementar sistema de autenticação unificado (SSO)
 - [x] Adicionar botão "Salvar Petição" no editor
 - [x] Implementar lógica de salvamento com API tRPC
 - [x] Adicionar feedback visual (loading, sucesso, erro)
