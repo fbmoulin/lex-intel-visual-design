@@ -26,7 +26,12 @@
 
 ## Frontend Profissional e Integração
 - [x] Planejar arquitetura de integração do ecossistema Lex Intelligentia
-- [ ] Criar templates pré-preenchidos para todas as áreas do direito
+- [x] Criar templates pré-preenchidos para todas as áreas do direito
+- [x] Atualizar página Templates para listar os 8 templates
+- [x] Criar cards visuais com preview de cada template
+- [x] Implementar botão 'Usar Template' que preenche o editor
+- [x] Adicionar filtros por área do direito
+- [x] Testar fluxo: selecionar template → editor preenchido
 - [ ] Implementar editor de timeline interativo no formulário
 - [ ] Adicionar recursos avançados de UX (transições, micro-interações)
 - [ ] Preparar APIs de integração com outros apps

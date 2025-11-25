@@ -13,6 +13,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { getTemplateById } from "@/data/petitionTemplates";
 
 export default function Editor() {
   const params = useParams();
@@ -27,9 +28,10 @@ export default function Editor() {
   const createPetitionMutation = trpc.petitions.create.useMutation();
   const updatePetitionMutation = trpc.petitions.update.useMutation();
   
-  // Obter ID da petição da URL
+  // Obter ID da petição e template da URL
   const searchParams = new URLSearchParams(useSearch());
   const petitionIdFromUrl = searchParams.get('id');
+  const templateIdFromUrl = searchParams.get('template');
   
   // Query para carregar petição
   const { data: loadedPetition, isLoading: isLoadingPetition } = trpc.petitions.getById.useQuery(
@@ -65,6 +67,26 @@ export default function Editor() {
       toast.success(`Petição "${loadedPetition.title}" carregada com sucesso!`);
     }
   }, [loadedPetition]);
+  
+  // Carregar template quando especificado na URL
+  useEffect(() => {
+    if (templateIdFromUrl && !petitionIdFromUrl) {
+      const template = getTemplateById(templateIdFromUrl);
+      if (template) {
+        setFormData({
+          numeroProcesso: template.content.numeroProcesso || "",
+          tribunal: template.content.tribunal || "",
+          autor: template.content.autor || "",
+          reu: template.content.reu || "",
+          fatos: template.content.fatos || "",
+          fundamentosJuridicos: template.content.fundamentosJuridicos || "",
+          pedidos: template.content.pedidos || "",
+          valorCausa: template.content.valorCausa || ""
+        });
+        toast.success(`Template "${template.title}" carregado com sucesso!`);
+      }
+    }
+  }, [templateIdFromUrl, petitionIdFromUrl]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
