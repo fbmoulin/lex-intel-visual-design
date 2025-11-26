@@ -3,23 +3,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FileDown, Eye, EyeOff, Save } from "lucide-react";
+import { FileDown, Eye, EyeOff, Save, Settings } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useParams, useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import { generatePetitionPDF, prepareElementForPDF } from "@/lib/pdfGenerator";
+import { generatePetitionDOCX } from "@/lib/docxGenerator";
 import { PetitionPreview } from "@/components/PetitionPreview";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getTemplateById } from "@/data/petitionTemplates";
+import { ExportModal, ExportConfig } from "@/components/ExportModal";
 
 export default function Editor() {
   const params = useParams();
   const templateId = params.templateId || "civil";
   const [showPreview, setShowPreview] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedPetitionId, setSavedPetitionId] = useState<number | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -95,14 +98,21 @@ export default function Editor() {
     });
   };
 
-  const handleGeneratePDF = async () => {
+  const handleOpenExportModal = () => {
     if (!previewRef.current) {
-      toast.error("Preview não encontrado. Ative o preview para gerar o PDF.");
+      toast.error("Preview não encontrado. Ative o preview para exportar.");
+      return;
+    }
+    setShowExportModal(true);
+  };
+
+  const handleExport = async (config: ExportConfig) => {
+    if (!previewRef.current) {
+      toast.error("Preview não encontrado. Ative o preview para exportar.");
       return;
     }
 
     setIsGeneratingPDF(true);
-    toast.loading("Gerando PDF...", { id: "pdf-generation" });
 
     try {
       // Prepara o elemento para exportação
@@ -111,22 +121,35 @@ export default function Editor() {
       // Aguarda um momento para garantir que tudo foi renderizado
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Gera o PDF
-      await generatePetitionPDF(previewRef.current, {
-        processNumber: formData.numeroProcesso,
-        court: formData.tribunal,
-        plaintiff: formData.autor,
-        defendant: formData.reu,
-        facts: formData.fatos,
-        legalBasis: formData.fundamentosJuridicos,
-        requests: formData.pedidos,
-        templateId,
-      });
-
-      toast.success("PDF gerado com sucesso!", { id: "pdf-generation" });
+      if (config.format === "pdf") {
+        // Gera o PDF com configurações personalizadas
+        await generatePetitionPDF(previewRef.current, {
+          processNumber: formData.numeroProcesso,
+          court: formData.tribunal,
+          plaintiff: formData.autor,
+          defendant: formData.reu,
+          facts: formData.fatos,
+          legalBasis: formData.fundamentosJuridicos,
+          requests: formData.pedidos,
+          templateId,
+        }, config);
+      } else if (config.format === "docx") {
+        // Gera o DOCX com configurações personalizadas
+        await generatePetitionDOCX({
+          processNumber: formData.numeroProcesso,
+          court: formData.tribunal,
+          plaintiff: formData.autor,
+          defendant: formData.reu,
+          facts: formData.fatos,
+          legalBasis: formData.fundamentosJuridicos,
+          requests: formData.pedidos,
+          caseValue: formData.valorCausa,
+          templateId,
+        }, config);
+      }
     } catch (error) {
-      console.error("Erro ao gerar PDF:", error);
-      toast.error("Erro ao gerar PDF. Tente novamente.", { id: "pdf-generation" });
+      console.error("Erro ao exportar:", error);
+      throw error;
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -217,9 +240,9 @@ export default function Editor() {
                 <Save className="mr-2 h-4 w-4" />
                 {isSaving ? "Salvando..." : savedPetitionId ? "Atualizar" : "Salvar"}
               </Button>
-              <Button onClick={handleGeneratePDF} disabled={isGeneratingPDF || !showPreview}>
+              <Button onClick={handleOpenExportModal} disabled={isGeneratingPDF || !showPreview}>
                 <FileDown className="mr-2 h-4 w-4" />
-                {isGeneratingPDF ? "Gerando..." : "Gerar PDF"}
+                Exportar
               </Button>
             </div>
           </div>
@@ -340,6 +363,13 @@ export default function Editor() {
       </main>
       
       <Footer />
+      
+      <ExportModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        onExport={handleExport}
+        previewElement={<PetitionPreview formData={formData} templateId={templateId} />}
+      />
     </div>
   );
 }

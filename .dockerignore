@@ -1,0 +1,63 @@
+# Lex Intel Visual Design - Docker Ignore
+# Desenvolvido por Lex Intelligentia
+
+# Dependencies (serão instaladas no container)
+node_modules/
+.pnpm-store/
+
+# Build outputs (serão gerados no container)
+dist/
+build/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Tests
+**/*.test.*
+**/*.spec.*
+__tests__/
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Database (local)
+*.db
+*.sqlite
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Misc
+.cache/
+.vercel/
+.railway/

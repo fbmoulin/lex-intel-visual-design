@@ -77,6 +77,12 @@
 - [x] Adicionar biblioteca html2canvas e jsPDF
 - [x] Criar componente de renderização para PDF
 - [x] Preservar estilos de Timeline, SummaryCard e gráficos
+- [x] Criar modal de configuração de exportação
+- [x] Adicionar opções de formato (PDF/DOCX)
+- [x] Implementar personalização de cabeçalho e rodapé
+- [x] Adicionar preview antes de exportar
+- [x] Implementar exportação DOCX com biblioteca docx
+- [x] Integrar configurações de exportação em PDF e DOCX
 
 ## Fase 5: Testes e Otimização
 - [ ] Testar responsividade em diferentes dispositivos

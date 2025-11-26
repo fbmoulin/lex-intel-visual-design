@@ -1,0 +1,63 @@
+# Lex Intel Visual Design - NPM Ignore
+# Desenvolvido por Lex Intelligentia
+# Previne publicação de arquivos sensíveis no npm registry
+
+# Environment & Secrets
+.env*
+*.pem
+*.key
+secrets/
+
+# Source files (apenas dist deve ser publicado)
+client/src/
+server/
+*.ts
+*.tsx
+!*.d.ts
+
+# Config files
+tsconfig.json
+vite.config.ts
+vitest.config.ts
+.eslintrc*
+.prettierrc*
+
+# Tests
+**/*.test.*
+**/*.spec.*
+__tests__/
+coverage/
+
+# Documentation (manter apenas README.md)
+docs/
+*.md
+!README.md
+
+# Development
+.vscode/
+.idea/
+*.log
+node_modules/
+
+# Build artifacts temporários
+.cache/
+tmp/
+temp/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Database
+*.db
+*.sqlite
+
+# Uploads
+uploads/
+public/uploads/
