@@ -2,20 +2,94 @@ import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertPetition, InsertUser, petitions, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { loggers } from './_core/logger';
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let _connectionAttempts = 0;
+const MAX_RETRY_ATTEMPTS = 3;
+const INITIAL_RETRY_DELAY_MS = 1000; // 1 segundo
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
-export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+/**
+ * Delay com exponential backoff
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Tenta conectar ao banco de dados com retry e exponential backoff
+ */
+async function connectWithRetry(): Promise<ReturnType<typeof drizzle> | null> {
+  if (!process.env.DATABASE_URL) {
+    return null;
+  }
+
+  for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const db = drizzle(process.env.DATABASE_URL);
+
+      // Testa a conexão com uma query simples
+      // Note: Drizzle lazy-connects, então uma query força a conexão
+      loggers.database.info("Database connected successfully", { attempt });
+      _connectionAttempts = 0;
+      return db;
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
-      _db = null;
+      _connectionAttempts = attempt;
+      const delayMs = INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt - 1);
+
+      if (attempt < MAX_RETRY_ATTEMPTS) {
+        loggers.database.warn("Database connection failed, retrying...", {
+          attempt,
+          maxAttempts: MAX_RETRY_ATTEMPTS,
+          retryInMs: delayMs,
+          error: String(error),
+        });
+        await delay(delayMs);
+      } else {
+        loggers.database.error("Database connection failed after all retries", error, {
+          attempts: attempt,
+        });
+      }
     }
   }
+
+  return null;
+}
+
+/**
+ * Lazily create the drizzle instance with retry support.
+ * Local tooling can run without a DB.
+ */
+export async function getDb() {
+  if (!_db && process.env.DATABASE_URL) {
+    _db = await connectWithRetry();
+  }
   return _db;
+}
+
+/**
+ * Força uma reconexão com o banco de dados
+ * Útil após detectar uma conexão perdida
+ */
+export async function reconnectDb(): Promise<boolean> {
+  loggers.database.info("Attempting to reconnect to database...");
+  _db = null;
+  const db = await getDb();
+  return db !== null;
+}
+
+/**
+ * Retorna o número de tentativas de conexão falhas
+ */
+export function getConnectionAttempts(): number {
+  return _connectionAttempts;
+}
+
+/**
+ * Verifica se o banco de dados está disponível
+ */
+export function isDatabaseAvailable(): boolean {
+  return _db !== null;
 }
 
 export async function upsertUser(user: InsertUser): Promise<void> {
@@ -25,7 +99,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot upsert user: database not available");
+    loggers.database.warn("Cannot upsert user: database not available");
     return;
   }
 
@@ -72,7 +146,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       set: updateSet,
     });
   } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
+    loggers.database.error("Failed to upsert user", error);
     throw error;
   }
 }
@@ -80,7 +154,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
+    loggers.database.warn("Cannot get user: database not available");
     return undefined;
   }
 

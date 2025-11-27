@@ -47,9 +47,11 @@ Implementamos um conjunto robusto de security headers para proteger a aplicaçã
 
 ### 3.2. Banco de Dados
 
-- **Acesso:** O banco de dados PostgreSQL é acessado com credenciais seguras e a conexão é criptografada.
+- **Acesso:** O banco de dados MySQL é acessado com credenciais seguras e a conexão pode ser criptografada com SSL.
+- **ORM Seguro:** Utilizamos Drizzle ORM com prepared statements para prevenir SQL Injection.
 - **Backups:** Realizamos backups automáticos e regulares do banco de dados.
 - **Least Privilege:** O usuário do banco de dados tem apenas as permissões necessárias para executar as operações da aplicação.
+- **Validação de URL:** A conexão com o banco é validada no boot do servidor, com fail-fast em produção.
 
 ### 3.3. Dependências
 

@@ -290,18 +290,84 @@ export function setupRateLimit(app: Express) {
 /**
  * Request Validation
  * Valida tamanho e tipo de requests
+ *
+ * CONFIGURAÇÃO via ENV:
+ * - MAX_PAYLOAD_SIZE_MB: Tamanho máximo do payload em MB (default: 50)
  */
+const MAX_PAYLOAD_SIZE_MB = parseInt(process.env.MAX_PAYLOAD_SIZE_MB || "50");
+const MAX_PAYLOAD_SIZE_BYTES = MAX_PAYLOAD_SIZE_MB * 1024 * 1024;
+
 export function setupRequestValidation(app: Express) {
-  // Valida Content-Type para POST/PUT
+  // Valida tamanho do payload antes de processar
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const contentLength = req.headers["content-length"];
+
+    if (contentLength) {
+      const size = parseInt(contentLength, 10);
+
+      if (isNaN(size)) {
+        res.status(400).json({
+          error: "Invalid Content-Length",
+          message: "Content-Length header is not a valid number.",
+        });
+        return;
+      }
+
+      if (size > MAX_PAYLOAD_SIZE_BYTES) {
+        loggers.security.warn("Request payload too large", {
+          contentLength: size,
+          maxAllowed: MAX_PAYLOAD_SIZE_BYTES,
+          ip: req.ip,
+          path: req.path,
+        });
+
+        res.status(413).json({
+          error: "Payload Too Large",
+          message: `Request body exceeds the maximum allowed size of ${MAX_PAYLOAD_SIZE_MB}MB.`,
+          maxSizeMB: MAX_PAYLOAD_SIZE_MB,
+        });
+        return;
+      }
+    }
+
+    next();
+  });
+
+  // Valida Content-Type para POST/PUT/PATCH
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (["POST", "PUT", "PATCH"].includes(req.method)) {
       const contentType = req.headers["content-type"];
-      if (contentType && !contentType.includes("application/json") && !contentType.includes("multipart/form-data")) {
-        res.status(415).json({
-          error: "Unsupported Media Type",
-          message: "Content-Type must be application/json or multipart/form-data",
-        });
-        return;
+
+      // Ignora requests sem body (Content-Length: 0 ou ausente)
+      const contentLength = req.headers["content-length"];
+      if (!contentLength || contentLength === "0") {
+        return next();
+      }
+
+      // Valida Content-Type
+      if (contentType) {
+        const validTypes = [
+          "application/json",
+          "multipart/form-data",
+          "application/x-www-form-urlencoded",
+        ];
+
+        const isValidType = validTypes.some(type => contentType.includes(type));
+
+        if (!isValidType) {
+          loggers.security.warn("Unsupported Content-Type", {
+            contentType,
+            ip: req.ip,
+            path: req.path,
+          });
+
+          res.status(415).json({
+            error: "Unsupported Media Type",
+            message: "Content-Type must be application/json, multipart/form-data, or application/x-www-form-urlencoded.",
+            receivedType: contentType,
+          });
+          return;
+        }
       }
     }
     next();
