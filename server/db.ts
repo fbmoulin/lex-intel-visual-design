@@ -1,10 +1,14 @@
 import { and, desc, eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { InsertPetition, InsertUser, petitions, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { loggers } from './_core/logger';
 
-let _db: ReturnType<typeof drizzle> | null = null;
+type PostgresDb = ReturnType<typeof drizzle>;
+
+let _db: PostgresDb | null = null;
+let _sql: ReturnType<typeof postgres> | null = null;
 let _connectionAttempts = 0;
 const MAX_RETRY_ATTEMPTS = 3;
 const INITIAL_RETRY_DELAY_MS = 1000; // 1 segundo
@@ -19,18 +23,27 @@ function delay(ms: number): Promise<void> {
 /**
  * Tenta conectar ao banco de dados com retry e exponential backoff
  */
-async function connectWithRetry(): Promise<ReturnType<typeof drizzle> | null> {
+async function connectWithRetry(): Promise<PostgresDb | null> {
   if (!process.env.DATABASE_URL) {
     return null;
   }
 
   for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
     try {
-      const db = drizzle(process.env.DATABASE_URL);
+      // Configura conexão PostgreSQL otimizada para Supabase
+      _sql = postgres(process.env.DATABASE_URL, {
+        max: 10, // Pool máximo de conexões
+        idle_timeout: 20, // Timeout de conexão ociosa em segundos
+        connect_timeout: 10, // Timeout de conexão em segundos
+        prepare: false, // Desabilita prepared statements (melhor para Supabase pooler)
+      });
+
+      const db = drizzle(_sql);
 
       // Testa a conexão com uma query simples
-      // Note: Drizzle lazy-connects, então uma query força a conexão
-      loggers.database.info("Database connected successfully", { attempt });
+      await _sql`SELECT 1`;
+
+      loggers.database.info("Database connected successfully (PostgreSQL/Supabase)", { attempt });
       _connectionAttempts = 0;
       return db;
     } catch (error) {
@@ -73,7 +86,18 @@ export async function getDb() {
  */
 export async function reconnectDb(): Promise<boolean> {
   loggers.database.info("Attempting to reconnect to database...");
+
+  // Fecha conexão existente se houver
+  if (_sql) {
+    try {
+      await _sql.end();
+    } catch {
+      // Ignora erro ao fechar conexão
+    }
+  }
+
   _db = null;
+  _sql = null;
   const db = await getDb();
   return db !== null;
 }
@@ -92,6 +116,19 @@ export function isDatabaseAvailable(): boolean {
   return _db !== null;
 }
 
+/**
+ * Fecha a conexão com o banco de dados
+ * Útil para graceful shutdown
+ */
+export async function closeDb(): Promise<void> {
+  if (_sql) {
+    await _sql.end();
+    _sql = null;
+    _db = null;
+    loggers.database.info("Database connection closed");
+  }
+}
+
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) {
     throw new Error("User openId is required for upsert");
@@ -107,7 +144,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     const values: InsertUser = {
       openId: user.openId,
     };
-    const updateSet: Record<string, unknown> = {};
+    const updateSet: Partial<InsertUser> = {};
 
     const textFields = ["name", "email", "loginMethod"] as const;
     type TextField = (typeof textFields)[number];
@@ -142,7 +179,9 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
+    // PostgreSQL usa onConflictDoUpdate em vez de onDuplicateKeyUpdate
+    await db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet,
     });
   } catch (error) {
@@ -170,8 +209,9 @@ export async function createPetition(petition: InsertPetition) {
     throw new Error("Database not available");
   }
 
-  const result = await db.insert(petitions).values(petition);
-  return Number(result[0].insertId);
+  // PostgreSQL usa returning() para obter o ID inserido
+  const result = await db.insert(petitions).values(petition).returning({ id: petitions.id });
+  return result[0].id;
 }
 
 export async function getUserPetitions(userId: number) {
@@ -212,9 +252,10 @@ export async function updatePetition(
     throw new Error("Database not available");
   }
 
+  // Adiciona updatedAt automaticamente
   await db
     .update(petitions)
-    .set(data)
+    .set({ ...data, updatedAt: new Date() })
     .where(and(eq(petitions.id, id), eq(petitions.userId, userId)));
 }
 

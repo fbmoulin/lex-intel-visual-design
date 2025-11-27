@@ -24,6 +24,9 @@ const OPTIONAL_ENV_VARS = {
   OWNER_OPEN_ID: "",
   BUILT_IN_FORGE_API_URL: "",
   BUILT_IN_FORGE_API_KEY: "",
+  SUPABASE_URL: "",
+  SUPABASE_ANON_KEY: "",
+  SUPABASE_SERVICE_ROLE_KEY: "",
 } as const;
 
 /**
@@ -53,9 +56,9 @@ function validateRequiredEnvVars(): void {
       "",
       "  Por favor, defina-as no arquivo .env ou como variáveis de ambiente.",
       "",
-      "  Exemplo de .env:",
+      "  Exemplo de .env (Supabase):",
       "    JWT_SECRET=sua-chave-secreta-aqui",
-      "    DATABASE_URL=mysql://user:pass@host:3306/db",
+      "    DATABASE_URL=postgresql://postgres.[ref]:[pass]@aws-0-[region].pooler.supabase.com:6543/postgres",
       "    OAUTH_SERVER_URL=https://oauth.example.com",
       "",
       "═══════════════════════════════════════════════════════════════",
@@ -87,11 +90,11 @@ function validateSecurityRequirements(): void {
     );
   }
 
-  // Avisa se DATABASE_URL contém credenciais em texto claro (para awareness)
+  // Verifica se DATABASE_URL é PostgreSQL (Supabase)
   const dbUrl = process.env.DATABASE_URL;
-  if (dbUrl && dbUrl.includes("@") && !dbUrl.includes("ssl=true")) {
+  if (dbUrl && !dbUrl.startsWith("postgresql://") && !dbUrl.startsWith("postgres://")) {
     console.warn(
-      "[ENV] ⚠️  DATABASE_URL não parece ter SSL habilitado. Considere usar ssl=true em produção."
+      "[ENV] ⚠️  DATABASE_URL deve ser uma URL PostgreSQL (Supabase). Formato: postgresql://..."
     );
   }
 }
@@ -113,8 +116,13 @@ export const ENV = {
   oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
   ownerOpenId: process.env.OWNER_OPEN_ID ?? OPTIONAL_ENV_VARS.OWNER_OPEN_ID,
 
-  // Banco de Dados
+  // Banco de Dados (PostgreSQL/Supabase)
   databaseUrl: process.env.DATABASE_URL ?? "",
+
+  // Supabase
+  supabaseUrl: process.env.SUPABASE_URL ?? OPTIONAL_ENV_VARS.SUPABASE_URL,
+  supabaseAnonKey: process.env.SUPABASE_ANON_KEY ?? OPTIONAL_ENV_VARS.SUPABASE_ANON_KEY,
+  supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? OPTIONAL_ENV_VARS.SUPABASE_SERVICE_ROLE_KEY,
 
   // APIs Externas
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? OPTIONAL_ENV_VARS.BUILT_IN_FORGE_API_URL,
@@ -129,7 +137,7 @@ export const ENV = {
 /**
  * Helper para verificar se uma feature está disponível
  */
-export function hasFeature(feature: "database" | "forge" | "oauth"): boolean {
+export function hasFeature(feature: "database" | "forge" | "oauth" | "supabase"): boolean {
   switch (feature) {
     case "database":
       return Boolean(ENV.databaseUrl);
@@ -137,6 +145,8 @@ export function hasFeature(feature: "database" | "forge" | "oauth"): boolean {
       return Boolean(ENV.forgeApiUrl && ENV.forgeApiKey);
     case "oauth":
       return Boolean(ENV.oAuthServerUrl);
+    case "supabase":
+      return Boolean(ENV.supabaseUrl && ENV.supabaseAnonKey);
     default:
       return false;
   }
