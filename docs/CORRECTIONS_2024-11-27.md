@@ -236,4 +236,189 @@ pnpm run build
 
 ---
 
-*Documento gerado automaticamente durante sessão de análise e correção de código.*
+## Correções de Alta Prioridade (Fase 2)
+
+Após as correções críticas, foram aplicadas 5 correções de alta prioridade.
+
+---
+
+## Correção Alta 1: Remover Type Assertions Inseguras
+
+### Detalhes
+| Campo | Valor |
+|-------|-------|
+| **Arquivos** | `textarea.tsx`, `dialog.tsx`, `input.tsx` |
+| **Severidade** | Alta |
+| **Tipo** | Type Safety |
+
+### Problema
+Uso de `as any` para acessar propriedade `isComposing` do `KeyboardEvent`.
+
+### Solução
+Substituído por type assertions específicas usando `globalThis.KeyboardEvent`.
+
+```typescript
+// ANTES
+const isComposing = (e.nativeEvent as any).isComposing;
+
+// DEPOIS
+const nativeEvent = e.nativeEvent as globalThis.KeyboardEvent;
+const isComposing = nativeEvent.isComposing;
+```
+
+---
+
+## Correção Alta 2: Rate Limiting com Proteção contra Memory Leak
+
+### Detalhes
+| Campo | Valor |
+|-------|-------|
+| **Arquivo** | `server/_core/security.ts` |
+| **Severidade** | Alta |
+| **Tipo** | Segurança/Performance |
+
+### Melhorias Implementadas
+1. **Limite máximo de IPs** (`RATE_LIMIT_MAX_IPS`, default 10000)
+2. **Eviction automática** quando store está cheio (remove 10% mais antigos)
+3. **Limpeza mais frequente** (15 min vs 1 hora)
+4. **Cleanup no shutdown** via SIGTERM/SIGINT
+5. **Documentação completa** de limitações e guia de migração para Redis
+
+### Configuração via ENV
+```bash
+RATE_LIMIT_WINDOW_MS=900000    # 15 minutos
+RATE_LIMIT_MAX_REQUESTS=100     # requests por janela
+RATE_LIMIT_MAX_IPS=10000        # máximo de IPs no store
+```
+
+---
+
+## Correção Alta 3: Validação Rigorosa de Input
+
+### Detalhes
+| Campo | Valor |
+|-------|-------|
+| **Arquivo** | `server/routers.ts` |
+| **Severidade** | Alta |
+| **Tipo** | Segurança |
+
+### Validações Adicionadas
+
+| Campo | Validação |
+|-------|-----------|
+| `templateType` | Enum (10 tipos: civil, trabalhista, criminal, etc.) |
+| `title` | min: 1, max: 255 caracteres |
+| `numeroProcesso` | max: 50, regex: `/^[\d.\-\/]*$/` |
+| `tribunal` | max: 100 caracteres |
+| `autor/reu` | max: 255 caracteres |
+| `fatos/fundamentosJuridicos` | max: 50000 caracteres (~10 páginas) |
+| `pedidos` | max: 10000 caracteres |
+| `valorCausa` | max: 50, regex: `/^[\d.,\s]*$/` |
+| `id` | inteiro positivo |
+
+---
+
+## Correção Alta 4: Validação de Variáveis de Ambiente
+
+### Detalhes
+| Campo | Valor |
+|-------|-------|
+| **Arquivo** | `server/_core/env.ts` |
+| **Severidade** | Alta |
+| **Tipo** | Configuração/Segurança |
+
+### Funcionalidades
+1. **Validação no boot** de variáveis obrigatórias
+2. **Fail-fast em produção** (throw se faltando)
+3. **Warning em desenvolvimento** (continua para dev local)
+4. **Validação de segurança** (JWT_SECRET mínimo 32 chars, aviso SSL)
+5. **Helper `hasFeature()`** para verificar disponibilidade de features
+
+### Variáveis Obrigatórias
+- `JWT_SECRET`
+- `DATABASE_URL`
+- `OAUTH_SERVER_URL`
+
+---
+
+## Correção Alta 5: Logger Estruturado
+
+### Detalhes
+| Campo | Valor |
+|-------|-------|
+| **Arquivo Criado** | `server/_core/logger.ts` |
+| **Arquivos Atualizados** | `index.ts`, `security.ts` |
+| **Severidade** | Alta |
+| **Tipo** | Observabilidade |
+
+### Características
+- **Níveis**: debug, info, warn, error
+- **Timestamps**: ISO 8601
+- **Contexto**: por módulo (Server, Database, Auth, OAuth, API, Security, RateLimit)
+- **Cores**: ANSI para terminal (desabilitado se não TTY)
+- **JSON em produção**: para log aggregation (ELK, Datadog, etc.)
+
+### Uso
+```typescript
+import { loggers, createLogger } from "./logger";
+
+// Loggers pré-configurados
+loggers.server.info("Server started", { port: 3000 });
+loggers.auth.error("Login failed", error, { userId: "123" });
+
+// Logger customizado
+const myLogger = createLogger("MyModule");
+myLogger.debug("Debug info", { data: "value" });
+```
+
+---
+
+## Sumário Completo de Arquivos Modificados
+
+### Fase 1 (Correções Críticas)
+| Arquivo | Tipo de Mudança |
+|---------|-----------------|
+| `client/src/_core/hooks/useAuth.ts` | Correção de sintaxe |
+| `server/_core/security.ts` | Hardening CSP |
+| `.github/workflows/ci.yml` | Arquivo novo |
+| `.github/workflows/release.yml` | Arquivo novo |
+
+### Fase 2 (Correções de Alta Prioridade)
+| Arquivo | Tipo de Mudança |
+|---------|-----------------|
+| `client/src/components/ui/textarea.tsx` | Type safety |
+| `client/src/components/ui/dialog.tsx` | Type safety |
+| `client/src/components/ui/input.tsx` | Type safety |
+| `server/_core/security.ts` | Rate limiting melhorado |
+| `server/routers.ts` | Validação de input |
+| `server/_core/env.ts` | Validação de env vars |
+| `server/_core/logger.ts` | Arquivo novo |
+| `server/_core/index.ts` | Usar logger |
+
+---
+
+## Próximos Passos Recomendados
+
+### Imediato
+- [x] ~~Fixar sintaxe em useAuth.ts~~
+- [x] ~~Atualizar CSP header~~
+- [x] ~~Criar GitHub Workflows~~
+- [x] ~~Remover `as any` type assertions~~
+- [x] ~~Melhorar rate limiting~~
+- [x] ~~Melhorar validação de input~~
+- [x] ~~Validação de env vars~~
+- [x] ~~Implementar logger estruturado~~
+
+### Curto Prazo
+- [ ] Substituir todos os console.log restantes pelo logger
+- [ ] Adicionar mais testes de integração
+- [ ] Implementar CSP baseado em nonces
+
+### Médio Prazo
+- [ ] Migrar rate limiting para Redis
+- [ ] Expandir testes (>80% coverage)
+- [ ] Documentação de API (OpenAPI/Swagger)
+
+---
+
+*Documento atualizado em 27/11/2024 - Sessão de análise e correção de código.*
