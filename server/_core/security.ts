@@ -14,18 +14,42 @@ import type { Express, Request, Response, NextFunction } from "express";
 /**
  * Configuração de Security Headers
  * Baseado em OWASP e Node.js Security Best Practices
+ *
+ * CSP Hardening Notes:
+ * - 'unsafe-eval' foi REMOVIDO para prevenir XSS via eval()/Function()
+ * - 'unsafe-inline' mantido em style-src para CSS-in-JS (React/Tailwind)
+ * - Em produção, scripts inline são bloqueados
+ * - Diretivas adicionais previnem clickjacking e data injection
+ *
+ * TODO Futuro: Implementar nonce-based CSP para eliminar 'unsafe-inline'
  */
 export function setupSecurityHeaders(app: Express) {
   // Content Security Policy
   app.use((req: Request, res: Response, next: NextFunction) => {
+    const isDevelopment = process.env.NODE_ENV === "development";
+
+    // CSP mais permissiva em desenvolvimento para hot reload
+    const scriptSrc = isDevelopment
+      ? "'self' 'unsafe-inline'" // Dev: permite inline para HMR
+      : "'self'";                 // Prod: apenas scripts do mesmo origem
+
+    const connectSrc = isDevelopment
+      ? "'self' ws: wss:"         // Dev: permite WebSocket para HMR
+      : "'self'";                 // Prod: apenas conexões do mesmo origem
+
     res.setHeader(
       "Content-Security-Policy",
       "default-src 'self'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-      "style-src 'self' 'unsafe-inline'; " +
+      `script-src ${scriptSrc}; ` +
+      "style-src 'self' 'unsafe-inline'; " +  // Necessário para CSS-in-JS
       "img-src 'self' data: https:; " +
       "font-src 'self' data:; " +
-      "connect-src 'self';"
+      `connect-src ${connectSrc}; ` +
+      "base-uri 'self'; " +                   // Previne base tag injection
+      "form-action 'self'; " +                // Previne form hijacking
+      "frame-ancestors 'none'; " +            // Previne clickjacking (substitui X-Frame-Options)
+      "object-src 'none'; " +                 // Bloqueia plugins (Flash, Java)
+      "upgrade-insecure-requests;"            // Força HTTPS para recursos
     );
     next();
   });

@@ -1,0 +1,188 @@
+# Release Workflow
+# Lex Intel Visual Design - Desenvolvido por Lex Intelligentia
+#
+# Este workflow executa quando uma tag de versão é criada (v*)
+# Ou manualmente via workflow_dispatch
+#
+# Etapas:
+# 1. Validação completa (CI)
+# 2. Build de produção
+# 3. Criação de release no GitHub
+# 4. Upload de artifacts
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versão para release (ex: v1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Marcar como pre-release?'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '10.4.1'
+
+jobs:
+  # ============================================
+  # Job: Validação
+  # ============================================
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm run check
+
+      - name: Executar testes
+        run: pnpm run test
+        env:
+          NODE_ENV: test
+
+      - name: Auditoria de segurança
+        run: pnpm run audit:security
+        continue-on-error: true
+
+  # ============================================
+  # Job: Build e Release
+  # ============================================
+  release:
+    name: Build & Release
+    runs-on: ubuntu-latest
+    needs: validate
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Build de produção
+        run: pnpm run build
+        env:
+          NODE_ENV: production
+
+      - name: Determinar versão
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "prerelease=${{ github.event.inputs.prerelease }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Gerar changelog
+        id: changelog
+        run: |
+          # Pega os commits desde a última tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREVIOUS_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" -20)
+          fi
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Criar arquivo de release
+        run: |
+          cd dist
+          tar -czvf ../lex-intel-visual-design-${{ steps.version.outputs.version }}.tar.gz .
+          cd ..
+
+      - name: Criar Release no GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
+          body: |
+            ## Lex Intel Visual Design ${{ steps.version.outputs.version }}
+
+            ### Changelog
+            ${{ steps.changelog.outputs.changelog }}
+
+            ### Instalação
+            ```bash
+            # Baixe o arquivo tar.gz abaixo e extraia
+            tar -xzvf lex-intel-visual-design-${{ steps.version.outputs.version }}.tar.gz
+
+            # Instale dependências de produção
+            pnpm install --prod
+
+            # Execute
+            NODE_ENV=production node dist/index.js
+            ```
+
+            ### Docker
+            ```bash
+            docker build -t lex-intel-visual-design:${{ steps.version.outputs.version }} .
+            docker run -p 3000:3000 --env-file .env lex-intel-visual-design:${{ steps.version.outputs.version }}
+            ```
+          files: |
+            lex-intel-visual-design-${{ steps.version.outputs.version }}.tar.gz
+          prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # Job: Notificação (opcional)
+  # ============================================
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: release
+    if: always()
+    steps:
+      - name: Status da release
+        run: |
+          if [ "${{ needs.release.result }}" == "success" ]; then
+            echo "✅ Release criada com sucesso!"
+          else
+            echo "❌ Falha ao criar release"
+            exit 1
+          fi
