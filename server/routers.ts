@@ -1,39 +1,9 @@
-import { COOKIE_NAME } from "@shared/const";
+import { COOKIE_NAME, PETITION_TEMPLATE_TYPES, PETITION_TEXT_LIMITS } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
-
-/**
- * Schema de validação para petições
- * Define tipos permitidos, limites de tamanho e formatos
- */
-const PETITION_TEMPLATE_TYPES = [
-  "civil",
-  "trabalhista",
-  "criminal",
-  "tributario",
-  "consumidor",
-  "familia",
-  "empresarial",
-  "administrativo",
-  "previdenciario",
-  "ambiental",
-] as const;
-
-// Limites de tamanho para campos de texto
-const TEXT_LIMITS = {
-  title: { min: 1, max: 255 },
-  numeroProcesso: { max: 50 },
-  tribunal: { max: 100 },
-  autor: { max: 255 },
-  reu: { max: 255 },
-  fatos: { max: 50000 },           // ~10 páginas
-  fundamentosJuridicos: { max: 50000 },
-  pedidos: { max: 10000 },
-  valorCausa: { max: 50 },
-} as const;
 
 // Schema base para campos de petição com validações rigorosas
 const petitionFieldsSchema = {
@@ -41,32 +11,32 @@ const petitionFieldsSchema = {
     message: `Tipo de template deve ser um de: ${PETITION_TEMPLATE_TYPES.join(", ")}`
   }),
   title: z.string()
-    .min(TEXT_LIMITS.title.min, "Título é obrigatório")
-    .max(TEXT_LIMITS.title.max, `Título deve ter no máximo ${TEXT_LIMITS.title.max} caracteres`),
+    .min(PETITION_TEXT_LIMITS.title.min, "Título é obrigatório")
+    .max(PETITION_TEXT_LIMITS.title.max, `Título deve ter no máximo ${PETITION_TEXT_LIMITS.title.max} caracteres`),
   numeroProcesso: z.string()
-    .max(TEXT_LIMITS.numeroProcesso.max, `Número do processo deve ter no máximo ${TEXT_LIMITS.numeroProcesso.max} caracteres`)
+    .max(PETITION_TEXT_LIMITS.numeroProcesso.max, `Número do processo deve ter no máximo ${PETITION_TEXT_LIMITS.numeroProcesso.max} caracteres`)
     .regex(/^[\d.\-\/]*$/, "Número do processo deve conter apenas dígitos, pontos, hífens e barras")
     .optional(),
   tribunal: z.string()
-    .max(TEXT_LIMITS.tribunal.max, `Tribunal deve ter no máximo ${TEXT_LIMITS.tribunal.max} caracteres`)
+    .max(PETITION_TEXT_LIMITS.tribunal.max, `Tribunal deve ter no máximo ${PETITION_TEXT_LIMITS.tribunal.max} caracteres`)
     .optional(),
   autor: z.string()
-    .max(TEXT_LIMITS.autor.max, `Autor deve ter no máximo ${TEXT_LIMITS.autor.max} caracteres`)
+    .max(PETITION_TEXT_LIMITS.autor.max, `Autor deve ter no máximo ${PETITION_TEXT_LIMITS.autor.max} caracteres`)
     .optional(),
   reu: z.string()
-    .max(TEXT_LIMITS.reu.max, `Réu deve ter no máximo ${TEXT_LIMITS.reu.max} caracteres`)
+    .max(PETITION_TEXT_LIMITS.reu.max, `Réu deve ter no máximo ${PETITION_TEXT_LIMITS.reu.max} caracteres`)
     .optional(),
   fatos: z.string()
-    .max(TEXT_LIMITS.fatos.max, `Fatos deve ter no máximo ${TEXT_LIMITS.fatos.max} caracteres`)
+    .max(PETITION_TEXT_LIMITS.fatos.max, `Fatos deve ter no máximo ${PETITION_TEXT_LIMITS.fatos.max} caracteres`)
     .optional(),
   fundamentosJuridicos: z.string()
-    .max(TEXT_LIMITS.fundamentosJuridicos.max, `Fundamentos jurídicos deve ter no máximo ${TEXT_LIMITS.fundamentosJuridicos.max} caracteres`)
+    .max(PETITION_TEXT_LIMITS.fundamentosJuridicos.max, `Fundamentos jurídicos deve ter no máximo ${PETITION_TEXT_LIMITS.fundamentosJuridicos.max} caracteres`)
     .optional(),
   pedidos: z.string()
-    .max(TEXT_LIMITS.pedidos.max, `Pedidos deve ter no máximo ${TEXT_LIMITS.pedidos.max} caracteres`)
+    .max(PETITION_TEXT_LIMITS.pedidos.max, `Pedidos deve ter no máximo ${PETITION_TEXT_LIMITS.pedidos.max} caracteres`)
     .optional(),
   valorCausa: z.string()
-    .max(TEXT_LIMITS.valorCausa.max, `Valor da causa deve ter no máximo ${TEXT_LIMITS.valorCausa.max} caracteres`)
+    .max(PETITION_TEXT_LIMITS.valorCausa.max, `Valor da causa deve ter no máximo ${PETITION_TEXT_LIMITS.valorCausa.max} caracteres`)
     .regex(/^[R$€£¥\d.,\s]*$/, "Valor da causa deve conter apenas números, moeda e separadores")
     .optional(),
   status: z.enum(["rascunho", "finalizada"]).default("rascunho"),
@@ -114,10 +84,7 @@ export const appRouter = router({
           id: z.number().int().positive("ID deve ser um número inteiro positivo"),
           // Campos opcionais para update, reutilizando validações do schema base
           templateType: petitionFieldsSchema.templateType.optional(),
-          title: z.string()
-            .min(TEXT_LIMITS.title.min, "Título é obrigatório")
-            .max(TEXT_LIMITS.title.max, `Título deve ter no máximo ${TEXT_LIMITS.title.max} caracteres`)
-            .optional(),
+          title: petitionFieldsSchema.title.optional(),
           numeroProcesso: petitionFieldsSchema.numeroProcesso,
           tribunal: petitionFieldsSchema.tribunal,
           autor: petitionFieldsSchema.autor,

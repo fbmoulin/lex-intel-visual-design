@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
+import { PETITION_TEMPLATE_TYPES, PETITION_TEXT_LIMITS } from "@shared/const";
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 
@@ -31,7 +33,78 @@ function createAuthContext(userId: number = 1): { ctx: TrpcContext } {
   return { ctx };
 }
 
-describe("petitions.create", () => {
+// =============================================================================
+// Schema Validation Tests (no database required)
+// =============================================================================
+
+describe("petition schema validation", () => {
+  it("accepts all valid template types", () => {
+    for (const type of PETITION_TEMPLATE_TYPES) {
+      const schema = z.enum(PETITION_TEMPLATE_TYPES);
+      expect(schema.safeParse(type).success).toBe(true);
+    }
+  });
+
+  it("rejects invalid template types", () => {
+    const schema = z.enum(PETITION_TEMPLATE_TYPES);
+    expect(schema.safeParse("invalid").success).toBe(false);
+    expect(schema.safeParse("").success).toBe(false);
+    expect(schema.safeParse(123).success).toBe(false);
+  });
+
+  it("validates title length constraints", () => {
+    const schema = z.string()
+      .min(PETITION_TEXT_LIMITS.title.min)
+      .max(PETITION_TEXT_LIMITS.title.max);
+
+    // Valid titles
+    expect(schema.safeParse("A").success).toBe(true);
+    expect(schema.safeParse("Valid Title").success).toBe(true);
+    expect(schema.safeParse("a".repeat(255)).success).toBe(true);
+
+    // Invalid titles
+    expect(schema.safeParse("").success).toBe(false);
+    expect(schema.safeParse("a".repeat(256)).success).toBe(false);
+  });
+
+  it("validates numeroProcesso format", () => {
+    const schema = z.string()
+      .max(PETITION_TEXT_LIMITS.numeroProcesso.max)
+      .regex(/^[\d.\-\/]*$/);
+
+    // Valid formats
+    expect(schema.safeParse("001/2025").success).toBe(true);
+    expect(schema.safeParse("1234567-89.2025.1.00.0001").success).toBe(true);
+    expect(schema.safeParse("").success).toBe(true);
+
+    // Invalid formats
+    expect(schema.safeParse("ABC-123").success).toBe(false);
+    expect(schema.safeParse("processo #1").success).toBe(false);
+  });
+
+  it("validates valorCausa format with currency symbols", () => {
+    const schema = z.string()
+      .max(PETITION_TEXT_LIMITS.valorCausa.max)
+      .regex(/^[R$€£¥\d.,\s]*$/);
+
+    // Valid formats
+    expect(schema.safeParse("R$ 10.000,00").success).toBe(true);
+    expect(schema.safeParse("10000").success).toBe(true);
+    expect(schema.safeParse("€ 1,000.00").success).toBe(true);
+    expect(schema.safeParse("").success).toBe(true);
+
+    // Invalid formats
+    expect(schema.safeParse("dez mil reais").success).toBe(false);
+    expect(schema.safeParse("10.000 BRL").success).toBe(false);
+  });
+});
+
+// =============================================================================
+// Database Integration Tests (require database connection)
+// These tests are skipped when DATABASE_URL is not set
+// =============================================================================
+
+describe.skipIf(!process.env.DATABASE_URL)("petitions.create", () => {
   it("creates a new petition and returns its ID", async () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
@@ -53,7 +126,7 @@ describe("petitions.create", () => {
   });
 });
 
-describe("petitions.list", () => {
+describe.skipIf(!process.env.DATABASE_URL)("petitions.list", () => {
   it("returns list of user petitions", async () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
@@ -75,7 +148,7 @@ describe("petitions.list", () => {
   });
 });
 
-describe("petitions.getById", () => {
+describe.skipIf(!process.env.DATABASE_URL)("petitions.getById", () => {
   it("returns petition by ID for the owner", async () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
@@ -106,7 +179,7 @@ describe("petitions.getById", () => {
   });
 });
 
-describe("petitions.update", () => {
+describe.skipIf(!process.env.DATABASE_URL)("petitions.update", () => {
   it("updates petition successfully", async () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
@@ -134,7 +207,7 @@ describe("petitions.update", () => {
   });
 });
 
-describe("petitions.delete", () => {
+describe.skipIf(!process.env.DATABASE_URL)("petitions.delete", () => {
   it("deletes petition successfully", async () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
@@ -156,7 +229,7 @@ describe("petitions.delete", () => {
   });
 });
 
-describe("petitions access control", () => {
+describe.skipIf(!process.env.DATABASE_URL)("petitions access control", () => {
   it("user cannot access another user's petition", async () => {
     const { ctx: ctx1 } = createAuthContext(1);
     const caller1 = appRouter.createCaller(ctx1);
