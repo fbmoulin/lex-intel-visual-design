@@ -2,13 +2,63 @@
 
 # Lex Intel Visual Design - GitHub Setup Automation Script
 # Desenvolvido por Lex Intelligentia
-# 
+#
 # Este script automatiza a configuração completa do repositório GitHub:
 # 1. Adiciona GitHub Actions workflows
 # 2. Configura proteções de branch
 # 3. Cria release da versão beta
+#
+# Uso: ./setup-github.sh [OPTIONS]
+#   -y, --yes       Aceita todas as confirmações automaticamente
+#   -f, --force     Força todas as operações (sobrescreve existentes)
+#   --skip-release  Pula criação de release
+#   --skip-protect  Pula configuração de proteções de branch
+#   -h, --help      Mostra ajuda
+#
+# Este script é idempotente - pode ser executado múltiplas vezes sem efeitos colaterais
 
 set -e  # Exit on error
+
+# Parse command line arguments
+AUTO_YES=false
+FORCE=false
+SKIP_RELEASE=false
+SKIP_PROTECT=false
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -y|--yes)
+      AUTO_YES=true
+      shift
+      ;;
+    -f|--force)
+      FORCE=true
+      shift
+      ;;
+    --skip-release)
+      SKIP_RELEASE=true
+      shift
+      ;;
+    --skip-protect)
+      SKIP_PROTECT=true
+      shift
+      ;;
+    -h|--help)
+      echo "Uso: ./setup-github.sh [OPTIONS]"
+      echo "  -y, --yes       Aceita todas as confirmações automaticamente"
+      echo "  -f, --force     Força todas as operações (sobrescreve existentes)"
+      echo "  --skip-release  Pula criação de release"
+      echo "  --skip-protect  Pula configuração de proteções de branch"
+      echo "  -h, --help      Mostra ajuda"
+      exit 0
+      ;;
+    *)
+      echo "Opção desconhecida: $1"
+      echo "Use --help para ver as opções disponíveis"
+      exit 1
+      ;;
+  esac
+done
 
 # Colors for output
 RED='\033[0;31m'
@@ -46,6 +96,33 @@ print_header() {
     echo -e "${BLUE}$1${NC}"
     echo -e "${BLUE}========================================${NC}"
     echo ""
+}
+
+# Function to ask confirmation (respects --yes and --force flags)
+ask_overwrite() {
+    local question="$1"
+    if [ "$FORCE" = true ]; then
+        print_info "$question (auto-force: yes)"
+        return 0
+    fi
+    if [ "$AUTO_YES" = true ]; then
+        print_info "$question (auto-yes: skipping)"
+        return 1
+    fi
+    read -p "$question (y/n) " -n 1 -r
+    echo
+    [[ $REPLY =~ ^[Yy]$ ]]
+}
+
+ask_continue() {
+    local question="$1"
+    if [ "$AUTO_YES" = true ]; then
+        print_info "$question (auto-yes)"
+        return 0
+    fi
+    read -p "$question (y/n) " -n 1 -r
+    echo
+    [[ $REPLY =~ ^[Yy]$ ]]
 }
 
 # Check if gh CLI is installed
@@ -91,9 +168,7 @@ add_workflows() {
     # Check if workflows already exist
     if gh api "repos/${REPO_FULL}/contents/.github/workflows/ci.yml" &> /dev/null; then
         print_warning "Workflow ci.yml já existe no repositório"
-        read -p "Deseja sobrescrever? (y/n) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        if ! ask_overwrite "Deseja sobrescrever?"; then
             print_info "Pulando ci.yml"
         else
             print_info "Atualizando ci.yml..."
@@ -118,9 +193,7 @@ add_workflows() {
     # Same for release.yml
     if gh api "repos/${REPO_FULL}/contents/.github/workflows/release.yml" &> /dev/null; then
         print_warning "Workflow release.yml já existe no repositório"
-        read -p "Deseja sobrescrever? (y/n) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        if ! ask_overwrite "Deseja sobrescrever?"; then
             print_info "Pulando release.yml"
         else
             print_info "Atualizando release.yml..."
@@ -152,12 +225,16 @@ configure_branch_protection() {
     
     print_info "Configurando proteções para branch 'main'..."
     
+    # Skip if flag is set
+    if [ "$SKIP_PROTECT" = true ]; then
+        print_warning "Proteções de branch puladas (--skip-protect flag)"
+        return
+    fi
+
     # Check if branch protection already exists
     if gh api "repos/${REPO_FULL}/branches/main/protection" &> /dev/null; then
         print_warning "Proteções já existem para 'main'"
-        read -p "Deseja reconfigurar? (y/n) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        if ! ask_overwrite "Deseja reconfigurar?"; then
             print_info "Pulando configuração de proteções"
             return
         fi
@@ -186,9 +263,7 @@ configure_branch_protection() {
     
     # Ask if user wants to configure develop branch
     echo ""
-    read -p "Deseja configurar proteções para branch 'develop'? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if ask_continue "Deseja configurar proteções para branch 'develop'?"; then
         # Check if develop branch exists
         if gh api "repos/${REPO_FULL}/branches/develop" &> /dev/null; then
             print_info "Configurando proteções para branch 'develop'..."
@@ -216,15 +291,19 @@ configure_branch_protection() {
 # Step 3: Create Release
 create_release() {
     print_header "ETAPA 3: Criando Release da Versão Beta"
-    
+
+    # Skip if flag is set
+    if [ "$SKIP_RELEASE" = true ]; then
+        print_warning "Criação de release pulada (--skip-release flag)"
+        return
+    fi
+
     print_info "Verificando se release já existe..."
-    
+
     # Check if release already exists
     if gh release view "${VERSION}" --repo "${REPO_FULL}" &> /dev/null; then
         print_warning "Release ${VERSION} já existe"
-        read -p "Deseja deletar e recriar? (y/n) " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
+        if ask_overwrite "Deseja deletar e recriar?"; then
             print_info "Deletando release existente..."
             gh release delete "${VERSION}" --repo "${REPO_FULL}" --yes
             print_success "Release deletado"
@@ -283,10 +362,8 @@ configure_about() {
 # Step 5: Enable Discussions (Optional)
 enable_discussions() {
     print_header "ETAPA 5: Habilitar Discussions (Opcional)"
-    
-    read -p "Deseja habilitar GitHub Discussions? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+
+    if ask_continue "Deseja habilitar GitHub Discussions?"; then
         print_info "Habilitando Discussions..."
         
         gh api "repos/${REPO_FULL}" \
@@ -347,16 +424,28 @@ main() {
     echo ""
     print_warning "Este script irá:"
     echo "  1. Adicionar GitHub Actions workflows"
-    echo "  2. Configurar proteções de branch"
-    echo "  3. Criar release da versão beta"
+    if [ "$SKIP_PROTECT" = false ]; then
+        echo "  2. Configurar proteções de branch"
+    else
+        echo "  2. Configurar proteções de branch (PULADO)"
+    fi
+    if [ "$SKIP_RELEASE" = false ]; then
+        echo "  3. Criar release da versão beta"
+    else
+        echo "  3. Criar release da versão beta (PULADO)"
+    fi
     echo "  4. Configurar About section"
     echo "  5. (Opcional) Habilitar Discussions"
     echo ""
-    read -p "Deseja continuar? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        print_info "Operação cancelada"
-        exit 0
+    if [ "$AUTO_YES" = false ]; then
+        read -p "Deseja continuar? (y/n) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            print_info "Operação cancelada"
+            exit 0
+        fi
+    else
+        print_info "Continuando automaticamente (--yes flag)"
     fi
     
     # Execute steps

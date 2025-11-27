@@ -410,7 +410,7 @@ myLogger.debug("Debug info", { data: "value" });
 - [x] ~~Implementar logger estruturado~~
 
 ### Curto Prazo
-- [ ] Substituir todos os console.log restantes pelo logger
+- [x] ~~Substituir todos os console.log restantes pelo logger~~
 - [ ] Adicionar mais testes de integração
 - [ ] Implementar CSP baseado em nonces
 
@@ -421,4 +421,233 @@ myLogger.debug("Debug info", { data: "value" });
 
 ---
 
-*Documento atualizado em 27/11/2024 - Sessão de análise e correção de código.*
+## Correções de Baixa Prioridade (Fase 4)
+
+Após as correções críticas, alta e média prioridade, foram aplicadas 3 correções de baixa prioridade.
+
+---
+
+## Correção Baixa 1: Sanitização de dangerouslySetInnerHTML
+
+### Detalhes
+| Campo | Valor |
+|-------|-------|
+| **Arquivo** | `client/src/components/ui/chart.tsx` |
+| **Severidade** | Baixa |
+| **Tipo** | Segurança Defensiva |
+
+### Problema
+O componente `ChartStyle` usa `dangerouslySetInnerHTML` para injetar CSS dinâmico. Embora o risco seja baixo (dados vêm de config do desenvolvedor, não de input do usuário), a prática de defesa em profundidade recomenda sanitização.
+
+### Solução
+Adicionadas funções de sanitização:
+
+```typescript
+// Sanitiza identificadores CSS
+function sanitizeCssIdentifier(id: string): string {
+  return id.replace(/[^a-zA-Z0-9-]/g, "");
+}
+
+// Valida cores CSS
+function isValidCssColor(value: string): boolean {
+  // Aceita: hex, rgb, rgba, hsl, hsla, CSS vars, named colors
+}
+
+// Sanitiza valores de cor
+function sanitizeCssColor(color: string | undefined): string | null
+```
+
+### Impacto
+- Previne injeção de CSS malicioso via identificadores
+- Valida formatos de cor antes de injeção
+- Documentação clara sobre segurança do componente
+
+---
+
+## Correção Baixa 2: Scripts Bash Idempotentes
+
+### Detalhes
+| Campo | Valor |
+|-------|-------|
+| **Arquivos** | `scripts/deploy.sh`, `scripts/setup-github.sh`, `scripts/full-pipeline.sh` |
+| **Severidade** | Baixa |
+| **Tipo** | DevOps/Automação |
+
+### Problema
+Os scripts não suportavam execução não-interativa e não tinham mecanismos de idempotência.
+
+### Solução
+Adicionadas flags de linha de comando:
+
+| Script | Flags Disponíveis |
+|--------|-------------------|
+| `deploy.sh` | `-y/--yes`, `-f/--force`, `-s/--skip-tests`, `-h/--help` |
+| `setup-github.sh` | `-y/--yes`, `-f/--force`, `--skip-release`, `--skip-protect`, `-h/--help` |
+| `full-pipeline.sh` | `-y/--yes`, `-f/--force`, `--skip-phase1`, `--skip-phase2`, `-h/--help` |
+
+### Características de Idempotência
+
+**deploy.sh:**
+- Cache de checksums para evitar operações desnecessárias
+- Verificação de lockfile antes de instalar dependências
+- Verificação de build antes de reconstruir
+- Verificação de imagem Docker antes de rebuild
+
+**Exemplos de uso:**
+```bash
+# Execução não-interativa (CI/CD)
+./deploy.sh --yes
+
+# Forçar todas as operações
+./deploy.sh --force
+
+# Pular testes em ambiente de staging
+./deploy.sh --yes --skip-tests
+```
+
+---
+
+## Correção Baixa 3: Health Check com Status do DB
+
+### Detalhes
+| Campo | Valor |
+|-------|-------|
+| **Arquivo Criado** | `server/_core/health.ts` |
+| **Arquivo Atualizado** | `server/_core/index.ts` |
+| **Severidade** | Baixa |
+| **Tipo** | Observabilidade/DevOps |
+
+### Endpoints Criados
+
+| Endpoint | Propósito | Response |
+|----------|-----------|----------|
+| `GET /api/health` | Health check completo | Status detalhado |
+| `GET /api/health/live` | Liveness probe (K8s) | `{ status: "ok" }` |
+| `GET /api/health/ready` | Readiness probe (K8s) | Status + DB |
+
+### Response de /api/health
+
+```json
+{
+  "status": "healthy | degraded | unhealthy",
+  "timestamp": "2024-11-27T00:00:00.000Z",
+  "uptime": 3600,
+  "version": "1.0.0-beta",
+  "environment": "production",
+  "database": {
+    "status": "connected | disconnected | connecting",
+    "connectionAttempts": 0,
+    "latencyMs": 5
+  },
+  "checks": [
+    { "name": "database", "status": "pass", "message": "Connected (5ms)" },
+    { "name": "memory", "status": "pass", "message": "128MB / 512MB (25%)" },
+    { "name": "environment", "status": "pass", "message": "All required environment variables set" }
+  ]
+}
+```
+
+### Códigos HTTP
+
+| Status | Código HTTP |
+|--------|-------------|
+| healthy | 200 |
+| degraded | 200 |
+| unhealthy | 503 |
+
+### Uso em Kubernetes
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /api/health/live
+    port: 3000
+  initialDelaySeconds: 10
+  periodSeconds: 15
+
+readinessProbe:
+  httpGet:
+    path: /api/health/ready
+    port: 3000
+  initialDelaySeconds: 5
+  periodSeconds: 10
+```
+
+---
+
+## Sumário Completo de Arquivos Modificados (Todas as Fases)
+
+### Fase 1 (Correções Críticas)
+| Arquivo | Tipo de Mudança |
+|---------|-----------------|
+| `client/src/_core/hooks/useAuth.ts` | Correção de sintaxe |
+| `server/_core/security.ts` | Hardening CSP |
+| `.github/workflows/ci.yml` | Arquivo novo |
+| `.github/workflows/release.yml` | Arquivo novo |
+
+### Fase 2 (Correções de Alta Prioridade)
+| Arquivo | Tipo de Mudança |
+|---------|-----------------|
+| `client/src/components/ui/textarea.tsx` | Type safety |
+| `client/src/components/ui/dialog.tsx` | Type safety |
+| `client/src/components/ui/input.tsx` | Type safety |
+| `server/_core/security.ts` | Rate limiting melhorado |
+| `server/routers.ts` | Validação de input |
+| `server/_core/env.ts` | Validação de env vars |
+| `server/_core/logger.ts` | Arquivo novo |
+| `server/_core/index.ts` | Usar logger |
+
+### Fase 3 (Correções de Média Prioridade)
+| Arquivo | Tipo de Mudança |
+|---------|-----------------|
+| `server/_core/oauth.ts` | Error handling |
+| `server/db.ts` | Retry logic |
+| `docs/SECURITY.md` | PostgreSQL → MySQL |
+| Múltiplos arquivos | console.log → logger |
+
+### Fase 4 (Correções de Baixa Prioridade)
+| Arquivo | Tipo de Mudança |
+|---------|-----------------|
+| `client/src/components/ui/chart.tsx` | CSS sanitization |
+| `scripts/deploy.sh` | Idempotência + flags |
+| `scripts/setup-github.sh` | Idempotência + flags |
+| `scripts/full-pipeline.sh` | Idempotência + flags |
+| `server/_core/health.ts` | Arquivo novo |
+| `server/_core/index.ts` | Registrar health routes |
+
+---
+
+## Próximos Passos Recomendados (Atualizado)
+
+### Completados
+- [x] ~~Fixar sintaxe em useAuth.ts~~
+- [x] ~~Atualizar CSP header~~
+- [x] ~~Criar GitHub Workflows~~
+- [x] ~~Remover `as any` type assertions~~
+- [x] ~~Melhorar rate limiting~~
+- [x] ~~Melhorar validação de input~~
+- [x] ~~Validação de env vars~~
+- [x] ~~Implementar logger estruturado~~
+- [x] ~~Substituir console.log pelo logger~~
+- [x] ~~Sanitizar dangerouslySetInnerHTML~~
+- [x] ~~Tornar scripts idempotentes~~
+- [x] ~~Adicionar health check com status do DB~~
+
+### Curto Prazo
+- [ ] Adicionar mais testes de integração
+- [ ] Implementar CSP baseado em nonces
+- [ ] Adicionar métricas de performance
+
+### Médio Prazo
+- [ ] Migrar rate limiting para Redis
+- [ ] Expandir testes (>80% coverage)
+- [ ] Documentação de API (OpenAPI/Swagger)
+
+### Longo Prazo
+- [ ] Testes E2E automatizados
+- [ ] Monitoramento APM (Datadog/NewRelic)
+- [ ] Alertas e dashboards
+
+---
+
+*Documento atualizado em 27/11/2024 - Sessão completa de análise e correção de código.*
