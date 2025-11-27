@@ -17,9 +17,30 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getTemplateById } from "@/data/petitionTemplates";
 import { ExportModal, ExportConfig } from "@/components/ExportModal";
 
+// Tipos de template válidos - deve corresponder ao schema do servidor
+const VALID_TEMPLATE_TYPES = [
+  "civil",
+  "trabalhista",
+  "criminal",
+  "tributario",
+  "consumidor",
+  "familia",
+  "empresarial",
+  "administrativo",
+  "previdenciario",
+  "ambiental",
+] as const;
+
+type TemplateType = typeof VALID_TEMPLATE_TYPES[number];
+
+function isValidTemplateType(value: string): value is TemplateType {
+  return VALID_TEMPLATE_TYPES.includes(value as TemplateType);
+}
+
 export default function Editor() {
   const params = useParams();
-  const templateId = params.templateId || "civil";
+  const rawTemplateId = params.templateId || "civil";
+  const templateId: TemplateType = isValidTemplateType(rawTemplateId) ? rawTemplateId : "civil";
   const [showPreview, setShowPreview] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);

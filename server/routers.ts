@@ -38,7 +38,7 @@ const TEXT_LIMITS = {
 // Schema base para campos de petição com validações rigorosas
 const petitionFieldsSchema = {
   templateType: z.enum(PETITION_TEMPLATE_TYPES, {
-    errorMap: () => ({ message: `Tipo de template deve ser um de: ${PETITION_TEMPLATE_TYPES.join(", ")}` })
+    message: `Tipo de template deve ser um de: ${PETITION_TEMPLATE_TYPES.join(", ")}`
   }),
   title: z.string()
     .min(TEXT_LIMITS.title.min, "Título é obrigatório")
@@ -67,7 +67,7 @@ const petitionFieldsSchema = {
     .optional(),
   valorCausa: z.string()
     .max(TEXT_LIMITS.valorCausa.max, `Valor da causa deve ter no máximo ${TEXT_LIMITS.valorCausa.max} caracteres`)
-    .regex(/^[\d.,\s]*$/, "Valor da causa deve conter apenas números e separadores")
+    .regex(/^[R$€£¥\d.,\s]*$/, "Valor da causa deve conter apenas números, moeda e separadores")
     .optional(),
   status: z.enum(["rascunho", "finalizada"]).default("rascunho"),
 };
