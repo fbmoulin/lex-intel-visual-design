@@ -8,7 +8,35 @@ Este diretório contém scripts de automação para configuração e deploy do p
 
 ## 📋 Scripts Disponíveis
 
-### 1. `deploy.sh` - Deploy Automatizado
+### 1. `full-pipeline.sh` - Pipeline Completo ⭐ NOVO!
+
+Script master que orquestra todo o pipeline de setup e deploy.
+
+**Uso:**
+```bash
+./scripts/full-pipeline.sh
+```
+
+**O que faz:**
+- **Fase 1: Configuração do GitHub**
+  - Executa `setup-github.sh` ou `setup-github-simple.sh`
+  - Adiciona workflows, proteções, release, etc.
+- **Fase 2: Deploy da Aplicação**
+  - Executa `deploy.sh`
+  - Build, testes, deploy completo
+- Validações entre fases
+- Checkpoints interativos
+- Log detalhado de execução
+- Resumo final com status
+
+**Quando usar:**
+- Setup inicial completo
+- Reconfiguração total do projeto
+- Automação end-to-end
+
+---
+
+### 2. `deploy.sh` - Deploy Automatizado
 
 Script completo de deploy que executa todas as verificações e build.
 
@@ -28,7 +56,7 @@ Script completo de deploy que executa todas as verificações e build.
 
 ---
 
-### 2. `setup-github.sh` - Configuração Completa do GitHub
+### 3. `setup-github.sh` - Configuração Completa do GitHub
 
 Script avançado que usa GitHub CLI para configurar completamente o repositório.
 
@@ -71,7 +99,7 @@ Script avançado que usa GitHub CLI para configurar completamente o repositório
 
 ---
 
-### 3. `setup-github-simple.sh` - Configuração Simplificada
+### 4. `setup-github-simple.sh` - Configuração Simplificada
 
 Versão simplificada que adiciona workflows via Git push.
 
@@ -119,19 +147,22 @@ cd /home/ubuntu/visual-law-app
 
 ## 📊 Comparação de Scripts
 
-| Recurso | deploy.sh | setup-github.sh | setup-github-simple.sh |
-|---------|-----------|-----------------|------------------------|
-| **Propósito** | Deploy | Config GitHub | Config GitHub |
-| **Complexidade** | Média | Alta | Baixa |
-| **Interativo** | Sim | Sim | Não |
-| **Requer gh CLI** | Não | Sim | Não |
-| **Workflows** | - | ✅ | ✅ |
-| **Branch Protection** | - | ✅ | Manual |
-| **Release** | - | ✅ | Manual |
-| **About Section** | - | ✅ | Manual |
-| **Build** | ✅ | - | - |
-| **Testes** | ✅ | - | - |
-| **Audit** | ✅ | - | - |
+| Recurso | full-pipeline.sh | deploy.sh | setup-github.sh | setup-github-simple.sh |
+|---------|------------------|-----------|-----------------|------------------------|
+| **Propósito** | Setup + Deploy | Deploy | Config GitHub | Config GitHub |
+| **Complexidade** | Alta | Média | Alta | Baixa |
+| **Interativo** | Sim | Sim | Sim | Não |
+| **Requer gh CLI** | Opcional | Não | Sim | Não |
+| **Workflows** | ✅ | - | ✅ | ✅ |
+| **Branch Protection** | ✅ | - | ✅ | Manual |
+| **Release** | ✅ | - | ✅ | Manual |
+| **About Section** | ✅ | - | ✅ | Manual |
+| **Build** | ✅ | ✅ | - | - |
+| **Testes** | ✅ | ✅ | - | - |
+| **Audit** | ✅ | ✅ | - | - |
+| **Checkpoints** | ✅ | - | - | - |
+| **Log Detalhado** | ✅ | - | - | - |
+| **Resumo Final** | ✅ | - | - | - |
 
 ---
 
