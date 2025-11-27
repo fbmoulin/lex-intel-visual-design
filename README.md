@@ -1,6 +1,14 @@
 # Lex Intel Visual Design
 
+[![Version](https://img.shields.io/badge/version-1.0.0--beta-blue.svg)](https://github.com/fbmoulin/lex-intel-visual-design/releases)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/typescript-5.x-blue.svg)](https://www.typescriptlang.org/)
+[![Status](https://img.shields.io/badge/status-beta-yellow.svg)](https://github.com/fbmoulin/lex-intel-visual-design)
+
 **Aplicação SaaS profissional para geração de petições jurídicas com Visual Law e Legal Design**
+
+> ⚠️ **VERSÃO BETA** - Esta é uma versão beta do projeto. Algumas funcionalidades ainda estão em desenvolvimento e podem apresentar instabilidades. Feedback e contribuições são muito bem-vindos!
 
 Desenvolvido por **Lex Intelligentia** - Transformando a advocacia através da tecnologia.
 

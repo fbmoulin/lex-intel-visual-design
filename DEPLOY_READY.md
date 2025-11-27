@@ -2,11 +2,13 @@
 
 **Desenvolvido por Lex Intelligentia**
 
+> ⚠️ **VERSÃO BETA (1.0.0-beta)** - Esta é uma versão beta do projeto. Recomendamos deploy em ambiente de testes/staging antes de produção. Algumas funcionalidades podem apresentar instabilidades.
+
 ---
 
 ## ✅ Status do Projeto
 
-O **Lex Intel Visual Design** está **100% pronto para deploy em produção**. Todas as otimizações, configurações de segurança e documentação foram implementadas seguindo as melhores práticas da indústria.
+O **Lex Intel Visual Design** está **100% pronto para deploy em ambiente de teste/staging**. Todas as otimizações, configurações de segurança e documentação foram implementadas seguindo as melhores práticas da indústria.
 
 ---
 

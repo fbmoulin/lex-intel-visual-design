@@ -2,6 +2,8 @@
 
 **Desenvolvido por Lex Intelligentia**
 
+> ⚠️ **VERSÃO BETA (1.0.0-beta)** - Este guia se aplica à versão beta do projeto. Recomendamos deploy inicial em ambiente de testes/staging.
+
 Este documento descreve o processo de deploy da aplicação **Lex Intel Visual Design** em um ambiente de produção. Siga os passos abaixo para garantir um deploy seguro e eficiente.
 
 ## 1. Pré-requisitos
