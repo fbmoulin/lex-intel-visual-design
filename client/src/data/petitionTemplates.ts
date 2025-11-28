@@ -239,6 +239,296 @@ Termos em que,
 Pede deferimento.`
     }
   },
+  {
+    id: 'criminal-defesa-preliminar',
+    templateType: 'criminal',
+    title: 'Defesa Preliminar (Resposta à Acusação)',
+    description: 'Template para defesa preliminar em ação penal (art. 396-A CPP)',
+    content: {
+      numeroProcesso: '[NÚMERO DO PROCESSO]',
+      tribunal: 'Vara Criminal da Comarca de [CIDADE/UF]',
+      fatos: `O ACUSADO, já qualificado nos autos, por seu advogado que esta subscreve, vem, tempestivamente, apresentar RESPOSTA À ACUSAÇÃO (Defesa Preliminar), nos termos do artigo 396-A do Código de Processo Penal, pelos fatos e fundamentos a seguir expostos.
+
+DOS FATOS:
+O ACUSADO foi denunciado pelo Ministério Público como incurso no artigo [TIPO PENAL] do Código Penal, em razão de fatos supostamente ocorridos em [DATA], em [LOCAL].
+
+Segundo a denúncia, o ACUSADO teria [DESCREVER BREVEMENTE A IMPUTAÇÃO].
+
+Contudo, a acusação não merece prosperar pelas razões adiante expostas.
+
+DA VERSÃO DEFENSIVA:
+[APRESENTAR A VERSÃO DOS FATOS DO ACUSADO]
+
+O ACUSADO [ESTAVA EM OUTRO LOCAL / AGIU EM LEGÍTIMA DEFESA / NÃO PRATICOU A CONDUTA DESCRITA / etc.], conforme será demonstrado ao longo da instrução processual.`,
+      fundamentosJuridicos: `1. DA AUSÊNCIA DE JUSTA CAUSA PARA A AÇÃO PENAL
+
+A denúncia é inepta, pois não descreve de forma clara e precisa a conduta supostamente praticada pelo ACUSADO, violando o artigo 41 do CPP.
+
+Não há elementos mínimos de autoria e materialidade que justifiquem o prosseguimento da ação penal, devendo ser aplicado o artigo 395, III, do CPP.
+
+2. DA ATIPICIDADE DA CONDUTA
+
+A conduta atribuída ao ACUSADO não se subsume ao tipo penal descrito na denúncia, pois [FUNDAMENTAR A ATIPICIDADE].
+
+Não está presente o elemento subjetivo do tipo (dolo), sendo a conduta, no máximo, um indiferente penal.
+
+3. DAS EXCLUDENTES DE ILICITUDE/CULPABILIDADE
+
+[SE APLICÁVEL: O ACUSADO agiu em legítima defesa própria/de terceiros, nos termos do artigo 25 do Código Penal, pois...]
+
+[SE APLICÁVEL: O ACUSADO encontrava-se em estado de necessidade, nos termos do artigo 24 do Código Penal...]
+
+[SE APLICÁVEL: O ACUSADO não tinha consciência da ilicitude do fato...]
+
+4. DA FRAGILIDADE PROBATÓRIA
+
+As provas colhidas na fase investigativa são insuficientes para sustentar a acusação.
+
+A palavra da vítima/testemunhas apresenta contradições que comprometem sua credibilidade.
+
+Não há provas técnicas que corroborem a versão acusatória.
+
+5. DA NECESSIDADE DE ABSOLVIÇÃO SUMÁRIA
+
+Presentes as hipóteses do artigo 397 do CPP, o ACUSADO faz jus à absolvição sumária, sem necessidade de instrução processual.`,
+      pedidos: `Ante o exposto, requer a Vossa Excelência:
+
+a) PRELIMINARMENTE:
+   - A rejeição da denúncia por inépcia, nos termos do artigo 395, I, do CPP;
+   - O reconhecimento da ausência de justa causa para a ação penal (art. 395, III, CPP);
+
+b) NO MÉRITO:
+   - A ABSOLVIÇÃO SUMÁRIA do ACUSADO, nos termos do artigo 397 do CPP, em razão de:
+     ( ) I - existência manifesta de causa excludente da ilicitude do fato;
+     ( ) II - existência manifesta de causa excludente da culpabilidade do agente;
+     ( ) III - que o fato narrado evidentemente não constitui crime;
+     ( ) IV - extinta a punibilidade do agente;
+
+c) Caso não seja este o entendimento de Vossa Excelência:
+   - A designação de audiência de instrução e julgamento;
+   - A oitiva das testemunhas arroladas ao final;
+   - A expedição de carta precatória para oitiva de testemunha residente em outra comarca;
+
+d) A intimação pessoal do ACUSADO de todos os atos processuais;
+
+e) A produção de todos os meios de prova em direito admitidos.
+
+ROL DE TESTEMUNHAS (art. 396-A, §2º, CPP):
+1. [NOME], [PROFISSÃO], residente [ENDEREÇO];
+2. [NOME], [PROFISSÃO], residente [ENDEREÇO];
+3. [NOME], [PROFISSÃO], residente [ENDEREÇO].
+
+Termos em que,
+Pede deferimento.`
+    }
+  },
+  {
+    id: 'criminal-revogacao-preventiva',
+    templateType: 'criminal',
+    title: 'Pedido de Revogação de Prisão Preventiva / Liberdade Provisória',
+    description: 'Template para pedido de revogação de prisão preventiva ou concessão de liberdade provisória',
+    content: {
+      numeroProcesso: '[NÚMERO DO PROCESSO / INQUÉRITO]',
+      tribunal: 'Vara Criminal da Comarca de [CIDADE/UF]',
+      fatos: `O REQUERENTE, [NOME COMPLETO], [NACIONALIDADE], [ESTADO CIVIL], [PROFISSÃO], portador do RG nº [NÚMERO] e CPF nº [NÚMERO], atualmente recolhido no [ESTABELECIMENTO PRISIONAL], por seu advogado que esta subscreve, vem, respeitosamente, requerer a REVOGAÇÃO DA PRISÃO PREVENTIVA / CONCESSÃO DE LIBERDADE PROVISÓRIA, pelos fatos e fundamentos a seguir expostos.
+
+DOS FATOS:
+O REQUERENTE encontra-se preso preventivamente desde [DATA], em razão de [DESCREVER A IMPUTAÇÃO], tendo a prisão sido decretada sob o fundamento de [MOTIVO ALEGADO: garantia da ordem pública, conveniência da instrução criminal, aplicação da lei penal].
+
+SITUAÇÃO PROCESSUAL ATUAL:
+- Data da prisão: [DATA]
+- Tempo de prisão: [X] dias/meses
+- Fase processual: [INQUÉRITO / PROCESSO - especificar]
+- Audiências realizadas: [DESCREVER]
+- Diligências pendentes: [DESCREVER]
+
+DAS CONDIÇÕES PESSOAIS DO REQUERENTE:
+O REQUERENTE é [PRIMÁRIO/REINCIDENTE], possui [RESIDÊNCIA FIXA/TRABALHO LÍCITO/FAMÍLIA CONSTITUÍDA], conforme documentos anexos.
+
+[DESCREVER OUTRAS CONDIÇÕES FAVORÁVEIS: bons antecedentes, colaboração com a justiça, etc.]`,
+      fundamentosJuridicos: `1. DA AUSÊNCIA DOS REQUISITOS DA PRISÃO PREVENTIVA (Art. 312, CPP)
+
+A prisão preventiva somente pode ser decretada quando presentes os requisitos do artigo 312 do CPP: garantia da ordem pública, garantia da ordem econômica, conveniência da instrução criminal ou para assegurar a aplicação da lei penal.
+
+No presente caso, NÃO estão presentes tais requisitos, pois:
+
+a) GARANTIA DA ORDEM PÚBLICA: O REQUERENTE não representa risco à ordem pública, pois [é primário / não possui antecedentes / o crime não envolveu violência / etc.].
+
+b) CONVENIÊNCIA DA INSTRUÇÃO CRIMINAL: A instrução já foi concluída / não há risco de interferência nas provas / o REQUERENTE não ameaçou testemunhas.
+
+c) APLICAÇÃO DA LEI PENAL: O REQUERENTE possui residência fixa, trabalho lícito e vínculos familiares, não havendo risco de fuga.
+
+2. DO EXCESSO DE PRAZO (Art. 316, parágrafo único, CPP)
+
+O REQUERENTE encontra-se preso há mais de [X] dias, sem que tenha havido conclusão da instrução processual, configurando constrangimento ilegal por excesso de prazo.
+
+A Lei 13.964/2019 (Pacote Anticrime) incluiu o parágrafo único do art. 316 do CPP, determinando a revisão da necessidade da prisão a cada 90 dias.
+
+3. DA POSSIBILIDADE DE APLICAÇÃO DE MEDIDAS CAUTELARES DIVERSAS (Art. 319, CPP)
+
+As medidas cautelares diversas da prisão, previstas no artigo 319 do CPP, são suficientes para acautelar o processo:
+
+I - comparecimento periódico em juízo;
+II - proibição de acesso ou frequência a determinados lugares;
+III - proibição de manter contato com pessoa determinada;
+IV - proibição de ausentar-se da comarca;
+V - recolhimento domiciliar no período noturno;
+VI - suspensão do exercício de função pública ou atividade;
+VII - internação provisória;
+VIII - fiança;
+IX - monitoração eletrônica.
+
+4. DO PRINCÍPIO DA PRESUNÇÃO DE INOCÊNCIA (Art. 5º, LVII, CF)
+
+A Constituição Federal assegura que ninguém será considerado culpado até o trânsito em julgado de sentença penal condenatória.
+
+A prisão processual é medida excepcional e deve ser fundamentada em elementos concretos, não podendo servir como antecipação de pena.
+
+5. DA JURISPRUDÊNCIA APLICÁVEL
+
+O STF, no julgamento das ADCs 43, 44 e 54, reafirmou a excepcionalidade da prisão preventiva e a necessidade de sua fundamentação concreta.
+
+A Súmula 52 do STJ estabelece que encerrada a instrução criminal, fica superada a alegação de constrangimento por excesso de prazo.`,
+      pedidos: `Ante o exposto, requer a Vossa Excelência:
+
+a) A REVOGAÇÃO DA PRISÃO PREVENTIVA do REQUERENTE, com a expedição imediata de ALVARÁ DE SOLTURA, determinando-se sua liberdade independentemente do pagamento de fiança;
+
+b) SUBSIDIARIAMENTE, caso não seja este o entendimento:
+   - A SUBSTITUIÇÃO da prisão preventiva por MEDIDAS CAUTELARES DIVERSAS, nos termos do artigo 319 do CPP, tais como:
+     ( ) Comparecimento periódico em juízo;
+     ( ) Proibição de ausentar-se da comarca;
+     ( ) Monitoração eletrônica;
+     ( ) Recolhimento domiciliar noturno;
+     ( ) Arbitramento de fiança;
+
+c) A CONCESSÃO DE LIBERDADE PROVISÓRIA, mediante:
+   ( ) Fiança no valor que Vossa Excelência entender adequado à situação econômica do REQUERENTE;
+   ( ) Termo de comparecimento a todos os atos processuais;
+
+d) O RECONHECIMENTO DO EXCESSO DE PRAZO, determinando-se o imediato relaxamento da prisão;
+
+e) Caso Vossa Excelência entenda necessário, o REQUERENTE se compromete a cumprir quaisquer condições impostas.
+
+DOCUMENTOS ANEXOS:
+- Comprovante de residência;
+- Carteira de trabalho / comprovante de vínculo empregatício;
+- Certidão de antecedentes criminais;
+- Declarações de familiares;
+- [OUTROS DOCUMENTOS].
+
+Termos em que,
+Pede deferimento.`
+    }
+  },
+  {
+    id: 'criminal-habeas-corpus',
+    templateType: 'criminal',
+    title: 'Habeas Corpus',
+    description: 'Template para petição de habeas corpus por constrangimento ilegal',
+    content: {
+      tribunal: 'Tribunal de Justiça do Estado de [UF] / Tribunal Regional Federal da [X]ª Região',
+      fatos: `IMPETRANTE: [NOME DO ADVOGADO], OAB/[UF] nº [NÚMERO]
+PACIENTE: [NOME COMPLETO DO PACIENTE]
+AUTORIDADE COATORA: Juiz(a) de Direito da [X]ª Vara Criminal da Comarca de [CIDADE/UF]
+PROCESSO ORIGINÁRIO: nº [NÚMERO]
+
+O IMPETRANTE, advogado regularmente inscrito na OAB, vem, com fundamento no artigo 5º, inciso LXVIII, da Constituição Federal, e artigos 647 e seguintes do Código de Processo Penal, impetrar a presente ordem de HABEAS CORPUS, com pedido de LIMINAR, em favor do PACIENTE acima qualificado, contra ato da autoridade coatora indicada, pelos fatos e fundamentos a seguir expostos.
+
+I - DO PACIENTE E DA AUTORIDADE COATORA:
+
+O PACIENTE, [QUALIFICAÇÃO COMPLETA], encontra-se [PRESO / AMEAÇADO DE PRISÃO] em razão de [DESCREVER O ATO COATOR], conforme decisão proferida nos autos do processo nº [NÚMERO].
+
+II - DOS FATOS:
+
+[DESCREVER CRONOLOGICAMENTE OS FATOS QUE LEVARAM AO CONSTRANGIMENTO ILEGAL]
+
+Em [DATA], o PACIENTE foi [PRESO EM FLAGRANTE / TEVE A PRISÃO PREVENTIVA DECRETADA / FOI INTIMADO PARA...].
+
+A autoridade coatora fundamentou sua decisão em [DESCREVER OS FUNDAMENTOS DA DECISÃO ATACADA].
+
+Contudo, conforme será demonstrado, tal decisão configura manifesto CONSTRANGIMENTO ILEGAL.
+
+III - DO CONSTRANGIMENTO ILEGAL:
+
+O PACIENTE sofre constrangimento ilegal em sua liberdade de locomoção em razão de:
+
+[  ] Prisão sem justa causa (art. 648, I, CPP)
+[  ] Prisão por mais tempo do que determina a lei (art. 648, II, CPP)
+[  ] Falta de competência da autoridade (art. 648, III, CPP)
+[  ] Cessação do motivo da prisão (art. 648, IV, CPP)
+[  ] Não admissão de fiança quando cabível (art. 648, V, CPP)
+[  ] Nulidade manifesta do processo (art. 648, VI, CPP)
+[  ] Extinção da punibilidade (art. 648, VII, CPP)`,
+      fundamentosJuridicos: `1. DO CABIMENTO DO HABEAS CORPUS
+
+O artigo 5º, inciso LXVIII, da Constituição Federal estabelece que "conceder-se-á habeas corpus sempre que alguém sofrer ou se achar ameaçado de sofrer violência ou coação em sua liberdade de locomoção, por ilegalidade ou abuso de poder".
+
+O artigo 647 do CPP dispõe que "dar-se-á habeas corpus sempre que alguém sofrer ou se achar na iminência de sofrer violência ou coação ilegal na sua liberdade de ir e vir".
+
+2. DA ILEGALIDADE DO ATO COATOR
+
+[FUNDAMENTAR ESPECIFICAMENTE O CONSTRANGIMENTO ILEGAL - ESCOLHER O MAIS ADEQUADO:]
+
+A) DA AUSÊNCIA DE FUNDAMENTAÇÃO IDÔNEA (Art. 93, IX, CF):
+A decisão que decretou/manteve a prisão do PACIENTE carece de fundamentação idônea, limitando-se a reproduzir os termos da lei sem indicar elementos concretos que justifiquem a custódia cautelar.
+
+O STF, no julgamento do HC 95.009, firmou entendimento de que "a prisão preventiva exige fundamentação concreta, sendo insuficiente a mera repetição dos termos legais".
+
+B) DA AUSÊNCIA DOS REQUISITOS DO ART. 312 DO CPP:
+Não estão presentes os requisitos autorizadores da prisão preventiva. [FUNDAMENTAR ESPECIFICAMENTE]
+
+C) DO EXCESSO DE PRAZO:
+O PACIENTE está preso há [X] dias/meses, sem que haja previsão de conclusão da instrução processual, configurando excesso de prazo.
+
+D) DA INOBSERVÂNCIA DO ART. 310 DO CPP:
+Não foi realizada audiência de custódia no prazo de 24 horas, conforme exige a Resolução 213/2015 do CNJ.
+
+E) DO CRIME AFIANÇÁVEL / AUSÊNCIA DE VIOLÊNCIA:
+O crime imputado ao PACIENTE [NÃO ENVOLVE VIOLÊNCIA / É AFIANÇÁVEL / POSSUI PENA MÁXIMA INFERIOR A 4 ANOS], não justificando a custódia cautelar.
+
+3. DO FUMUS BONI IURIS E PERICULUM IN MORA (LIMINAR)
+
+Estão presentes os requisitos para concessão da liminar:
+
+FUMUS BONI IURIS: A ilegalidade do ato coator é manifesta, conforme demonstrado acima.
+
+PERICULUM IN MORA: O PACIENTE encontra-se encarcerado ilegalmente, sofrendo restrição em seu direito fundamental à liberdade, sendo urgente a concessão da ordem.
+
+4. DA JURISPRUDÊNCIA APLICÁVEL
+
+[CITAR PRECEDENTES RELEVANTES DO STF/STJ]`,
+      pedidos: `Ante o exposto, requer o IMPETRANTE a Vossa Excelência:
+
+a) LIMINARMENTE:
+   - A CONCESSÃO DA ORDEM para determinar a imediata expedição de ALVARÁ DE SOLTURA em favor do PACIENTE, ou;
+   - A SUSPENSÃO DOS EFEITOS da decisão atacada até o julgamento definitivo deste writ;
+
+b) NO MÉRITO:
+   - A CONCESSÃO DEFINITIVA DA ORDEM de habeas corpus para:
+     ( ) RELAXAR a prisão ilegal do PACIENTE;
+     ( ) REVOGAR a prisão preventiva decretada;
+     ( ) SUBSTITUIR a prisão por medidas cautelares diversas (art. 319, CPP);
+     ( ) CONCEDER liberdade provisória, com ou sem fiança;
+     ( ) RECONHECER a nulidade [ESPECIFICAR];
+     ( ) DECLARAR extinta a punibilidade;
+
+c) A requisição de informações à autoridade coatora, no prazo legal;
+
+d) A intimação do Ministério Público para manifestação;
+
+e) Caso Vossas Excelências entendam necessário, a realização de sustentação oral.
+
+DOCUMENTOS ANEXOS:
+- Cópia da decisão atacada;
+- Cópia da denúncia/inquérito;
+- Procuração com poderes especiais;
+- Documentos pessoais do PACIENTE;
+- [OUTROS DOCUMENTOS RELEVANTES].
+
+Termos em que,
+Pede deferimento.`
+    }
+  },
 
   // ===== TEMPLATES TRIBUTÁRIOS =====
   {
