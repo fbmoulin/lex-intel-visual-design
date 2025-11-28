@@ -2,14 +2,62 @@
 
 # Lex Intel Visual Design - Full Pipeline Automation
 # Desenvolvido por Lex Intelligentia
-# 
+#
 # Este script orquestra o pipeline completo de setup e deploy:
 # 1. Configuração completa do GitHub (workflows, proteções, release)
 # 2. Deploy da aplicação em produção
 #
-# Ideal para setup inicial ou reconfigurações completas
+# Uso: ./full-pipeline.sh [OPTIONS]
+#   -y, --yes       Aceita todas as confirmações automaticamente
+#   -f, --force     Força todas as operações
+#   --skip-phase1   Pula Fase 1 (GitHub setup)
+#   --skip-phase2   Pula Fase 2 (Deploy)
+#   -h, --help      Mostra ajuda
+#
+# Este script é idempotente - pode ser executado múltiplas vezes sem efeitos colaterais
 
 set -e  # Exit on error
+
+# Parse command line arguments
+AUTO_YES=false
+FORCE=false
+SKIP_PHASE1=false
+SKIP_PHASE2=false
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -y|--yes)
+      AUTO_YES=true
+      shift
+      ;;
+    -f|--force)
+      FORCE=true
+      shift
+      ;;
+    --skip-phase1)
+      SKIP_PHASE1=true
+      shift
+      ;;
+    --skip-phase2)
+      SKIP_PHASE2=true
+      shift
+      ;;
+    -h|--help)
+      echo "Uso: ./full-pipeline.sh [OPTIONS]"
+      echo "  -y, --yes       Aceita todas as confirmações automaticamente"
+      echo "  -f, --force     Força todas as operações"
+      echo "  --skip-phase1   Pula Fase 1 (GitHub setup)"
+      echo "  --skip-phase2   Pula Fase 2 (Deploy)"
+      echo "  -h, --help      Mostra ajuda"
+      exit 0
+      ;;
+    *)
+      echo "Opção desconhecida: $1"
+      echo "Use --help para ver as opções disponíveis"
+      exit 1
+      ;;
+  esac
+done
 
 # Colors for output
 RED='\033[0;31m'
@@ -192,18 +240,24 @@ show_pipeline_overview() {
     echo ""
 }
 
-# Function to ask for confirmation
+# Function to ask for confirmation (respects --yes flag)
 ask_confirmation() {
     local question="$1"
     local default="${2:-n}"
-    
+
+    # Auto-yes mode
+    if [ "$AUTO_YES" = true ]; then
+        print_info "$question (auto-yes)"
+        return 0
+    fi
+
     if [ "$default" = "y" ]; then
         read -p "$(echo -e ${YELLOW}${question}${NC}) [Y/n] " -n 1 -r
     else
         read -p "$(echo -e ${YELLOW}${question}${NC}) [y/N] " -n 1 -r
     fi
     echo
-    
+
     if [ "$default" = "y" ]; then
         [[ $REPLY =~ ^[Nn]$ ]] && return 1 || return 0
     else
@@ -214,10 +268,23 @@ ask_confirmation() {
 # Function to execute Phase 1: GitHub Setup
 execute_phase1() {
     print_header "FASE 1: Configuração do GitHub"
+
+    # Skip if flag is set
+    if [ "$SKIP_PHASE1" = true ]; then
+        print_warning "Fase 1 pulada (--skip-phase1 flag)"
+        log "Phase 1 skipped (--skip-phase1 flag)"
+        return 0
+    fi
+
     log "Starting Phase 1: GitHub Setup"
-    
+
     local setup_script=""
-    
+    local script_args=""
+
+    # Build arguments to pass to child scripts
+    [ "$AUTO_YES" = true ] && script_args="$script_args --yes"
+    [ "$FORCE" = true ] && script_args="$script_args --force"
+
     # Determine which setup script to use
     if command -v gh &> /dev/null && gh auth status &> /dev/null; then
         print_info "GitHub CLI detectado e autenticado"
@@ -231,15 +298,15 @@ execute_phase1() {
         print_info "Usando setup simplificado (setup-github-simple.sh)"
         setup_script="${SCRIPT_DIR}/setup-github-simple.sh"
     fi
-    
+
     print_separator
-    print_step "Executando: $(basename $setup_script)"
+    print_step "Executando: $(basename $setup_script) $script_args"
     echo ""
-    
+
     # Execute setup script
     if [ -x "$setup_script" ]; then
-        log "Executing: $setup_script"
-        if bash "$setup_script"; then
+        log "Executing: $setup_script $script_args"
+        if bash "$setup_script" $script_args; then
             print_separator
             print_success "Fase 1 concluída com sucesso!"
             log "Phase 1 completed successfully"
@@ -260,21 +327,37 @@ execute_phase1() {
 # Function to execute Phase 2: Deploy
 execute_phase2() {
     print_header "FASE 2: Deploy da Aplicação"
+
+    # Skip if flag is set
+    if [ "$SKIP_PHASE2" = true ]; then
+        print_warning "Fase 2 pulada (--skip-phase2 flag)"
+        log "Phase 2 skipped (--skip-phase2 flag)"
+        return 0
+    fi
+
     log "Starting Phase 2: Deploy"
-    
-    print_info "O script de deploy será executado de forma interativa"
-    print_info "Você poderá escolher a plataforma de deploy"
-    
+
+    local script_args=""
+
+    # Build arguments to pass to child scripts
+    [ "$AUTO_YES" = true ] && script_args="$script_args --yes"
+    [ "$FORCE" = true ] && script_args="$script_args --force"
+
+    print_info "O script de deploy será executado"
+    if [ "$AUTO_YES" = false ]; then
+        print_info "Você poderá escolher a plataforma de deploy"
+    fi
+
     print_separator
-    
+
     if ask_confirmation "Continuar com o deploy?" "y"; then
-        print_step "Executando: deploy.sh"
+        print_step "Executando: deploy.sh $script_args"
         echo ""
-        
+
         # Execute deploy script
         if [ -x "${SCRIPT_DIR}/deploy.sh" ]; then
-            log "Executing: deploy.sh"
-            if bash "${SCRIPT_DIR}/deploy.sh"; then
+            log "Executing: deploy.sh $script_args"
+            if bash "${SCRIPT_DIR}/deploy.sh" $script_args; then
                 print_separator
                 print_success "Fase 2 concluída com sucesso!"
                 log "Phase 2 completed successfully"

@@ -67,6 +67,61 @@ function ChartContainer({
   );
 }
 
+/**
+ * Sanitiza um identificador CSS para prevenir injeção.
+ * Permite apenas caracteres alfanuméricos e hífens.
+ */
+function sanitizeCssIdentifier(id: string): string {
+  return id.replace(/[^a-zA-Z0-9-]/g, "");
+}
+
+/**
+ * Valida se um valor é uma cor CSS válida.
+ * Aceita: hex, rgb, rgba, hsl, hsla, e nomes de cores CSS.
+ */
+function isValidCssColor(value: string): boolean {
+  // Regex para cores CSS válidas
+  const hexPattern = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/;
+  const rgbPattern = /^rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*(,\s*[\d.]+)?\s*\)$/;
+  const hslPattern = /^hsla?\(\s*\d+\s*,\s*[\d.]+%\s*,\s*[\d.]+%\s*(,\s*[\d.]+)?\s*\)$/;
+  const cssVarPattern = /^var\(--[a-zA-Z0-9-]+\)$/;
+  // CSS named colors (partial list of common ones)
+  const namedColors = /^(transparent|currentColor|inherit|initial|unset|black|white|red|green|blue|yellow|orange|purple|pink|gray|grey|navy|teal|olive|maroon|aqua|fuchsia|lime|silver)$/i;
+
+  return (
+    hexPattern.test(value) ||
+    rgbPattern.test(value) ||
+    hslPattern.test(value) ||
+    cssVarPattern.test(value) ||
+    namedColors.test(value)
+  );
+}
+
+/**
+ * Sanitiza um valor de cor, retornando null se inválido.
+ */
+function sanitizeCssColor(color: string | undefined): string | null {
+  if (!color) return null;
+  // Remove espaços extras
+  const trimmed = color.trim();
+  // Valida o formato
+  if (!isValidCssColor(trimmed)) {
+    console.warn(`[ChartStyle] Invalid CSS color value ignored: ${trimmed}`);
+    return null;
+  }
+  return trimmed;
+}
+
+/**
+ * ChartStyle component injects dynamic CSS variables for theming.
+ *
+ * Security note: This component uses dangerouslySetInnerHTML for CSS injection.
+ * This is safe because:
+ * 1. All values are sanitized before injection
+ * 2. The data comes from developer-controlled config, not user input
+ * 3. CSS is injected into a <style> tag, which cannot execute JavaScript
+ * 4. The id is sanitized to prevent CSS selector injection
+ */
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
     ([, config]) => config.theme || config.color
@@ -76,20 +131,27 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
+  // Sanitize the chart ID to prevent CSS injection
+  const safeId = sanitizeCssIdentifier(id);
+
   return (
     <style
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
           .map(
             ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+${prefix} [data-chart=${safeId}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
-    const color =
+    const rawColor =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    const color = sanitizeCssColor(rawColor);
+    // Sanitize the key to prevent CSS property injection
+    const safeKey = sanitizeCssIdentifier(key);
+    return color ? `  --color-${safeKey}: ${color};` : null;
   })
+  .filter(Boolean)
   .join("\n")}
 }
 `

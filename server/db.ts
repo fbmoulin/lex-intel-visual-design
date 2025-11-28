@@ -1,21 +1,132 @@
 import { and, desc, eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { InsertPetition, InsertUser, petitions, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { loggers } from './_core/logger';
 
-let _db: ReturnType<typeof drizzle> | null = null;
+type PostgresDb = ReturnType<typeof drizzle>;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
-export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+let _db: PostgresDb | null = null;
+let _sql: ReturnType<typeof postgres> | null = null;
+let _connectionAttempts = 0;
+const MAX_RETRY_ATTEMPTS = 3;
+const INITIAL_RETRY_DELAY_MS = 1000; // 1 segundo
+
+/**
+ * Delay com exponential backoff
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Tenta conectar ao banco de dados com retry e exponential backoff
+ */
+async function connectWithRetry(): Promise<PostgresDb | null> {
+  if (!process.env.DATABASE_URL) {
+    return null;
+  }
+
+  for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      // Configura conexão PostgreSQL otimizada para Supabase
+      _sql = postgres(process.env.DATABASE_URL, {
+        max: 10, // Pool máximo de conexões
+        idle_timeout: 20, // Timeout de conexão ociosa em segundos
+        connect_timeout: 10, // Timeout de conexão em segundos
+        prepare: false, // Desabilita prepared statements (melhor para Supabase pooler)
+      });
+
+      const db = drizzle(_sql);
+
+      // Testa a conexão com uma query simples
+      await _sql`SELECT 1`;
+
+      loggers.database.info("Database connected successfully (PostgreSQL/Supabase)", { attempt });
+      _connectionAttempts = 0;
+      return db;
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
-      _db = null;
+      _connectionAttempts = attempt;
+      const delayMs = INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt - 1);
+
+      if (attempt < MAX_RETRY_ATTEMPTS) {
+        loggers.database.warn("Database connection failed, retrying...", {
+          attempt,
+          maxAttempts: MAX_RETRY_ATTEMPTS,
+          retryInMs: delayMs,
+          error: String(error),
+        });
+        await delay(delayMs);
+      } else {
+        loggers.database.error("Database connection failed after all retries", error, {
+          attempts: attempt,
+        });
+      }
     }
   }
+
+  return null;
+}
+
+/**
+ * Lazily create the drizzle instance with retry support.
+ * Local tooling can run without a DB.
+ */
+export async function getDb() {
+  if (!_db && process.env.DATABASE_URL) {
+    _db = await connectWithRetry();
+  }
   return _db;
+}
+
+/**
+ * Força uma reconexão com o banco de dados
+ * Útil após detectar uma conexão perdida
+ */
+export async function reconnectDb(): Promise<boolean> {
+  loggers.database.info("Attempting to reconnect to database...");
+
+  // Fecha conexão existente se houver
+  if (_sql) {
+    try {
+      await _sql.end();
+    } catch {
+      // Ignora erro ao fechar conexão
+    }
+  }
+
+  _db = null;
+  _sql = null;
+  const db = await getDb();
+  return db !== null;
+}
+
+/**
+ * Retorna o número de tentativas de conexão falhas
+ */
+export function getConnectionAttempts(): number {
+  return _connectionAttempts;
+}
+
+/**
+ * Verifica se o banco de dados está disponível
+ */
+export function isDatabaseAvailable(): boolean {
+  return _db !== null;
+}
+
+/**
+ * Fecha a conexão com o banco de dados
+ * Útil para graceful shutdown
+ */
+export async function closeDb(): Promise<void> {
+  if (_sql) {
+    await _sql.end();
+    _sql = null;
+    _db = null;
+    loggers.database.info("Database connection closed");
+  }
 }
 
 export async function upsertUser(user: InsertUser): Promise<void> {
@@ -25,7 +136,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot upsert user: database not available");
+    loggers.database.warn("Cannot upsert user: database not available");
     return;
   }
 
@@ -33,7 +144,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     const values: InsertUser = {
       openId: user.openId,
     };
-    const updateSet: Record<string, unknown> = {};
+    const updateSet: Partial<InsertUser> = {};
 
     const textFields = ["name", "email", "loginMethod"] as const;
     type TextField = (typeof textFields)[number];
@@ -68,11 +179,13 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
+    // PostgreSQL usa onConflictDoUpdate em vez de onDuplicateKeyUpdate
+    await db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet,
     });
   } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
+    loggers.database.error("Failed to upsert user", error);
     throw error;
   }
 }
@@ -80,7 +193,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
+    loggers.database.warn("Cannot get user: database not available");
     return undefined;
   }
 
@@ -96,8 +209,9 @@ export async function createPetition(petition: InsertPetition) {
     throw new Error("Database not available");
   }
 
-  const result = await db.insert(petitions).values(petition);
-  return Number(result[0].insertId);
+  // PostgreSQL usa returning() para obter o ID inserido
+  const result = await db.insert(petitions).values(petition).returning({ id: petitions.id });
+  return result[0].id;
 }
 
 export async function getUserPetitions(userId: number) {
@@ -138,9 +252,10 @@ export async function updatePetition(
     throw new Error("Database not available");
   }
 
+  // Adiciona updatedAt automaticamente
   await db
     .update(petitions)
-    .set(data)
+    .set({ ...data, updatedAt: new Date() })
     .where(and(eq(petitions.id, id), eq(petitions.userId, userId)));
 }
 

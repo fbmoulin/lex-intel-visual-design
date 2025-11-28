@@ -4,10 +4,12 @@ import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
+import { registerHealthRoutes } from "./health";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { setupSecurity } from "./security";
+import { loggers } from "./logger";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -38,6 +40,10 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  // Health check endpoints (before auth middleware)
+  registerHealthRoutes(app);
+
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // tRPC API
@@ -59,12 +65,18 @@ async function startServer() {
   const port = await findAvailablePort(preferredPort);
 
   if (port !== preferredPort) {
-    console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
+    loggers.server.warn(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
 
   server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}/`);
+    loggers.server.info(`Server running on http://localhost:${port}/`, {
+      port,
+      env: process.env.NODE_ENV,
+    });
   });
 }
 
-startServer().catch(console.error);
+startServer().catch((error) => {
+  loggers.server.error("Failed to start server", error);
+  process.exit(1);
+});

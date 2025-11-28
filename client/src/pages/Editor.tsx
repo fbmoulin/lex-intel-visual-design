@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FileDown, Eye, EyeOff, Save, Settings } from "lucide-react";
+import { FileDown, Eye, EyeOff, Save } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { useParams, useLocation, useSearch } from "wouter";
+import { useParams, useSearch } from "wouter";
 import { toast } from "sonner";
 import { generatePetitionPDF, prepareElementForPDF } from "@/lib/pdfGenerator";
 import { generatePetitionDOCX } from "@/lib/docxGenerator";
@@ -16,10 +16,12 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getTemplateById } from "@/data/petitionTemplates";
 import { ExportModal, ExportConfig } from "@/components/ExportModal";
+import { isValidTemplateType, type PetitionTemplateType } from "@shared/const";
 
 export default function Editor() {
   const params = useParams();
-  const templateId = params.templateId || "civil";
+  const rawTemplateId = params.templateId || "civil";
+  const templateId: PetitionTemplateType = isValidTemplateType(rawTemplateId) ? rawTemplateId : "civil";
   const [showPreview, setShowPreview] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);

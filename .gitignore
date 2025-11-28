@@ -101,6 +101,9 @@ jspm_packages/
 tmp/
 temp/
 
+# Deploy cache (script idempotency)
+.deploy-cache/
+
 # Database
 *.db
 *.sqlite

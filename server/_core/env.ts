@@ -1,10 +1,153 @@
+/**
+ * Environment Variables Configuration
+ * Lex Intel Visual Design - Desenvolvido por Lex Intelligentia
+ *
+ * Valida e exporta variáveis de ambiente com tipagem segura.
+ * Falha fast no boot se variáveis obrigatórias não estiverem definidas.
+ */
+
+/**
+ * Variáveis de ambiente obrigatórias
+ * O servidor não inicia se alguma delas estiver faltando
+ */
+const REQUIRED_ENV_VARS = [
+  "JWT_SECRET",
+  "DATABASE_URL",
+  "OAUTH_SERVER_URL",
+] as const;
+
+/**
+ * Variáveis opcionais que têm valores default
+ */
+const OPTIONAL_ENV_VARS = {
+  VITE_APP_ID: "",
+  OWNER_OPEN_ID: "",
+  BUILT_IN_FORGE_API_URL: "",
+  BUILT_IN_FORGE_API_KEY: "",
+  SUPABASE_URL: "",
+  SUPABASE_ANON_KEY: "",
+  SUPABASE_SERVICE_ROLE_KEY: "",
+} as const;
+
+/**
+ * Valida que todas as variáveis obrigatórias estão definidas
+ * Lança erro no boot se alguma estiver faltando
+ */
+function validateRequiredEnvVars(): void {
+  const missingVars: string[] = [];
+
+  for (const varName of REQUIRED_ENV_VARS) {
+    const value = process.env[varName];
+    if (!value || value.trim() === "") {
+      missingVars.push(varName);
+    }
+  }
+
+  if (missingVars.length > 0) {
+    const errorMessage = [
+      "",
+      "═══════════════════════════════════════════════════════════════",
+      "  ERRO: Variáveis de ambiente obrigatórias não definidas",
+      "═══════════════════════════════════════════════════════════════",
+      "",
+      "  As seguintes variáveis são obrigatórias mas não foram encontradas:",
+      "",
+      ...missingVars.map((v) => `    - ${v}`),
+      "",
+      "  Por favor, defina-as no arquivo .env ou como variáveis de ambiente.",
+      "",
+      "  Exemplo de .env (Supabase):",
+      "    JWT_SECRET=sua-chave-secreta-aqui",
+      "    DATABASE_URL=postgresql://postgres.[ref]:[pass]@aws-0-[region].pooler.supabase.com:6543/postgres",
+      "    OAUTH_SERVER_URL=https://oauth.example.com",
+      "",
+      "═══════════════════════════════════════════════════════════════",
+      "",
+    ].join("\n");
+
+    console.error(errorMessage);
+
+    // Em produção, falha imediatamente
+    // Em desenvolvimento, apenas avisa (permite rodar sem DB para dev local)
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(`Missing required environment variables: ${missingVars.join(", ")}`);
+    } else {
+      console.warn("[ENV] ⚠️  Continuando em modo desenvolvimento com variáveis faltando...\n");
+    }
+  }
+}
+
+/**
+ * Valida requisitos mínimos de segurança para variáveis sensíveis
+ */
+function validateSecurityRequirements(): void {
+  const jwtSecret = process.env.JWT_SECRET;
+
+  // Em produção, JWT_SECRET deve ter no mínimo 32 caracteres
+  if (process.env.NODE_ENV === "production" && jwtSecret && jwtSecret.length < 32) {
+    console.warn(
+      "[ENV] ⚠️  JWT_SECRET deve ter no mínimo 32 caracteres para segurança adequada"
+    );
+  }
+
+  // Verifica se DATABASE_URL é PostgreSQL (Supabase)
+  const dbUrl = process.env.DATABASE_URL;
+  if (dbUrl && !dbUrl.startsWith("postgresql://") && !dbUrl.startsWith("postgres://")) {
+    console.warn(
+      "[ENV] ⚠️  DATABASE_URL deve ser uma URL PostgreSQL (Supabase). Formato: postgresql://..."
+    );
+  }
+}
+
+// Executa validações no import do módulo (fail-fast)
+validateRequiredEnvVars();
+validateSecurityRequirements();
+
+/**
+ * Objeto ENV tipado e validado
+ * Use este objeto em vez de acessar process.env diretamente
+ */
 export const ENV = {
-  appId: process.env.VITE_APP_ID ?? "",
+  // Identificação da aplicação
+  appId: process.env.VITE_APP_ID ?? OPTIONAL_ENV_VARS.VITE_APP_ID,
+
+  // Autenticação e Segurança
   cookieSecret: process.env.JWT_SECRET ?? "",
-  databaseUrl: process.env.DATABASE_URL ?? "",
   oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
-  ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
+  ownerOpenId: process.env.OWNER_OPEN_ID ?? OPTIONAL_ENV_VARS.OWNER_OPEN_ID,
+
+  // Banco de Dados (PostgreSQL/Supabase)
+  databaseUrl: process.env.DATABASE_URL ?? "",
+
+  // Supabase
+  supabaseUrl: process.env.SUPABASE_URL ?? OPTIONAL_ENV_VARS.SUPABASE_URL,
+  supabaseAnonKey: process.env.SUPABASE_ANON_KEY ?? OPTIONAL_ENV_VARS.SUPABASE_ANON_KEY,
+  supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? OPTIONAL_ENV_VARS.SUPABASE_SERVICE_ROLE_KEY,
+
+  // APIs Externas
+  forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? OPTIONAL_ENV_VARS.BUILT_IN_FORGE_API_URL,
+  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? OPTIONAL_ENV_VARS.BUILT_IN_FORGE_API_KEY,
+
+  // Flags de Ambiente
   isProduction: process.env.NODE_ENV === "production",
-  forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
-  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
-};
+  isDevelopment: process.env.NODE_ENV === "development",
+  isTest: process.env.NODE_ENV === "test",
+} as const;
+
+/**
+ * Helper para verificar se uma feature está disponível
+ */
+export function hasFeature(feature: "database" | "forge" | "oauth" | "supabase"): boolean {
+  switch (feature) {
+    case "database":
+      return Boolean(ENV.databaseUrl);
+    case "forge":
+      return Boolean(ENV.forgeApiUrl && ENV.forgeApiKey);
+    case "oauth":
+      return Boolean(ENV.oAuthServerUrl);
+    case "supabase":
+      return Boolean(ENV.supabaseUrl && ENV.supabaseAnonKey);
+    default:
+      return false;
+  }
+}
