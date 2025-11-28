@@ -1016,6 +1016,217 @@ e) Custas e honorários.
 Termos em que,
 Pede deferimento.`
     }
+  },
+
+  // ===== TEMPLATES DE EXECUÇÃO E CUMPRIMENTO =====
+  {
+    id: 'civil-busca-apreensao',
+    templateType: 'civil',
+    title: 'Ação de Busca e Apreensão',
+    description: 'Template para ação de busca e apreensão de bem alienado fiduciariamente',
+    content: {
+      tribunal: 'Vara Cível da Comarca de [CIDADE/UF]',
+      valorCausa: 'R$ [VALOR DO BEM]',
+      fatos: `O AUTOR celebrou com o RÉU, em [DATA], contrato de financiamento com garantia de alienação fiduciária do bem abaixo descrito, conforme contrato anexo:
+
+BEM OBJETO DA GARANTIA:
+- Descrição: [VEÍCULO/BEM MÓVEL]
+- Marca/Modelo: [ESPECIFICAR]
+- Ano: [ANO]
+- Placa/Chassi: [IDENTIFICAÇÃO]
+- RENAVAM: [NÚMERO] (se aplicável)
+
+O RÉU comprometeu-se ao pagamento de [NÚMERO] parcelas mensais de R$ [VALOR], com vencimento todo dia [DIA] de cada mês.
+
+Ocorre que o RÉU encontra-se inadimplente desde a parcela vencida em [DATA], totalizando [NÚMERO] parcelas em atraso, no montante de R$ [VALOR TOTAL EM ATRASO].
+
+O AUTOR notificou extrajudicialmente o RÉU através de [CARTÓRIO/CORREIOS] em [DATA], conforme documento anexo, constituindo-o em mora, nos termos do artigo 2º, §2º do Decreto-Lei 911/69.
+
+Decorrido o prazo sem purgação da mora, resta configurada a inadimplência que autoriza a busca e apreensão do bem alienado fiduciariamente.`,
+      fundamentosJuridicos: `A presente ação tem fundamento no Decreto-Lei nº 911/69, que disciplina a alienação fiduciária em garantia.
+
+O artigo 3º do referido diploma legal estabelece que "O proprietário fiduciário ou credor poderá, desde que comprovada a mora, na forma estabelecida pelo § 2º do art. 2º, ou o inadimplemento, requerer contra o devedor ou terceiro a busca e apreensão do bem alienado fiduciariamente".
+
+O §1º do mesmo artigo dispõe que "Cinco dias após executada a liminar mencionada no caput, consolidar-se-ão a propriedade e a posse plena e exclusiva do bem no patrimônio do credor fiduciário".
+
+O §2º estabelece que "No prazo do § 1º, o devedor fiduciante poderá pagar a integralidade da dívida pendente, segundo os valores apresentados pelo credor fiduciário na inicial, hipótese na qual o bem lhe será restituído livre do ônus".
+
+A mora foi devidamente comprovada pela notificação extrajudicial, atendendo aos requisitos do artigo 2º, §2º do DL 911/69.
+
+A Súmula 72 do STJ estabelece que "A comprovação da mora é imprescindível à busca e apreensão do bem alienado fiduciariamente".
+
+O bem permanece em poder do devedor, que não cumpriu sua obrigação, justificando a medida de busca e apreensão para garantir o crédito do AUTOR.`,
+      pedidos: `Ante o exposto, requer a Vossa Excelência:
+
+a) A concessão de LIMINAR de busca e apreensão do bem descrito na inicial, independentemente de audiência do RÉU, nos termos do artigo 3º do Decreto-Lei 911/69;
+
+b) Após a apreensão do bem, a citação do RÉU para, no prazo de 5 (cinco) dias:
+   - Pagar a integralidade da dívida, no valor de R$ [VALOR TOTAL], para restituição do bem; ou
+   - Apresentar contestação;
+
+c) A consolidação da propriedade e posse plena do bem em favor do AUTOR, caso não seja purgada a mora no prazo legal;
+
+d) Alternativamente, caso o bem não seja encontrado, a conversão da ação em execução pelo valor equivalente ao bem, acrescido das parcelas vencidas e vincendas;
+
+e) A condenação do RÉU ao pagamento das custas processuais e honorários advocatícios de 10% sobre o valor da causa;
+
+f) A expedição de ofício ao DETRAN para bloqueio de transferência do veículo (se aplicável).
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    }
+  },
+  {
+    id: 'civil-execucao-titulo-extrajudicial',
+    templateType: 'civil',
+    title: 'Ação de Execução de Título Extrajudicial',
+    description: 'Template para execução de título executivo extrajudicial (cheque, nota promissória, contrato)',
+    content: {
+      tribunal: 'Vara Cível da Comarca de [CIDADE/UF]',
+      valorCausa: 'R$ [VALOR DA EXECUÇÃO]',
+      fatos: `O EXEQUENTE é legítimo credor do EXECUTADO, conforme título executivo extrajudicial anexo:
+
+TÍTULO EXECUTIVO:
+- Natureza: [CHEQUE / NOTA PROMISSÓRIA / DUPLICATA / CONTRATO / CCB]
+- Número: [NÚMERO DO TÍTULO]
+- Data de emissão: [DATA]
+- Valor original: R$ [VALOR]
+- Data de vencimento: [DATA]
+- [Para cheques: Banco sacado: [BANCO], Agência: [AG], Conta: [CC]]
+
+O título foi regularmente emitido pelo EXECUTADO em favor do EXEQUENTE, em razão de [ORIGEM DA DÍVIDA: compra e venda, empréstimo, prestação de serviços, etc.].
+
+Na data do vencimento, o título foi apresentado [ao banco sacado / para pagamento] e não foi honrado [por insuficiência de fundos / sem motivo justificado].
+
+O EXECUTADO foi notificado [extrajudicialmente / através de protesto] para pagamento, conforme documento anexo, permanecendo inerte.
+
+DEMONSTRATIVO DE DÉBITO ATUALIZADO:
+- Principal: R$ [VALOR]
+- Correção monetária (INPC): R$ [VALOR]
+- Juros de mora (1% a.m.): R$ [VALOR]
+- Multa contratual: R$ [VALOR] (se aplicável)
+- TOTAL: R$ [VALOR TOTAL]`,
+      fundamentosJuridicos: `A presente execução fundamenta-se no artigo 784 do Código de Processo Civil, que elenca os títulos executivos extrajudiciais:
+
+"Art. 784. São títulos executivos extrajudiciais:
+I - a letra de câmbio, a nota promissória, a duplicata, a debênture e o cheque;
+II - a escritura pública ou outro documento público assinado pelo devedor;
+III - o documento particular assinado pelo devedor e por 2 (duas) testemunhas;
+[...]"
+
+O título executivo preenche todos os requisitos legais de liquidez, certeza e exigibilidade, nos termos do artigo 783 do CPC.
+
+O artigo 786 do CPC estabelece que "A execução pode ser instaurada caso o devedor não satisfaça a obrigação certa, líquida e exigível consubstanciada em título executivo".
+
+O artigo 827 do CPC autoriza a fixação de honorários advocatícios de dez por cento sobre o valor da execução.
+
+O artigo 829 do CPC determina que "O executado será citado para pagar a dívida no prazo de 3 (três) dias, contado da citação".
+
+O artigo 831 do CPC prevê a penhora de tantos bens quantos bastem para o pagamento do principal atualizado, dos juros, das custas e dos honorários advocatícios.`,
+      pedidos: `Ante o exposto, requer a Vossa Excelência:
+
+a) A citação do EXECUTADO para pagar a quantia de R$ [VALOR TOTAL], no prazo de 3 (três) dias, sob pena de penhora de bens suficientes à garantia do juízo;
+
+b) A fixação de honorários advocatícios em 10% sobre o valor da execução, nos termos do artigo 827 do CPC;
+
+c) Não havendo pagamento no prazo legal:
+   - A penhora de bens do EXECUTADO, preferencialmente via SISBAJUD/BACENJUD;
+   - O bloqueio de veículos via RENAJUD;
+   - A averbação premonitória em imóveis via ARISP/CRI;
+
+d) A intimação do EXECUTADO da penhora realizada, na pessoa de seu advogado ou pessoalmente;
+
+e) Não havendo embargos ou sendo estes rejeitados, a expropriação dos bens penhorados para satisfação do crédito;
+
+f) A condenação do EXECUTADO ao pagamento das custas processuais.
+
+Dá-se à causa o valor de R$ [VALOR TOTAL].
+
+Termos em que,
+Pede deferimento.`
+    }
+  },
+  {
+    id: 'civil-cumprimento-sentenca',
+    templateType: 'civil',
+    title: 'Cumprimento de Sentença',
+    description: 'Template para cumprimento de sentença judicial com obrigação de pagar quantia certa',
+    content: {
+      numeroProcesso: '[NÚMERO DO PROCESSO DE CONHECIMENTO]',
+      tribunal: '[VARA/TRIBUNAL QUE PROFERIU A SENTENÇA]',
+      valorCausa: 'R$ [VALOR DA EXECUÇÃO]',
+      fatos: `O EXEQUENTE promoveu ação judicial em face do EXECUTADO (processo nº [NÚMERO]), tendo sido proferida sentença [de procedência / parcialmente procedente] que condenou o EXECUTADO ao pagamento de [DESCREVER A CONDENAÇÃO].
+
+A sentença transitou em julgado em [DATA], conforme certidão anexa.
+
+Não houve cumprimento voluntário da obrigação pelo EXECUTADO.
+
+DEMONSTRATIVO DE DÉBITO ATUALIZADO (Art. 524, CPC):
+
+1. VALOR PRINCIPAL DA CONDENAÇÃO:
+   - Valor original: R$ [VALOR]
+   - Data-base: [DATA DA SENTENÇA/EVENTO]
+
+2. CORREÇÃO MONETÁRIA:
+   - Índice: [INPC/IPCA-E/TR]
+   - Período: [DATA INICIAL] a [DATA ATUAL]
+   - Valor: R$ [VALOR]
+
+3. JUROS DE MORA:
+   - Taxa: [1% a.m. / SELIC]
+   - Termo inicial: [CITAÇÃO / EVENTO DANOSO]
+   - Período: [DATA INICIAL] a [DATA ATUAL]
+   - Valor: R$ [VALOR]
+
+4. MULTA DO ART. 523, §1º, CPC (10%):
+   - Valor: R$ [VALOR] (a incidir após decurso do prazo de pagamento voluntário)
+
+5. HONORÁRIOS DA FASE DE CUMPRIMENTO (10%):
+   - Valor: R$ [VALOR] (a incidir após decurso do prazo de pagamento voluntário)
+
+TOTAL ATUALIZADO: R$ [VALOR TOTAL]`,
+      fundamentosJuridicos: `O cumprimento de sentença é regido pelos artigos 513 a 538 do Código de Processo Civil.
+
+O artigo 523 do CPC estabelece:
+"No caso de condenação em quantia certa, ou já fixada em liquidação, e no caso de decisão sobre parcela incontroversa, o cumprimento definitivo da sentença far-se-á a requerimento do exequente, sendo o executado intimado para pagar o débito, no prazo de 15 (quinze) dias, acrescido de custas, se houver."
+
+O §1º do mesmo artigo dispõe:
+"Não ocorrendo pagamento voluntário no prazo do caput, o débito será acrescido de multa de dez por cento e, também, de honorários de advogado de dez por cento."
+
+O artigo 524 do CPC determina que o requerimento de cumprimento deve ser instruído com demonstrativo discriminado e atualizado do crédito.
+
+O artigo 525 do CPC estabelece o prazo de 15 dias para eventual impugnação ao cumprimento de sentença, após a intimação para pagamento.
+
+O artigo 831 do CPC autoriza a penhora de tantos bens quantos bastem para o pagamento do débito.
+
+A jurisprudência do STJ consolidou que os honorários advocatícios fixados na fase de conhecimento são cumuláveis com aqueles fixados na fase de cumprimento de sentença (Tema 973).`,
+      pedidos: `Ante o exposto, requer a Vossa Excelência:
+
+a) O recebimento do presente cumprimento de sentença;
+
+b) A intimação do EXECUTADO, na pessoa de seu advogado constituído nos autos, para pagar a quantia de R$ [VALOR TOTAL], no prazo de 15 (quinze) dias, sob pena de acréscimo de multa de 10% e honorários advocatícios de 10%, nos termos do artigo 523, §1º, do CPC;
+
+c) Decorrido o prazo sem pagamento:
+   - O bloqueio de valores via SISBAJUD/BACENJUD até o limite do débito atualizado;
+   - A penhora de veículos via RENAJUD;
+   - A penhora de imóveis e averbação premonitória via ARISP/CRI;
+   - A penhora de outros bens suficientes à satisfação do crédito;
+
+d) A intimação do EXECUTADO da penhora para, querendo, apresentar impugnação no prazo legal;
+
+e) Não havendo impugnação ou sendo esta rejeitada, a expropriação dos bens penhorados;
+
+f) A expedição de mandado de levantamento em favor do EXEQUENTE após a satisfação do crédito;
+
+g) A condenação do EXECUTADO nas custas processuais.
+
+Dá-se à causa o valor de R$ [VALOR TOTAL].
+
+Termos em que,
+Pede deferimento.`
+    }
   }
 ];
 
