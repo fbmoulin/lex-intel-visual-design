@@ -21,14 +21,29 @@ O **Lex Intel Visual Design** é uma aplicação full-stack moderna que permite 
 ### Principais Funcionalidades
 
 - ✅ **Editor de Petições:** Interface intuitiva com preview em tempo real
-- ✅ **Templates Profissionais:** 8 templates pré-preenchidos (Civil, Trabalhista, Criminal, Tributária, Consumidor)
+- ✅ **Templates Profissionais:** 26 templates pré-preenchidos cobrindo 10 áreas do direito
 - ✅ **Componentes Visuais:** Timeline, Cards de Resumo, Gráficos (Recharts)
 - ✅ **Exportação Avançada:** PDF e DOCX com personalização de cabeçalho/rodapé
 - ✅ **Autenticação Segura:** Manus OAuth integrado
-- ✅ **Banco de Dados:** PostgreSQL com Drizzle ORM
-- ✅ **API tRPC:** Type-safe API com 7 testes unitários
+- ✅ **Banco de Dados:** PostgreSQL/Supabase com Drizzle ORM
+- ✅ **API tRPC:** Type-safe API com testes unitários
 - ✅ **Modo Escuro:** Tema configurável
 - ✅ **Gerenciamento de Petições:** Busca, filtros, edição e exclusão
+
+### Templates por Área do Direito
+
+| Área | Qtd | Exemplos |
+|------|-----|----------|
+| Civil | 5 | Cobrança, Indenização, Busca e Apreensão, Execução, Cumprimento de Sentença |
+| Trabalhista | 2 | Rescisão Indireta, Horas Extras |
+| Criminal | 4 | Queixa-crime, Defesa Preliminar, Revogação de Preventiva, Habeas Corpus |
+| Tributário | 2 | Restituição de Indébito, Anulatória de Débito Fiscal |
+| Consumidor | 3 | Vício de Produto, Cobrança Indevida, Negativação Indevida |
+| Família | 4 | Divórcio, Alimentos, Guarda, Inventário |
+| Empresarial | 2 | Recuperação Judicial, Dissolução Parcial |
+| Administrativo | 2 | Mandado de Segurança, Anulatória |
+| Previdenciário | 3 | Aposentadoria, Auxílio-doença, BPC/LOAS |
+| Ambiental | 2 | Ação Civil Pública, Embargo |
 
 ---
 

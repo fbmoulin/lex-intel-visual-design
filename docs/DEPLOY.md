@@ -31,7 +31,37 @@ Antes de iniciar, certifique-se de que os seguintes pré-requisitos estão atend
 
    **Atenção:** Nunca commite o arquivo `.env` no repositório Git.
 
-### 2.2. Instalação de Dependências
+### 2.2. Configuração do Supabase (Banco de Dados)
+
+A aplicação utiliza **Supabase** como banco de dados PostgreSQL. Para configurar:
+
+1. **Crie um projeto no Supabase:**
+   - Acesse [supabase.com](https://supabase.com) e crie uma conta
+   - Crie um novo projeto e aguarde a inicialização
+
+2. **Obtenha as credenciais:**
+   - No painel do Supabase, vá em **Settings > Database**
+   - Copie a **Connection string** (URI mode)
+
+3. **Configure as variáveis de ambiente:**
+   ```bash
+   # URL de conexão PostgreSQL (obrigatório)
+   DATABASE_URL=postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
+
+   # URL do projeto Supabase (opcional, para cliente JS)
+   SUPABASE_URL=https://[project-ref].supabase.co
+
+   # Chaves de API (opcional, para funcionalidades avançadas)
+   SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   ```
+
+4. **Execute as migrações:**
+   ```bash
+   pnpm run db:push
+   ```
+
+### 2.3. Instalação de Dependências
 
 Instale as dependências do projeto usando `pnpm`:
 

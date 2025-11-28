@@ -5,6 +5,48 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.1.0-beta] - 2025-11-28
+
+### ✨ Novidades
+
+#### Migração para Supabase
+- Migração completa do banco de dados de MySQL para PostgreSQL/Supabase
+- Novo cliente Supabase para integração direta
+- Driver postgres-js para melhor compatibilidade com pooling
+- Conexão com retry e exponential backoff
+
+#### Expansão de Templates (8 → 26)
+- **Civil (5):** Cobrança, Indenização, Busca e Apreensão, Execução de Título Extrajudicial, Cumprimento de Sentença
+- **Trabalhista (2):** Rescisão Indireta, Horas Extras
+- **Criminal (4):** Queixa-crime, Defesa Preliminar, Revogação de Preventiva, Habeas Corpus
+- **Tributário (2):** Restituição de Indébito, Anulatória de Débito Fiscal
+- **Consumidor (3):** Vício de Produto, Cobrança Indevida, Negativação Indevida
+- **Família (4):** Divórcio Consensual, Alimentos, Guarda Compartilhada, Inventário
+- **Empresarial (2):** Recuperação Judicial, Dissolução Parcial de Sociedade
+- **Administrativo (2):** Mandado de Segurança, Anulatória de Ato Administrativo
+- **Previdenciário (3):** Aposentadoria, Auxílio-doença, BPC/LOAS
+- **Ambiental (2):** Ação Civil Pública, Embargo de Obra Irregular
+
+### 🔧 Melhorias
+
+- Atualização do Vite e Vitest para corrigir vulnerabilidades de segurança
+- Centralização de constantes em `shared/const.ts`
+- Melhoria nos testes para ambiente sem banco de dados
+- Drizzle relations adicionadas para users/petitions
+
+### 🐛 Correções
+
+- Correções de tipo para testes e validação
+- Remoção de dependência mysql2 (não mais necessária)
+
+### 📦 Dependências
+
+- Adicionado: `@supabase/supabase-js`, `postgres`
+- Removido: `mysql2`
+- Atualizado: `vite@7.x`, `vitest@4.x`
+
+---
+
 ## [1.0.0-beta] - 2025-11-26
 
 ### 🎉 Lançamento Inicial (Beta)
