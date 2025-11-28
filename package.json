@@ -106,7 +106,7 @@
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
     "add": "^2.0.6",
-    "autoprefixer": "^10.4.20",
+    "autoprefixer": "^10.4.22",
     "drizzle-kit": "^0.31.7",
     "esbuild": "^0.25.0",
     "pnpm": "^10.15.1",
