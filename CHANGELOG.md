@@ -5,6 +5,66 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.2.0-beta] - 2025-11-29
+
+### 🔒 Segurança (Phase 1 - Security Hardening)
+
+#### CSRF Protection
+- Implementação de proteção CSRF com padrão Double Submit Cookie
+- Geração segura de tokens usando `crypto.randomBytes`
+- Validação de Origin/Referer headers
+- Endpoint `/api/csrf-token` para obtenção de tokens
+- Compatibilidade com autenticação baseada em sessão tRPC
+- Limpeza automática de tokens expirados
+
+#### Rate Limiting Melhorado
+- Proteção contra memory leak com limite de IPs
+- Eviction de entradas antigas quando store está cheio
+- Headers informativos (X-RateLimit-Limit, X-RateLimit-Remaining)
+- Configuração via variáveis de ambiente
+
+### ⚡ Performance (Phase 1 - Database Optimization)
+
+#### Indexes de Banco de Dados
+- `idx_petitions_user_id` - Busca por usuário
+- `idx_petitions_status` - Filtro por status
+- `idx_petitions_template_type` - Filtro por tipo de template
+- `idx_petitions_user_status` - Busca composta (usuário + status)
+- `idx_petitions_updated_at` - Ordenação por data
+
+#### Paginação Cursor-Based
+- Nova função `getUserPetitionsPaginated()` com cursor-based pagination
+- Projeção de campos para excluir textos grandes na listagem
+- Contagem eficiente com `countUserPetitions()`
+- Suporte a filtros opcionais (status, templateType)
+- Limite máximo de 100 itens por página
+
+#### Novos Endpoints tRPC
+- `petitions.listPaginated` - Lista paginada com cursor
+- `petitions.count` - Contagem com filtros
+
+### 📊 Observabilidade
+
+#### Structured Logging com Pino
+- Migração para Pino (10x mais rápido que console.log)
+- Pretty print colorizado para desenvolvimento
+- JSON estruturado para produção
+- Middleware de logging HTTP
+- Suporte a LOG_LEVEL via ambiente
+- Child loggers com contexto
+
+### 📦 Dependências
+
+- Adicionado: `pino`, `pino-pretty`
+
+### 📚 Documentação
+
+- Novo: `docs/STRATEGIC_ROADMAP.md` com plano enterprise completo
+- 4 fases de implementação detalhadas
+- Cobertura de segurança, performance, escalabilidade e compliance LGPD
+
+---
+
 ## [1.1.0-beta] - 2025-11-28
 
 ### ✨ Novidades
@@ -191,4 +251,6 @@ Nenhum bug crítico conhecido no momento. Reporte bugs em: https://github.com/fb
 
 **Desenvolvido por Lex Intelligentia** - Transformando a advocacia através da tecnologia.
 
+[1.2.0-beta]: https://github.com/fbmoulin/lex-intel-visual-design/releases/tag/v1.2.0-beta
+[1.1.0-beta]: https://github.com/fbmoulin/lex-intel-visual-design/releases/tag/v1.1.0-beta
 [1.0.0-beta]: https://github.com/fbmoulin/lex-intel-visual-design/releases/tag/v1.0.0-beta
