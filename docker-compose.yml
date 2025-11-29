@@ -1,0 +1,87 @@
+# Lex Intel Visual Design - Docker Compose for Local Development
+# Desenvolvido por Lex Intelligentia
+#
+# Usage:
+#   docker-compose up -d postgres   # Start only PostgreSQL
+#   docker-compose up -d            # Start all services
+#   docker-compose down             # Stop all services
+#   docker-compose logs -f          # View logs
+
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: lex-intel-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lex_intel
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d lex_intel"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (optional - for distributed rate limiting and caching)
+  redis:
+    image: redis:7-alpine
+    container_name: lex-intel-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Application (development mode)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lex-intel-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:devpassword@postgres:5432/lex_intel
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-jwt-secret-change-in-production
+      OAUTH_SERVER_URL: ${OAUTH_SERVER_URL:-https://oauth.example.com}
+      APP_URL: http://localhost:3000
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+      LOG_LEVEL: debug
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      # Mount source for hot reload (development)
+      - ./client:/app/client:ro
+      - ./server:/app/server:ro
+      - ./shared:/app/shared:ro
+    profiles:
+      - full
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# Networks (optional - for isolation)
+networks:
+  default:
+    name: lex-intel-network

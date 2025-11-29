@@ -1,10 +1,18 @@
-import { index, integer, pgEnum, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgEnum, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 /**
  * Enums do PostgreSQL
  */
 export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
 export const petitionStatusEnum = pgEnum("petition_status", ["rascunho", "finalizada"]);
+export const consentTypeEnum = pgEnum("consent_type", [
+  "terms_of_service",
+  "privacy_policy",
+  "data_processing",
+  "marketing",
+  "analytics",
+  "third_party_sharing",
+]);
 
 /**
  * Core user table backing auth flow.
@@ -62,3 +70,32 @@ export const petitions = pgTable("petitions", {
 
 export type Petition = typeof petitions.$inferSelect;
 export type InsertPetition = typeof petitions.$inferInsert;
+
+/**
+ * Tabela de consentimentos do usuário - LGPD Compliance
+ * Lei nº 13.709/2018 - Lei Geral de Proteção de Dados
+ *
+ * Armazena o histórico de consentimentos para:
+ * - Portabilidade de dados (Art. 18, III)
+ * - Revogação do consentimento (Art. 18, IX)
+ * - Auditoria e compliance
+ */
+export const userConsents = pgTable("user_consents", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  consentType: consentTypeEnum("consent_type").notNull(),
+  granted: boolean("granted").notNull(),
+  version: varchar("version", { length: 20 }).notNull(),
+  ipAddress: varchar("ip_address", { length: 45 }), // IPv6 max length
+  userAgent: varchar("user_agent", { length: 500 }),
+  grantedAt: timestamp("granted_at", { withTimezone: true }),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("idx_user_consents_user_id").on(table.userId),
+  index("idx_user_consents_type").on(table.consentType),
+  index("idx_user_consents_user_type").on(table.userId, table.consentType),
+]);
+
+export type UserConsent = typeof userConsents.$inferSelect;
+export type InsertUserConsent = typeof userConsents.$inferInsert;

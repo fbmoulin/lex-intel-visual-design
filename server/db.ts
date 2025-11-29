@@ -1,7 +1,16 @@
 import { and, count, desc, eq, lt, SQL } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { InsertPetition, InsertUser, Petition, petitions, users } from "../drizzle/schema";
+import {
+  InsertPetition,
+  InsertUser,
+  InsertUserConsent,
+  Petition,
+  petitions,
+  userConsents,
+  UserConsent,
+  users,
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { loggers } from './_core/logger';
 
@@ -419,4 +428,141 @@ export async function countUserPetitions(
     .where(and(...conditions));
 
   return total;
+}
+
+// ============================================================================
+// LGPD Consent Operations
+// ============================================================================
+
+/**
+ * Obtém todos os consentimentos de um usuário
+ */
+export async function getUserConsents(userId: number): Promise<UserConsent[]> {
+  const db = await getDb();
+  if (!db) {
+    return [];
+  }
+
+  return await db
+    .select()
+    .from(userConsents)
+    .where(eq(userConsents.userId, userId))
+    .orderBy(desc(userConsents.createdAt));
+}
+
+/**
+ * Obtém o consentimento mais recente de um tipo específico
+ */
+export async function getLatestConsent(
+  userId: number,
+  consentType: InsertUserConsent["consentType"]
+): Promise<UserConsent | undefined> {
+  const db = await getDb();
+  if (!db) {
+    return undefined;
+  }
+
+  const result = await db
+    .select()
+    .from(userConsents)
+    .where(
+      and(
+        eq(userConsents.userId, userId),
+        eq(userConsents.consentType, consentType)
+      )
+    )
+    .orderBy(desc(userConsents.createdAt))
+    .limit(1);
+
+  return result[0];
+}
+
+/**
+ * Registra um novo consentimento
+ */
+export async function createConsent(consent: InsertUserConsent): Promise<number> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const result = await db
+    .insert(userConsents)
+    .values(consent)
+    .returning({ id: userConsents.id });
+
+  loggers.database.info("Consent recorded", {
+    userId: consent.userId,
+    consentType: consent.consentType,
+    granted: consent.granted,
+  });
+
+  return result[0].id;
+}
+
+/**
+ * Registra concessão de consentimento
+ */
+export async function grantConsent(
+  userId: number,
+  consentType: InsertUserConsent["consentType"],
+  version: string,
+  ipAddress?: string,
+  userAgent?: string
+): Promise<number> {
+  return createConsent({
+    userId,
+    consentType,
+    granted: true,
+    version,
+    ipAddress,
+    userAgent,
+    grantedAt: new Date(),
+  });
+}
+
+/**
+ * Registra revogação de consentimento
+ */
+export async function revokeConsent(
+  userId: number,
+  consentType: InsertUserConsent["consentType"],
+  version: string,
+  ipAddress?: string,
+  userAgent?: string
+): Promise<number> {
+  return createConsent({
+    userId,
+    consentType,
+    granted: false,
+    version,
+    ipAddress,
+    userAgent,
+    revokedAt: new Date(),
+  });
+}
+
+/**
+ * Verifica se o usuário tem todos os consentimentos obrigatórios
+ */
+export async function hasRequiredConsents(userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    return false;
+  }
+
+  const requiredTypes: InsertUserConsent["consentType"][] = [
+    "terms_of_service",
+    "privacy_policy",
+    "data_processing",
+  ];
+
+  for (const consentType of requiredTypes) {
+    const latest = await getLatestConsent(userId, consentType);
+    if (!latest || !latest.granted) {
+      return false;
+    }
+  }
+
+  return true;
 }

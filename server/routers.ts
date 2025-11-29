@@ -223,6 +223,17 @@ export const appRouter = router({
         {
           getUserById: db.getUserById,
           getUserPetitions: db.getUserPetitions,
+          getUserConsents: async (userId: number) => {
+            const dbConsents = await db.getUserConsents(userId);
+            return dbConsents.map((c) => ({
+              type: c.consentType as ConsentType,
+              granted: c.granted,
+              grantedAt: c.grantedAt?.toISOString(),
+              revokedAt: c.revokedAt?.toISOString(),
+              version: c.version,
+              ipAddress: c.ipAddress || undefined,
+            }));
+          },
         },
         auditContext
       );
@@ -241,9 +252,15 @@ export const appRouter = router({
 
     // Obter status de consentimento
     getConsentStatus: protectedProcedure.query(async ({ ctx }) => {
-      // Por enquanto, retorna consentimentos vazios
-      // TODO: Implementar armazenamento de consentimentos no banco
-      const consents: ConsentRecord[] = [];
+      const dbConsents = await db.getUserConsents(ctx.user.id);
+      const consents: ConsentRecord[] = dbConsents.map((c) => ({
+        type: c.consentType as ConsentType,
+        granted: c.granted,
+        grantedAt: c.grantedAt?.toISOString(),
+        revokedAt: c.revokedAt?.toISOString(),
+        version: c.version,
+        ipAddress: c.ipAddress || undefined,
+      }));
       return getConsentSummary(consents);
     }),
 
@@ -261,13 +278,21 @@ export const appRouter = router({
           ctx.req.ip
         );
 
+        // Persist consent to database
+        await db.grantConsent(
+          ctx.user.id,
+          input.consentType,
+          consent.version,
+          ctx.req.ip,
+          ctx.req.headers["user-agent"] as string | undefined
+        );
+
         // Audit consent grant
         auditUserData(auditContext, "user.consent_granted", "success", {
           consentType: input.consentType,
           version: consent.version,
         });
 
-        // TODO: Persistir consentimento no banco
         return { success: true, consent };
       }),
 
@@ -285,14 +310,27 @@ export const appRouter = router({
           ctx.req.ip
         );
 
+        // Persist revocation to database
+        await db.revokeConsent(
+          ctx.user.id,
+          input.consentType,
+          consent.version,
+          ctx.req.ip,
+          ctx.req.headers["user-agent"] as string | undefined
+        );
+
         // Audit consent revocation
         auditUserData(auditContext, "user.consent_revoked", "success", {
           consentType: input.consentType,
         });
 
-        // TODO: Persistir revogação no banco
         return { success: true, consent };
       }),
+
+    // Verificar se usuário tem consentimentos obrigatórios
+    hasRequiredConsents: protectedProcedure.query(async ({ ctx }) => {
+      return { hasAll: await db.hasRequiredConsents(ctx.user.id) };
+    }),
   }),
 });
 
