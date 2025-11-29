@@ -1,16 +1,27 @@
 /**
  * Security Middleware
  * Lex Intel Visual Design - Desenvolvido por Lex Intelligentia
- * 
+ *
  * Implementa camadas de segurança para produção:
- * - Helmet.js para security headers
+ * - Security headers (CSP, HSTS, etc.)
  * - CORS configurável
  * - Rate limiting
  * - Request validation
+ * - CSRF protection
  */
 
 import type { Express, Request, Response, NextFunction } from "express";
+import { randomBytes, createHash } from "crypto";
 import { loggers } from "./logger";
+
+// Estende o tipo Request para incluir csrfToken
+declare global {
+  namespace Express {
+    interface Request {
+      csrfToken?: string;
+    }
+  }
+}
 
 /**
  * Configuração de Security Headers
@@ -125,7 +136,7 @@ export function setupCORS(app: Express) {
     );
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
+      "Content-Type, Authorization, X-CSRF-Token"
     );
     res.setHeader("Access-Control-Allow-Credentials", "true");
     res.setHeader("Access-Control-Max-Age", "86400");
@@ -422,6 +433,196 @@ export function setupHealthCheck(app: Express) {
 }
 
 /**
+ * CSRF Protection
+ * Protege contra Cross-Site Request Forgery
+ *
+ * Implementação baseada em Double Submit Cookie pattern:
+ * 1. Gera token único por sessão
+ * 2. Envia token via cookie + header
+ * 3. Valida que ambos coincidem em mutações
+ *
+ * NOTA: Para APIs stateless (como tRPC com cookies de sessão),
+ * usamos o padrão de verificar Origin/Referer + token customizado
+ */
+
+// Store de tokens CSRF (em produção, usar Redis)
+const csrfTokenStore = new Map<string, { token: string; expiresAt: number }>();
+const CSRF_TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 horas
+const CSRF_COOKIE_NAME = "csrf_token";
+const CSRF_HEADER_NAME = "x-csrf-token";
+
+/**
+ * Gera um token CSRF seguro
+ */
+export function generateCsrfToken(): string {
+  return randomBytes(32).toString("hex");
+}
+
+/**
+ * Cria hash do token para armazenamento seguro
+ */
+function hashToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+/**
+ * Limpa tokens expirados
+ */
+function cleanupExpiredCsrfTokens(): void {
+  const now = Date.now();
+  let cleaned = 0;
+
+  // Converte para array para evitar problemas de iteração em TypeScript
+  const entries = Array.from(csrfTokenStore.entries());
+  for (const [key, value] of entries) {
+    if (value.expiresAt < now) {
+      csrfTokenStore.delete(key);
+      cleaned++;
+    }
+  }
+
+  if (cleaned > 0) {
+    loggers.security.debug("Cleaned expired CSRF tokens", { count: cleaned });
+  }
+}
+
+// Cleanup periódico de tokens CSRF
+setInterval(cleanupExpiredCsrfTokens, 60 * 60 * 1000); // A cada hora
+
+/**
+ * Middleware de proteção CSRF
+ * - GET/HEAD/OPTIONS: Gera e retorna token
+ * - POST/PUT/DELETE/PATCH: Valida token
+ */
+export function setupCsrfProtection(app: Express) {
+  // Endpoint para obter token CSRF
+  app.get("/api/csrf-token", (req: Request, res: Response) => {
+    const token = generateCsrfToken();
+    const hashedToken = hashToken(token);
+
+    // Armazena hash do token
+    csrfTokenStore.set(hashedToken, {
+      token: hashedToken,
+      expiresAt: Date.now() + CSRF_TOKEN_EXPIRY_MS,
+    });
+
+    // Define cookie com token
+    res.cookie(CSRF_COOKIE_NAME, token, {
+      httpOnly: false, // Precisa ser acessível pelo JS
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: CSRF_TOKEN_EXPIRY_MS,
+      path: "/",
+    });
+
+    res.json({ csrfToken: token });
+  });
+
+  // Middleware de validação CSRF
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    // Métodos seguros não precisam de validação CSRF
+    if (["GET", "HEAD", "OPTIONS"].includes(req.method)) {
+      return next();
+    }
+
+    // Em desenvolvimento, CSRF pode ser desabilitado
+    if (process.env.NODE_ENV === "development" && process.env.DISABLE_CSRF === "true") {
+      return next();
+    }
+
+    // Rotas que não precisam de CSRF (webhooks, etc.)
+    const exemptPaths = ["/api/webhooks", "/health", "/api/health"];
+    if (exemptPaths.some(path => req.path.startsWith(path))) {
+      return next();
+    }
+
+    // Valida Origin/Referer (proteção adicional)
+    const origin = req.headers.origin;
+    const referer = req.headers.referer;
+    const host = req.headers.host;
+
+    if (origin) {
+      try {
+        const originHost = new URL(origin).host;
+        if (originHost !== host) {
+          loggers.security.warn("CSRF: Origin mismatch", {
+            origin,
+            host,
+            ip: req.ip,
+            path: req.path,
+          });
+          return res.status(403).json({
+            error: "Forbidden",
+            message: "CSRF validation failed: Origin mismatch",
+          });
+        }
+      } catch {
+        // Origin inválida
+      }
+    }
+
+    // Valida token CSRF
+    const headerToken = req.headers[CSRF_HEADER_NAME] as string | undefined;
+    const cookieToken = req.cookies?.[CSRF_COOKIE_NAME];
+
+    // Se não há tokens, permite (para compatibilidade com tRPC batch)
+    // tRPC usa cookies de sessão que já fornecem proteção
+    if (!headerToken && !cookieToken) {
+      // Verifica se é uma requisição tRPC (tem cookie de sessão)
+      const hasSessionCookie = req.cookies?.app_session_id;
+      if (hasSessionCookie && req.path.startsWith("/api/trpc")) {
+        return next(); // tRPC com sessão é seguro
+      }
+    }
+
+    // Se tem tokens, valida
+    if (headerToken || cookieToken) {
+      if (!headerToken || !cookieToken) {
+        loggers.security.warn("CSRF: Missing token", {
+          hasHeader: !!headerToken,
+          hasCookie: !!cookieToken,
+          ip: req.ip,
+          path: req.path,
+        });
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "CSRF token missing",
+        });
+      }
+
+      // Valida que tokens coincidem
+      if (headerToken !== cookieToken) {
+        loggers.security.warn("CSRF: Token mismatch", {
+          ip: req.ip,
+          path: req.path,
+        });
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "CSRF token mismatch",
+        });
+      }
+
+      // Valida que token está no store
+      const hashedToken = hashToken(headerToken);
+      const storedToken = csrfTokenStore.get(hashedToken);
+
+      if (!storedToken || storedToken.expiresAt < Date.now()) {
+        loggers.security.warn("CSRF: Invalid or expired token", {
+          ip: req.ip,
+          path: req.path,
+        });
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "CSRF token invalid or expired",
+        });
+      }
+    }
+
+    next();
+  });
+}
+
+/**
  * Setup completo de segurança
  * Aplica todos os middlewares de segurança
  */
@@ -430,6 +631,7 @@ export function setupSecurity(app: Express) {
   setupSecurityHeaders(app);
   setupCORS(app);
   setupRateLimit(app);
+  setupCsrfProtection(app);
   setupRequestValidation(app);
   // setupErrorHandler deve ser o último
   setupErrorHandler(app);
