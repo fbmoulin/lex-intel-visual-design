@@ -13,6 +13,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { randomBytes, createHash } from "crypto";
 import { loggers } from "./logger";
+import { getRateLimitStore, closeRateLimitStore, type RateLimitStore } from "./rateLimitStore";
 
 // Estende o tipo Request para incluir csrfToken
 declare global {
@@ -152,150 +153,114 @@ export function setupCORS(app: Express) {
 }
 
 /**
- * Rate Limiting com proteção contra memory leak
+ * Rate Limiting com suporte a múltiplos backends
  * Previne DoS e brute force attacks
  *
- * LIMITAÇÕES (In-Memory Implementation):
- * - Não funciona com múltiplas instâncias (cada instância tem seu próprio store)
- * - Dados perdidos ao reiniciar o servidor
- * - Para produção com múltiplas instâncias, migrar para Redis
+ * BACKENDS SUPORTADOS:
+ * - In-Memory (padrão): Para single-instance deployments
+ * - Redis (via REDIS_URL): Para multi-instance deployments
  *
  * CONFIGURAÇÃO via ENV:
  * - RATE_LIMIT_WINDOW_MS: Janela de tempo em ms (default: 900000 = 15 min)
  * - RATE_LIMIT_MAX_REQUESTS: Máximo de requests por janela (default: 100)
- * - RATE_LIMIT_MAX_IPS: Máximo de IPs no store (default: 10000)
- *
- * MIGRAÇÃO PARA REDIS:
- * 1. Instalar: pnpm add ioredis
- * 2. Criar cliente Redis
- * 3. Substituir rateLimitStore por operações Redis (INCR, EXPIRE)
- * 4. Exemplo: redis.incr(`ratelimit:${ip}`) + redis.expire(`ratelimit:${ip}`, windowMs/1000)
+ * - RATE_LIMIT_MAX_IPS: Máximo de IPs no store in-memory (default: 10000)
+ * - REDIS_URL: URL do Redis para store distribuído (opcional)
  */
-interface RateLimitRecord {
-  count: number;
-  resetTime: number;
-}
 
-interface RateLimitStore {
-  [key: string]: RateLimitRecord;
-}
-
-// Store com limite de tamanho para prevenir memory leak
-const rateLimitStore: RateLimitStore = {};
+// Variável para armazenar o tamanho do store (para métricas)
 let rateLimitStoreSize = 0;
 
-/**
- * Remove entradas expiradas do store
- */
-function cleanupExpiredEntries(windowMs: number): void {
-  const now = Date.now();
-  const keysToDelete: string[] = [];
+// Store singleton (inicializado async)
+let rateLimitStoreInstance: RateLimitStore | null = null;
 
-  for (const ip of Object.keys(rateLimitStore)) {
-    if (now > rateLimitStore[ip].resetTime + windowMs) {
-      keysToDelete.push(ip);
-    }
+async function getStore(): Promise<RateLimitStore> {
+  if (!rateLimitStoreInstance) {
+    rateLimitStoreInstance = await getRateLimitStore();
   }
-
-  for (const ip of keysToDelete) {
-    delete rateLimitStore[ip];
-    rateLimitStoreSize--;
-  }
-}
-
-/**
- * Remove as entradas mais antigas quando o store está cheio
- */
-function evictOldestEntries(maxIps: number): void {
-  if (rateLimitStoreSize <= maxIps) return;
-
-  // Encontra as entradas mais antigas (menor resetTime)
-  const entries = Object.entries(rateLimitStore)
-    .sort((a, b) => a[1].resetTime - b[1].resetTime);
-
-  // Remove 10% das entradas mais antigas
-  const toRemove = Math.ceil(maxIps * 0.1);
-  for (let i = 0; i < toRemove && i < entries.length; i++) {
-    delete rateLimitStore[entries[i][0]];
-    rateLimitStoreSize--;
-  }
+  return rateLimitStoreInstance;
 }
 
 export function setupRateLimit(app: Express) {
   const windowMs = parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000"); // 15 min
   const maxRequests = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "100");
-  const maxIps = parseInt(process.env.RATE_LIMIT_MAX_IPS || "10000"); // Limite de IPs
 
   // Log de configuração
   loggers.rateLimit.info("Rate limiting configured", {
     maxRequests,
     windowSeconds: windowMs / 1000,
-    maxIps,
+    backend: process.env.REDIS_URL ? "redis" : "in-memory",
   });
 
-  app.use((req: Request, res: Response, next: NextFunction) => {
+  app.use(async (req: Request, res: Response, next: NextFunction) => {
     // Skip rate limiting em desenvolvimento
     if (process.env.NODE_ENV === "development") {
       return next();
     }
 
-    const ip = req.ip || req.socket.remoteAddress || "unknown";
-    const now = Date.now();
+    try {
+      const store = await getStore();
+      const ip = req.ip || req.socket.remoteAddress || "unknown";
 
-    // Verifica se precisa evictar entradas antigas
-    if (rateLimitStoreSize >= maxIps) {
-      evictOldestEntries(maxIps);
+      const { count, resetTime } = await store.increment(ip, windowMs);
+
+      // Atualiza métrica de tamanho
+      rateLimitStoreSize = await store.size();
+
+      // Verifica limite
+      if (count > maxRequests) {
+        const now = Date.now();
+        loggers.rateLimit.warn("Rate limit exceeded", {
+          ip,
+          count,
+          limit: maxRequests,
+        });
+
+        res.status(429).json({
+          error: "Too many requests",
+          message: "Rate limit exceeded. Please try again later.",
+          retryAfter: Math.ceil((resetTime - now) / 1000),
+        });
+        return;
+      }
+
+      // Adiciona headers informativos
+      res.setHeader("X-RateLimit-Limit", maxRequests.toString());
+      res.setHeader("X-RateLimit-Remaining", (maxRequests - count).toString());
+      res.setHeader("X-RateLimit-Reset", new Date(resetTime).toISOString());
+
+      next();
+    } catch (error) {
+      // Em caso de erro, permite o request (fail-open)
+      loggers.rateLimit.error("Rate limit check failed", error);
+      next();
     }
-
-    if (!rateLimitStore[ip]) {
-      rateLimitStore[ip] = {
-        count: 1,
-        resetTime: now + windowMs,
-      };
-      rateLimitStoreSize++;
-      return next();
-    }
-
-    const record = rateLimitStore[ip];
-
-    // Reset se passou o tempo
-    if (now > record.resetTime) {
-      record.count = 1;
-      record.resetTime = now + windowMs;
-      return next();
-    }
-
-    // Incrementa contador
-    record.count++;
-
-    // Verifica limite
-    if (record.count > maxRequests) {
-      res.status(429).json({
-        error: "Too many requests",
-        message: "Rate limit exceeded. Please try again later.",
-        retryAfter: Math.ceil((record.resetTime - now) / 1000),
-      });
-      return;
-    }
-
-    // Adiciona headers informativos
-    res.setHeader("X-RateLimit-Limit", maxRequests.toString());
-    res.setHeader("X-RateLimit-Remaining", (maxRequests - record.count).toString());
-    res.setHeader("X-RateLimit-Reset", new Date(record.resetTime).toISOString());
-
-    next();
   });
 
-  // Limpa registros expirados a cada 15 minutos (mais frequente para menor uso de memória)
-  const cleanupInterval = setInterval(() => {
-    cleanupExpiredEntries(windowMs);
+  // Limpa registros expirados a cada 15 minutos
+  const cleanupInterval = setInterval(async () => {
+    try {
+      const store = await getStore();
+      await store.cleanup(windowMs);
+      rateLimitStoreSize = await store.size();
+    } catch (error) {
+      loggers.rateLimit.error("Cleanup failed", error);
+    }
   }, 900000); // 15 minutos
 
-  // Cleanup no shutdown (se process.on disponível)
+  // Cleanup no shutdown
   if (typeof process !== "undefined" && process.on) {
-    process.on("SIGTERM", () => clearInterval(cleanupInterval));
-    process.on("SIGINT", () => clearInterval(cleanupInterval));
+    const cleanup = async () => {
+      clearInterval(cleanupInterval);
+      await closeRateLimitStore();
+    };
+    process.on("SIGTERM", cleanup);
+    process.on("SIGINT", cleanup);
   }
+}
+
+// Exporta tamanho do store para métricas
+export function getRateLimitStoreSize(): number {
+  return rateLimitStoreSize;
 }
 
 /**
