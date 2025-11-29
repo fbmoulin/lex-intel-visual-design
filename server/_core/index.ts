@@ -10,6 +10,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { setupSecurity } from "./security";
 import { loggers } from "./logger";
+import { initSentry, setupErrorTracking, setupErrorHandler as setupSentryErrorHandler } from "./errorTracking";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -33,7 +34,13 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
-  
+
+  // Initialize Sentry (if configured)
+  await initSentry();
+
+  // Sentry request handler (must be first)
+  setupErrorTracking(app);
+
   // Security middleware (CORS, headers, rate limiting, etc.)
   setupSecurity(app);
   
@@ -60,6 +67,9 @@ async function startServer() {
   } else {
     serveStatic(app);
   }
+
+  // Sentry error handler (must be after all routes)
+  setupSentryErrorHandler(app);
 
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);
