@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Loader2, Send, User, Sparkles } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Streamdown } from "streamdown";
+import { sanitizeMarkdown } from "@shared/sanitize";
 
 /**
  * Message type matching server-side LLM Message interface
@@ -262,7 +263,7 @@ export function AIChatBox({
                     >
                       {message.role === "assistant" ? (
                         <div className="prose prose-sm dark:prose-invert max-w-none">
-                          <Streamdown>{message.content}</Streamdown>
+                          <Streamdown>{sanitizeMarkdown(message.content)}</Streamdown>
                         </div>
                       ) : (
                         <p className="whitespace-pre-wrap text-sm">

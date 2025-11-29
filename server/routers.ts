@@ -4,6 +4,8 @@ import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
+import { sanitizePetitionData, containsSuspiciousContent } from "@shared/sanitize";
+import { loggers } from "./_core/logger";
 
 // Schema base para campos de petição com validações rigorosas
 const petitionFieldsSchema = {
@@ -94,8 +96,20 @@ export const appRouter = router({
     create: protectedProcedure
       .input(z.object(petitionFieldsSchema))
       .mutation(async ({ ctx, input }) => {
+        // Log tentativas de XSS para monitoramento
+        const fieldsToCheck = [input.fatos, input.fundamentosJuridicos, input.pedidos];
+        if (fieldsToCheck.some(containsSuspiciousContent)) {
+          loggers.security.warn("Suspicious content detected in petition create", {
+            userId: ctx.user.id,
+            templateType: input.templateType,
+          });
+        }
+
+        // Sanitiza todos os campos de texto antes de salvar
+        const sanitizedInput = sanitizePetitionData(input);
+
         const petitionId = await db.createPetition({
-          ...input,
+          ...sanitizedInput,
           userId: ctx.user.id,
         });
         return { id: petitionId };
@@ -121,7 +135,20 @@ export const appRouter = router({
       )
       .mutation(async ({ ctx, input }) => {
         const { id, ...data } = input;
-        await db.updatePetition(id, ctx.user.id, data);
+
+        // Log tentativas de XSS para monitoramento
+        const fieldsToCheck = [data.fatos, data.fundamentosJuridicos, data.pedidos];
+        if (fieldsToCheck.some(containsSuspiciousContent)) {
+          loggers.security.warn("Suspicious content detected in petition update", {
+            userId: ctx.user.id,
+            petitionId: id,
+          });
+        }
+
+        // Sanitiza todos os campos de texto antes de salvar
+        const sanitizedData = sanitizePetitionData(data);
+
+        await db.updatePetition(id, ctx.user.id, sanitizedData);
         return { success: true };
       }),
 
