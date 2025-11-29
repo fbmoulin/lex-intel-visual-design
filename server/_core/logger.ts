@@ -1,15 +1,15 @@
 /**
- * Logger Estruturado
+ * Logger Estruturado com Pino
  * Lex Intel Visual Design - Desenvolvido por Lex Intelligentia
  *
- * Implementação leve de logger estruturado sem dependências externas.
- * Substitui console.log com níveis, timestamps e contexto.
- *
- * Para produção com requisitos avançados, considere migrar para:
- * - pino (mais performático)
- * - winston (mais configurável)
- * - bunyan (JSON nativo)
+ * Implementação de logger de alta performance usando Pino.
+ * - JSON estruturado para produção
+ * - Pretty print para desenvolvimento
+ * - Suporte a contextos e child loggers
+ * - Compatível com a interface anterior
  */
+
+import pino, { Logger as PinoLogger, LoggerOptions as PinoLoggerOptions } from "pino";
 
 type LogLevel = "debug" | "info" | "warn" | "error";
 
@@ -26,117 +26,75 @@ interface LoggerOptions {
   minLevel?: LogLevel;
 }
 
-// Ordem de níveis (para filtragem)
-const LOG_LEVELS: Record<LogLevel, number> = {
-  debug: 0,
-  info: 1,
-  warn: 2,
-  error: 3,
+// Mapeia níveis para Pino
+const PINO_LEVELS: Record<LogLevel, string> = {
+  debug: "debug",
+  info: "info",
+  warn: "warn",
+  error: "error",
 };
 
-// Nível mínimo baseado no ambiente
-const DEFAULT_MIN_LEVEL: LogLevel =
-  process.env.NODE_ENV === "production" ? "info" : "debug";
+// Configuração base do Pino
+function createPinoOptions(): PinoLoggerOptions {
+  const isDevelopment = process.env.NODE_ENV !== "production";
+  const level = process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info");
 
-// Cores para terminal (ANSI)
-const COLORS = {
-  reset: "\x1b[0m",
-  dim: "\x1b[2m",
-  debug: "\x1b[36m",   // Cyan
-  info: "\x1b[32m",    // Green
-  warn: "\x1b[33m",    // Yellow
-  error: "\x1b[31m",   // Red
-  context: "\x1b[35m", // Magenta
-} as const;
-
-/**
- * Formata timestamp ISO
- */
-function getTimestamp(): string {
-  return new Date().toISOString();
+  return {
+    level,
+    // Formato customizado para incluir contexto
+    formatters: {
+      level: (label) => ({ level: label }),
+      bindings: () => ({}), // Remove pid e hostname por padrão
+    },
+    // Timestamp ISO
+    timestamp: pino.stdTimeFunctions.isoTime,
+  };
 }
 
+// Instância base do Pino
+let basePino: PinoLogger;
+
 /**
- * Formata dados extras como JSON compacto
+ * Inicializa o logger Pino (lazy loading)
  */
-function formatData(data: Record<string, unknown> | undefined): string {
-  if (!data || Object.keys(data).length === 0) return "";
-  try {
-    return ` ${JSON.stringify(data)}`;
-  } catch {
-    return " [unserializable data]";
+function getBasePino(): PinoLogger {
+  if (!basePino) {
+    const isDevelopment = process.env.NODE_ENV !== "production";
+    const options = createPinoOptions();
+
+    if (isDevelopment && process.stdout.isTTY) {
+      // Pretty print para desenvolvimento
+      basePino = pino(options, pino.transport({
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+          translateTime: "SYS:standard",
+          ignore: "pid,hostname",
+          messageFormat: "{context} - {msg}",
+        },
+      }));
+    } else {
+      // JSON para produção
+      basePino = pino(options);
+    }
   }
+  return basePino;
 }
 
 /**
- * Determina se deve usar cores (terminal vs arquivo)
- */
-function shouldUseColors(): boolean {
-  // Desabilita cores se não for TTY ou se LOG_NO_COLORS estiver definido
-  if (process.env.LOG_NO_COLORS === "true") return false;
-  if (!process.stdout.isTTY) return false;
-  return true;
-}
-
-/**
- * Formata uma entrada de log para output
- */
-function formatLogEntry(entry: LogEntry, useColors: boolean): string {
-  const { timestamp, level, context, message, data } = entry;
-  const dataStr = formatData(data);
-
-  if (useColors) {
-    const levelColor = COLORS[level];
-    const levelPadded = level.toUpperCase().padEnd(5);
-    return (
-      `${COLORS.dim}${timestamp}${COLORS.reset} ` +
-      `${levelColor}${levelPadded}${COLORS.reset} ` +
-      `${COLORS.context}[${context}]${COLORS.reset} ` +
-      `${message}${COLORS.dim}${dataStr}${COLORS.reset}`
-    );
-  }
-
-  // Formato JSON para produção (mais fácil de parsear)
-  if (process.env.NODE_ENV === "production") {
-    return JSON.stringify({ ...entry, data: data || undefined });
-  }
-
-  // Formato texto simples
-  return `${timestamp} ${level.toUpperCase().padEnd(5)} [${context}] ${message}${dataStr}`;
-}
-
-/**
- * Classe Logger
+ * Classe Logger com interface compatível
+ * Wrapper sobre Pino mantendo a API existente
  */
 class Logger {
+  private pinoLogger: PinoLogger;
   private context: string;
-  private minLevel: number;
-  private useColors: boolean;
 
   constructor(options: LoggerOptions) {
     this.context = options.context;
-    this.minLevel = LOG_LEVELS[options.minLevel ?? DEFAULT_MIN_LEVEL];
-    this.useColors = shouldUseColors();
-  }
+    this.pinoLogger = getBasePino().child({ context: options.context });
 
-  private log(level: LogLevel, message: string, data?: Record<string, unknown>): void {
-    if (LOG_LEVELS[level] < this.minLevel) return;
-
-    const entry: LogEntry = {
-      timestamp: getTimestamp(),
-      level,
-      context: this.context,
-      message,
-      data,
-    };
-
-    const formatted = formatLogEntry(entry, this.useColors);
-
-    // Usa console.error para warn/error (stderr)
-    if (level === "error" || level === "warn") {
-      console.error(formatted);
-    } else {
-      console.log(formatted);
+    if (options.minLevel) {
+      this.pinoLogger.level = PINO_LEVELS[options.minLevel];
     }
   }
 
@@ -144,21 +102,33 @@ class Logger {
    * Log de debug - apenas em desenvolvimento
    */
   debug(message: string, data?: Record<string, unknown>): void {
-    this.log("debug", message, data);
+    if (data) {
+      this.pinoLogger.debug(data, message);
+    } else {
+      this.pinoLogger.debug(message);
+    }
   }
 
   /**
    * Log informativo
    */
   info(message: string, data?: Record<string, unknown>): void {
-    this.log("info", message, data);
+    if (data) {
+      this.pinoLogger.info(data, message);
+    } else {
+      this.pinoLogger.info(message);
+    }
   }
 
   /**
    * Log de aviso
    */
   warn(message: string, data?: Record<string, unknown>): void {
-    this.log("warn", message, data);
+    if (data) {
+      this.pinoLogger.warn(data, message);
+    } else {
+      this.pinoLogger.warn(message);
+    }
   }
 
   /**
@@ -168,29 +138,37 @@ class Logger {
     const errorData: Record<string, unknown> = { ...data };
 
     if (error instanceof Error) {
-      errorData.errorName = error.name;
-      errorData.errorMessage = error.message;
-      // Stack trace apenas em desenvolvimento
-      if (process.env.NODE_ENV !== "production") {
-        errorData.stack = error.stack;
-      }
+      errorData.err = {
+        name: error.name,
+        message: error.message,
+        stack: process.env.NODE_ENV !== "production" ? error.stack : undefined,
+      };
     } else if (error !== undefined) {
       errorData.error = String(error);
     }
 
-    this.log("error", message, Object.keys(errorData).length > 0 ? errorData : undefined);
+    if (Object.keys(errorData).length > 0) {
+      this.pinoLogger.error(errorData, message);
+    } else {
+      this.pinoLogger.error(message);
+    }
   }
 
   /**
    * Cria um logger filho com contexto adicional
    */
   child(subContext: string): Logger {
-    return new Logger({
+    const childLogger = new Logger({
       context: `${this.context}:${subContext}`,
-      minLevel: Object.keys(LOG_LEVELS).find(
-        (key) => LOG_LEVELS[key as LogLevel] === this.minLevel
-      ) as LogLevel,
     });
+    return childLogger;
+  }
+
+  /**
+   * Acesso direto ao logger Pino (para casos avançados)
+   */
+  get pino(): PinoLogger {
+    return this.pinoLogger;
   }
 }
 
@@ -217,7 +195,40 @@ export const loggers = {
   api: createLogger("API"),
   security: createLogger("Security"),
   rateLimit: createLogger("RateLimit"),
+  http: createLogger("HTTP"),
+  metrics: createLogger("Metrics"),
 } as const;
+
+/**
+ * Logger para requests HTTP (formato CLF-like)
+ */
+export function createHttpLogger() {
+  return getBasePino().child({ context: "HTTP" });
+}
+
+/**
+ * Express middleware para logging de requests
+ */
+export function httpLoggerMiddleware() {
+  const httpLogger = createHttpLogger();
+
+  return (req: { method: string; url: string; ip?: string }, res: { statusCode: number; on: (event: string, cb: () => void) => void }, next: () => void) => {
+    const startTime = Date.now();
+
+    res.on("finish", () => {
+      const duration = Date.now() - startTime;
+      httpLogger.info({
+        method: req.method,
+        url: req.url,
+        statusCode: res.statusCode,
+        duration: `${duration}ms`,
+        ip: req.ip,
+      }, `${req.method} ${req.url} ${res.statusCode} ${duration}ms`);
+    });
+
+    next();
+  };
+}
 
 // Exporta tipo para uso externo
 export type { Logger, LogLevel, LogEntry };
