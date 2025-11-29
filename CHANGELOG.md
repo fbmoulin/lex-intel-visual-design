@@ -7,6 +7,67 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [1.2.0-beta] - 2025-11-29
 
+### 🛡️ Compliance (Phase 4 - LGPD/Privacy)
+
+#### Audit Logging
+- Sistema de auditoria estruturada para operações sensíveis
+- Tracking de eventos: autenticação, petições, dados de usuário, segurança
+- Níveis de resultado: success, failure, blocked
+- Context extraction automático de requests tRPC/Express
+- Correlação com request tracing (correlation IDs)
+- Configurável via `AUDIT_LOG_ENABLED`
+
+#### LGPD Compliance (Lei nº 13.709/2018)
+- Endpoint `lgpd.exportData` para portabilidade de dados (Art. 18, III)
+- Export completo: dados do usuário, petições, metadados
+- Endpoint `lgpd.getDataSubjectRights` para informação de direitos
+- Sistema de consentimento com versionamento
+- Tipos de consentimento: obrigatórios e opcionais
+- Endpoints `grantConsent` e `revokeConsent`
+- Categorias de dados e finalidades de processamento documentadas
+- Período de retenção e controlador de dados definidos
+
+### 🧪 Testing (Phase 3 - Quality Assurance)
+
+#### E2E Testing com Playwright
+- Configuração completa para testes E2E
+- Suporte multi-browser (Chromium, Firefox, WebKit)
+- Testes de página inicial, templates, editor
+- Testes de API health e security headers
+- Scripts: `test:e2e`, `test:e2e:ui`, `test:e2e:headed`, `test:all`
+
+#### Unit Tests Expandidos
+- 173 testes unitários passando
+- Cobertura de audit logging (29 testes)
+- Cobertura de LGPD compliance (30 testes)
+- Cobertura de sanitização (55 testes)
+- Cobertura de rate limiting (20 testes)
+- Cobertura de segurança (33 testes)
+
+### 🔐 Security Enhancements (Phase 1/2 Gaps)
+
+#### XSS Prevention
+- Sanitização com DOMPurify (isomorphic)
+- `sanitizeText()` para campos de texto plano
+- `sanitizeMarkdown()` para conteúdo markdown com links seguros
+- `containsSuspiciousContent()` para detecção de ataques
+- `sanitizePetitionData()` para sanitização de petições
+- Integração no client (AIChatBox) e server (routers.ts)
+
+#### Error Tracking (Sentry Ready)
+- Módulo de error tracking com Sentry
+- Inicialização condicional via `SENTRY_DSN`
+- Capture de exceptions com contexto
+- Error handler middleware para Express
+- Sampling configurável por ambiente
+
+#### Caching Layer
+- Abstração `CacheStore` com múltiplos backends
+- `InMemoryCacheStore` com eviction LRU
+- `RedisCacheStore` para cache distribuído
+- Helper `cacheOrFetch()` para cache-aside pattern
+- Configuração via `REDIS_URL`, `CACHE_TTL_SECONDS`, `CACHE_MAX_SIZE`
+
 ### 📊 Observabilidade (Phase 2 - Enterprise Monitoring)
 
 #### Request Tracing com Correlation IDs
