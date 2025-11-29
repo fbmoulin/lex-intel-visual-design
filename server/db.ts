@@ -1,7 +1,7 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, lt, SQL } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { InsertPetition, InsertUser, petitions, users } from "../drizzle/schema";
+import { InsertPetition, InsertUser, Petition, petitions, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { loggers } from './_core/logger';
 
@@ -268,4 +268,143 @@ export async function deletePetition(id: number, userId: number) {
   await db
     .delete(petitions)
     .where(and(eq(petitions.id, id), eq(petitions.userId, userId)));
+}
+
+/**
+ * Tipos para paginação
+ */
+export interface PaginationParams {
+  cursor?: number;
+  limit?: number;
+  status?: "rascunho" | "finalizada";
+  templateType?: string;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  nextCursor: number | null;
+  hasMore: boolean;
+  total: number;
+}
+
+/**
+ * Lista de campos para listagem (exclui campos grandes como fatos, fundamentosJuridicos)
+ */
+type PetitionListItem = Pick<Petition,
+  | "id"
+  | "userId"
+  | "templateType"
+  | "title"
+  | "numeroProcesso"
+  | "tribunal"
+  | "autor"
+  | "reu"
+  | "valorCausa"
+  | "status"
+  | "createdAt"
+  | "updatedAt"
+>;
+
+/**
+ * Busca petições do usuário com paginação cursor-based
+ * Otimizado para performance: exclui campos grandes na listagem
+ */
+export async function getUserPetitionsPaginated(
+  userId: number,
+  params: PaginationParams = {}
+): Promise<PaginatedResult<PetitionListItem>> {
+  const db = await getDb();
+  if (!db) {
+    return { data: [], nextCursor: null, hasMore: false, total: 0 };
+  }
+
+  const { cursor, limit = 20, status, templateType } = params;
+  const effectiveLimit = Math.min(limit, 100); // Max 100 por página
+
+  // Constrói condições WHERE
+  const conditions: SQL[] = [eq(petitions.userId, userId)];
+
+  if (cursor) {
+    conditions.push(lt(petitions.id, cursor));
+  }
+
+  if (status) {
+    conditions.push(eq(petitions.status, status));
+  }
+
+  if (templateType) {
+    conditions.push(eq(petitions.templateType, templateType));
+  }
+
+  // Query principal - seleciona apenas campos necessários para listagem
+  const data = await db
+    .select({
+      id: petitions.id,
+      userId: petitions.userId,
+      templateType: petitions.templateType,
+      title: petitions.title,
+      numeroProcesso: petitions.numeroProcesso,
+      tribunal: petitions.tribunal,
+      autor: petitions.autor,
+      reu: petitions.reu,
+      valorCausa: petitions.valorCausa,
+      status: petitions.status,
+      createdAt: petitions.createdAt,
+      updatedAt: petitions.updatedAt,
+    })
+    .from(petitions)
+    .where(and(...conditions))
+    .orderBy(desc(petitions.id))
+    .limit(effectiveLimit + 1); // +1 para verificar se há mais
+
+  // Verifica se há mais resultados
+  const hasMore = data.length > effectiveLimit;
+  const items = hasMore ? data.slice(0, effectiveLimit) : data;
+
+  // Conta total (sem cursor, para paginação)
+  const countConditions: SQL[] = [eq(petitions.userId, userId)];
+  if (status) countConditions.push(eq(petitions.status, status));
+  if (templateType) countConditions.push(eq(petitions.templateType, templateType));
+
+  const [{ total }] = await db
+    .select({ total: count() })
+    .from(petitions)
+    .where(and(...countConditions));
+
+  return {
+    data: items,
+    nextCursor: hasMore && items.length > 0 ? items[items.length - 1].id : null,
+    hasMore,
+    total,
+  };
+}
+
+/**
+ * Conta petições do usuário com filtros opcionais
+ */
+export async function countUserPetitions(
+  userId: number,
+  filters: { status?: "rascunho" | "finalizada"; templateType?: string } = {}
+): Promise<number> {
+  const db = await getDb();
+  if (!db) {
+    return 0;
+  }
+
+  const conditions: SQL[] = [eq(petitions.userId, userId)];
+
+  if (filters.status) {
+    conditions.push(eq(petitions.status, filters.status));
+  }
+
+  if (filters.templateType) {
+    conditions.push(eq(petitions.templateType, filters.templateType));
+  }
+
+  const [{ total }] = await db
+    .select({ total: count() })
+    .from(petitions)
+    .where(and(...conditions));
+
+  return total;
 }

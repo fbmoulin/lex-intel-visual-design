@@ -58,9 +58,32 @@ export const appRouter = router({
 
   // Petitions router
   petitions: router({
+    // Lista simples (mantido para compatibilidade)
     list: protectedProcedure.query(async ({ ctx }) => {
       return await db.getUserPetitions(ctx.user.id);
     }),
+
+    // Lista paginada com cursor (recomendado para produção)
+    listPaginated: protectedProcedure
+      .input(z.object({
+        cursor: z.number().int().positive().optional(),
+        limit: z.number().int().min(1).max(100).default(20),
+        status: z.enum(["rascunho", "finalizada"]).optional(),
+        templateType: z.enum(PETITION_TEMPLATE_TYPES).optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        return await db.getUserPetitionsPaginated(ctx.user.id, input ?? {});
+      }),
+
+    // Contagem de petições com filtros
+    count: protectedProcedure
+      .input(z.object({
+        status: z.enum(["rascunho", "finalizada"]).optional(),
+        templateType: z.enum(PETITION_TEMPLATE_TYPES).optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        return await db.countUserPetitions(ctx.user.id, input ?? {});
+      }),
 
     getById: protectedProcedure
       .input(z.object({ id: z.number().int().positive("ID deve ser um número inteiro positivo") }))

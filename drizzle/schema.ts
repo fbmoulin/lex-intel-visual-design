@@ -1,4 +1,4 @@
-import { integer, pgEnum, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { index, integer, pgEnum, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 /**
  * Enums do PostgreSQL
@@ -51,7 +51,14 @@ export const petitions = pgTable("petitions", {
   status: petitionStatusEnum("status").default("rascunho").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => [
+  // Indexes para performance (Phase 1 do Roadmap)
+  index("idx_petitions_user_id").on(table.userId),
+  index("idx_petitions_status").on(table.status),
+  index("idx_petitions_template_type").on(table.templateType),
+  index("idx_petitions_user_status").on(table.userId, table.status),
+  index("idx_petitions_updated_at").on(table.updatedAt),
+]);
 
 export type Petition = typeof petitions.$inferSelect;
 export type InsertPetition = typeof petitions.$inferInsert;
