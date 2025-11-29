@@ -7,6 +7,32 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [1.2.0-beta] - 2025-11-29
 
+### 📊 Observabilidade (Phase 2 - Enterprise Monitoring)
+
+#### Request Tracing com Correlation IDs
+- Geração automática de correlation IDs únicos por request
+- Propagação via header `X-Correlation-ID` para requests encadeados
+- Logging estruturado com correlation ID em todos os níveis
+- Formato timestamp+random para IDs ordenáveis e únicos
+
+#### Prometheus Metrics Endpoint (/metrics)
+- `http_requests_total`: Contador por método, path e status
+- `http_request_duration_ms`: Latência com percentis p50/p90/p99
+- `nodejs_memory_usage_bytes`: Uso de memória (heap, rss, external)
+- `nodejs_uptime_seconds`: Tempo de atividade do processo
+- `rate_limit_store_size`: Tamanho do store de rate limiting
+- `csrf_token_store_size`: Tamanho do store de tokens CSRF
+- Normalização de paths dinâmicos (IDs, UUIDs)
+
+#### Redis-Ready Rate Limiting
+- Nova abstração `RateLimitStore` com múltiplos backends
+- `InMemoryRateLimitStore` para single-instance deployments
+- `RedisRateLimitStore` para deployments distribuídos
+- Suporte a `REDIS_URL` para habilitação automática de Redis
+- Operações atômicas via Lua script no Redis
+- Fallback automático para in-memory se Redis indisponível
+- Comportamento fail-open em caso de erros
+
 ### 🔒 Segurança (Phase 1 - Security Hardening)
 
 #### CSRF Protection
