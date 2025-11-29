@@ -623,11 +623,229 @@ export function setupCsrfProtection(app: Express) {
 }
 
 /**
+ * Request Tracing com Correlation IDs
+ * Permite rastrear requests através do sistema
+ *
+ * - Gera um ID único para cada request
+ * - Propaga via header X-Correlation-ID
+ * - Adiciona ao contexto de logging
+ * - Retorna no response para debugging
+ */
+
+// Estende Request para incluir correlationId
+declare global {
+  namespace Express {
+    interface Request {
+      correlationId?: string;
+    }
+  }
+}
+
+/**
+ * Gera um correlation ID único
+ * Formato: timestamp-randomhex (ex: 1732852800000-a1b2c3d4)
+ */
+function generateCorrelationId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = randomBytes(4).toString("hex");
+  return `${timestamp}-${random}`;
+}
+
+export function setupRequestTracing(app: Express) {
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    // Usa correlation ID do header se existir (para requests encadeados)
+    // ou gera um novo
+    const correlationId =
+      (req.headers["x-correlation-id"] as string) || generateCorrelationId();
+
+    // Adiciona ao request para uso em handlers
+    req.correlationId = correlationId;
+
+    // Adiciona ao response header
+    res.setHeader("X-Correlation-ID", correlationId);
+
+    // Log do request com correlation ID
+    const startTime = Date.now();
+
+    res.on("finish", () => {
+      const duration = Date.now() - startTime;
+      const logData = {
+        correlationId,
+        method: req.method,
+        path: req.path,
+        statusCode: res.statusCode,
+        duration: `${duration}ms`,
+        userAgent: req.headers["user-agent"]?.substring(0, 100),
+        ip: req.ip,
+      };
+
+      // Log level baseado no status code
+      if (res.statusCode >= 500) {
+        loggers.api.error("Request failed", undefined, logData);
+      } else if (res.statusCode >= 400) {
+        loggers.api.warn("Request client error", logData);
+      } else if (req.path !== "/health" && req.path !== "/api/health") {
+        // Não loga health checks em info
+        loggers.api.info("Request completed", logData);
+      }
+    });
+
+    next();
+  });
+}
+
+/**
+ * Prometheus Metrics Endpoint
+ * Expõe métricas para monitoramento
+ *
+ * Métricas disponíveis:
+ * - http_requests_total: Contador de requests por método, path e status
+ * - http_request_duration_seconds: Histograma de latência
+ * - nodejs_memory_usage_bytes: Uso de memória
+ * - nodejs_active_handles: Handles ativos
+ */
+
+interface MetricsData {
+  requestCounts: Map<string, number>;
+  requestDurations: number[];
+  lastReset: number;
+}
+
+const metricsData: MetricsData = {
+  requestCounts: new Map(),
+  requestDurations: [],
+  lastReset: Date.now(),
+};
+
+// Limita o tamanho do array de durações para evitar memory leak
+const MAX_DURATIONS = 10000;
+
+/**
+ * Middleware para coletar métricas
+ */
+export function setupMetricsCollection(app: Express) {
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const startTime = process.hrtime.bigint();
+
+    res.on("finish", () => {
+      const endTime = process.hrtime.bigint();
+      const durationNs = Number(endTime - startTime);
+      const durationMs = durationNs / 1_000_000;
+
+      // Incrementa contador de requests
+      const key = `${req.method}:${normalizePathForMetrics(req.path)}:${res.statusCode}`;
+      metricsData.requestCounts.set(
+        key,
+        (metricsData.requestCounts.get(key) || 0) + 1
+      );
+
+      // Adiciona duração ao histograma
+      if (metricsData.requestDurations.length < MAX_DURATIONS) {
+        metricsData.requestDurations.push(durationMs);
+      }
+    });
+
+    next();
+  });
+}
+
+/**
+ * Normaliza paths para métricas (remove IDs dinâmicos)
+ */
+function normalizePathForMetrics(path: string): string {
+  return path
+    .replace(/\/\d+/g, "/:id")           // /petitions/123 -> /petitions/:id
+    .replace(/\/[a-f0-9-]{36}/g, "/:uuid") // UUIDs
+    .replace(/\?.+$/, "");                // Remove query strings
+}
+
+/**
+ * Calcula percentis para histograma
+ */
+function calculatePercentile(arr: number[], percentile: number): number {
+  if (arr.length === 0) return 0;
+  const sorted = [...arr].sort((a, b) => a - b);
+  const index = Math.ceil((percentile / 100) * sorted.length) - 1;
+  return sorted[Math.max(0, index)];
+}
+
+/**
+ * Endpoint de métricas Prometheus
+ */
+export function setupPrometheusMetrics(app: Express) {
+  // Coleta métricas primeiro
+  setupMetricsCollection(app);
+
+  app.get("/metrics", (req: Request, res: Response) => {
+    const memoryUsage = process.memoryUsage();
+    const uptime = process.uptime();
+
+    let output = "";
+
+    // Metadata
+    output += "# HELP nodejs_app_info Application info\n";
+    output += "# TYPE nodejs_app_info gauge\n";
+    output += `nodejs_app_info{version="1.2.0-beta",env="${process.env.NODE_ENV || "development"}"} 1\n\n`;
+
+    // Uptime
+    output += "# HELP nodejs_uptime_seconds Process uptime in seconds\n";
+    output += "# TYPE nodejs_uptime_seconds gauge\n";
+    output += `nodejs_uptime_seconds ${uptime.toFixed(2)}\n\n`;
+
+    // Memory
+    output += "# HELP nodejs_memory_usage_bytes Memory usage by type\n";
+    output += "# TYPE nodejs_memory_usage_bytes gauge\n";
+    output += `nodejs_memory_usage_bytes{type="heapUsed"} ${memoryUsage.heapUsed}\n`;
+    output += `nodejs_memory_usage_bytes{type="heapTotal"} ${memoryUsage.heapTotal}\n`;
+    output += `nodejs_memory_usage_bytes{type="rss"} ${memoryUsage.rss}\n`;
+    output += `nodejs_memory_usage_bytes{type="external"} ${memoryUsage.external}\n\n`;
+
+    // HTTP Request Counts
+    output += "# HELP http_requests_total Total HTTP requests\n";
+    output += "# TYPE http_requests_total counter\n";
+    const requestEntries = Array.from(metricsData.requestCounts.entries());
+    for (const [key, count] of requestEntries) {
+      const [method, path, status] = key.split(":");
+      output += `http_requests_total{method="${method}",path="${path}",status="${status}"} ${count}\n`;
+    }
+    output += "\n";
+
+    // HTTP Request Duration
+    if (metricsData.requestDurations.length > 0) {
+      output += "# HELP http_request_duration_ms HTTP request duration in milliseconds\n";
+      output += "# TYPE http_request_duration_ms summary\n";
+      output += `http_request_duration_ms{quantile="0.5"} ${calculatePercentile(metricsData.requestDurations, 50).toFixed(2)}\n`;
+      output += `http_request_duration_ms{quantile="0.9"} ${calculatePercentile(metricsData.requestDurations, 90).toFixed(2)}\n`;
+      output += `http_request_duration_ms{quantile="0.99"} ${calculatePercentile(metricsData.requestDurations, 99).toFixed(2)}\n`;
+      output += `http_request_duration_ms_count ${metricsData.requestDurations.length}\n`;
+      output += `http_request_duration_ms_sum ${metricsData.requestDurations.reduce((a, b) => a + b, 0).toFixed(2)}\n\n`;
+    }
+
+    // Rate Limit Store Size
+    output += "# HELP rate_limit_store_size Current size of rate limit store\n";
+    output += "# TYPE rate_limit_store_size gauge\n";
+    output += `rate_limit_store_size ${rateLimitStoreSize}\n\n`;
+
+    // CSRF Token Store Size
+    output += "# HELP csrf_token_store_size Current size of CSRF token store\n";
+    output += "# TYPE csrf_token_store_size gauge\n";
+    output += `csrf_token_store_size ${csrfTokenStore.size}\n`;
+
+    res.setHeader("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
+    res.send(output);
+  });
+
+  loggers.metrics.info("Prometheus metrics endpoint enabled", { path: "/metrics" });
+}
+
+/**
  * Setup completo de segurança
  * Aplica todos os middlewares de segurança
  */
 export function setupSecurity(app: Express) {
   setupHealthCheck(app);
+  setupRequestTracing(app);      // Tracing primeiro para ter correlation ID
+  setupPrometheusMetrics(app);   // Métricas antes dos outros middlewares
   setupSecurityHeaders(app);
   setupCORS(app);
   setupRateLimit(app);
