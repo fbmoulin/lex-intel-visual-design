@@ -1,0 +1,300 @@
+# Deployment Workflow
+# Lex Intel Visual Design - Desenvolvido por Lex Intelligentia
+#
+# Este workflow gerencia deployments para staging e produção:
+# - Staging: Deploy automático quando main é atualizado
+# - Production: Deploy manual ou quando uma release é criada
+#
+# Requer os seguintes secrets configurados:
+# - RAILWAY_TOKEN: Token de API do Railway
+# - RAILWAY_PROJECT_ID: ID do projeto no Railway
+# - RAILWAY_SERVICE_STAGING: ID do serviço de staging
+# - RAILWAY_SERVICE_PRODUCTION: ID do serviço de produção (opcional)
+# - DEPLOY_URL_STAGING: URL do ambiente de staging
+# - DEPLOY_URL_PRODUCTION: URL do ambiente de produção (opcional)
+
+name: Deploy
+
+on:
+  # Deploy para staging quando main é atualizado
+  push:
+    branches: [main, master]
+
+  # Deploy para produção com releases
+  release:
+    types: [published]
+
+  # Deploy manual via workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Ambiente de deploy'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+      skip_tests:
+        description: 'Pular testes (não recomendado)'
+        required: false
+        type: boolean
+        default: false
+
+# Cancela execuções anteriores do mesmo workflow na mesma branch
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false # Não cancela deploys em andamento
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '10.4.1'
+
+jobs:
+  # ============================================
+  # Job: Validação Pré-Deploy
+  # ============================================
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.skip_tests != 'true' }}
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm run check
+
+      - name: Executar testes
+        run: pnpm run test
+        env:
+          NODE_ENV: test
+
+      - name: Build de produção
+        run: pnpm run build
+        env:
+          NODE_ENV: production
+
+  # ============================================
+  # Job: Deploy para Staging
+  # ============================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: |
+      always() &&
+      (needs.validate.result == 'success' || needs.validate.result == 'skipped') &&
+      (github.event_name == 'push' ||
+       (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging'))
+    environment:
+      name: staging
+      url: ${{ vars.DEPLOY_URL_STAGING }}
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Build de produção
+        run: pnpm run build
+        env:
+          NODE_ENV: production
+
+      - name: Instalar Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy para Railway (Staging)
+        run: |
+          railway up --service ${{ secrets.RAILWAY_SERVICE_STAGING }} --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+
+      - name: Aguardar deploy finalizar
+        run: sleep 30
+
+      - name: Health check - Staging
+        id: health-check
+        run: |
+          MAX_RETRIES=10
+          RETRY_DELAY=15
+          HEALTH_URL="${{ vars.DEPLOY_URL_STAGING }}/health"
+
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Tentativa $i de $MAX_RETRIES..."
+
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "000")
+
+            if [ "$RESPONSE" = "200" ]; then
+              echo "Health check passou!"
+              echo "status=success" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            echo "Health check falhou (HTTP $RESPONSE). Aguardando $RETRY_DELAY segundos..."
+            sleep $RETRY_DELAY
+          done
+
+          echo "Health check falhou após $MAX_RETRIES tentativas"
+          echo "status=failed" >> $GITHUB_OUTPUT
+          exit 1
+        continue-on-error: true
+
+      - name: Notificar falha no health check
+        if: steps.health-check.outputs.status == 'failed'
+        run: |
+          echo "::error::Deploy para staging completado mas health check falhou"
+          echo "Verifique os logs do serviço no Railway"
+
+  # ============================================
+  # Job: Deploy para Production
+  # ============================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: |
+      always() &&
+      (needs.validate.result == 'success' || needs.validate.result == 'skipped') &&
+      (github.event_name == 'release' ||
+       (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'))
+    environment:
+      name: production
+      url: ${{ vars.DEPLOY_URL_PRODUCTION }}
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Build de produção
+        run: pnpm run build
+        env:
+          NODE_ENV: production
+
+      - name: Instalar Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy para Railway (Production)
+        run: |
+          railway up --service ${{ secrets.RAILWAY_SERVICE_PRODUCTION }} --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+
+      - name: Aguardar deploy finalizar
+        run: sleep 45
+
+      - name: Health check - Production
+        id: health-check-prod
+        run: |
+          MAX_RETRIES=12
+          RETRY_DELAY=20
+          HEALTH_URL="${{ vars.DEPLOY_URL_PRODUCTION }}/health"
+
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Tentativa $i de $MAX_RETRIES..."
+
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "000")
+
+            if [ "$RESPONSE" = "200" ]; then
+              echo "Health check passou!"
+              echo "status=success" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            echo "Health check falhou (HTTP $RESPONSE). Aguardando $RETRY_DELAY segundos..."
+            sleep $RETRY_DELAY
+          done
+
+          echo "Health check falhou após $MAX_RETRIES tentativas"
+          echo "status=failed" >> $GITHUB_OUTPUT
+          exit 1
+
+      - name: Smoke test - Production
+        if: steps.health-check-prod.outputs.status == 'success'
+        run: |
+          echo "Executando smoke tests..."
+
+          # Verifica se a página inicial carrega
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "${{ vars.DEPLOY_URL_PRODUCTION }}")
+          if [ "$RESPONSE" != "200" ]; then
+            echo "::error::Página inicial não carregou (HTTP $RESPONSE)"
+            exit 1
+          fi
+
+          echo "Smoke tests passaram!"
+
+  # ============================================
+  # Job: Notificação de Deploy
+  # ============================================
+  notify:
+    name: Notify Deploy Status
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    steps:
+      - name: Resumo do deploy
+        run: |
+          echo "## Resumo do Deploy" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.deploy-staging.result }}" != "skipped" ]; then
+            if [ "${{ needs.deploy-staging.result }}" == "success" ]; then
+              echo "### Staging: ✅ Sucesso" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "### Staging: ❌ Falhou" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          if [ "${{ needs.deploy-production.result }}" != "skipped" ]; then
+            if [ "${{ needs.deploy-production.result }}" == "success" ]; then
+              echo "### Production: ✅ Sucesso" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "### Production: ❌ Falhou" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Ref:** ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
