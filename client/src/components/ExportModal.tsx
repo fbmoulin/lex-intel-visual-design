@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileDown, FileText, Image as ImageIcon, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { RateLimiters } from "@/lib/rateLimit";
 
 export interface ExportConfig {
   format: "pdf" | "docx";
@@ -66,9 +67,20 @@ export function ExportModal({
   });
 
   const handleExport = async () => {
+    // Check rate limit before proceeding
+    const rateLimitResult = RateLimiters.export();
+    if (!rateLimitResult.allowed) {
+      const seconds = Math.ceil(rateLimitResult.retryAfterMs / 1000);
+      toast.error(
+        `Muitas exportações. Tente novamente em ${seconds} segundo${seconds !== 1 ? "s" : ""}.`,
+        { id: "export-rate-limit" }
+      );
+      return;
+    }
+
     setIsExporting(true);
     toast.loading("Preparando exportação...", { id: "export" });
-    
+
     try {
       await onExport(config);
       toast.success(

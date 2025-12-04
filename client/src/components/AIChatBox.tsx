@@ -6,6 +6,8 @@ import { Loader2, Send, User, Sparkles } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Streamdown } from "streamdown";
 import { sanitizeMarkdown } from "@shared/sanitize";
+import { RateLimiters } from "@/lib/rateLimit";
+import { toast } from "sonner";
 
 /**
  * Message type matching server-side LLM Message interface
@@ -170,6 +172,17 @@ export function AIChatBox({
     e.preventDefault();
     const trimmedInput = input.trim();
     if (!trimmedInput || isLoading) return;
+
+    // Check rate limit before sending
+    const rateLimitResult = RateLimiters.aiChat();
+    if (!rateLimitResult.allowed) {
+      const seconds = Math.ceil(rateLimitResult.retryAfterMs / 1000);
+      toast.error(
+        `Muitas mensagens. Aguarde ${seconds} segundo${seconds !== 1 ? "s" : ""}.`,
+        { id: "chat-rate-limit" }
+      );
+      return;
+    }
 
     onSendMessage(trimmedInput);
     setInput("");
