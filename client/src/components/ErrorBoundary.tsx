@@ -1,7 +1,7 @@
+import React, { Component, ErrorInfo, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { captureException } from "@/lib/sentry";
 import { AlertTriangle, RotateCcw } from "lucide-react";
-import { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;

@@ -13,7 +13,23 @@ export default defineConfig({
     },
   },
   test: {
+    // Default environment for server tests
     environment: "node",
-    include: ["server/**/*.test.ts", "server/**/*.spec.ts", "shared/**/*.test.ts"],
+    include: [
+      "server/**/*.test.ts",
+      "server/**/*.spec.ts",
+      "shared/**/*.test.ts",
+      "client/src/**/*.test.tsx",
+      "client/src/**/*.test.ts",
+    ],
+    // Use jsdom environment for client tests
+    environmentMatchGlobs: [
+      ["client/src/**/*.test.tsx", "jsdom"],
+      ["client/src/**/*.test.ts", "jsdom"],
+    ],
+    // Setup files for client tests
+    setupFiles: ["./client/src/test/setup.ts"],
+    // Globals for jest-dom matchers
+    globals: true,
   },
 });
