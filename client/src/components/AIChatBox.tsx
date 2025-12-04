@@ -308,6 +308,7 @@ export function AIChatBox({
         ref={inputAreaRef}
         onSubmit={handleSubmit}
         className="flex gap-2 p-4 border-t bg-background/50 items-end"
+        aria-label="Formulário de chat com IA"
       >
         <Textarea
           ref={textareaRef}
@@ -317,17 +318,19 @@ export function AIChatBox({
           placeholder={placeholder}
           className="flex-1 max-h-32 resize-none min-h-9"
           rows={1}
+          aria-label="Digite sua mensagem para o assistente de IA"
         />
         <Button
           type="submit"
           size="icon"
           disabled={!input.trim() || isLoading}
           className="shrink-0 h-[38px] w-[38px]"
+          aria-label={isLoading ? "Enviando mensagem..." : "Enviar mensagem"}
         >
           {isLoading ? (
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : (
-            <Send className="size-4" />
+            <Send className="size-4" aria-hidden="true" />
           )}
         </Button>
       </form>
