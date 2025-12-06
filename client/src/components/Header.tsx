@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Scale, Moon, Sun } from "lucide-react";
 import { Link } from "wouter";

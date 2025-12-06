@@ -5,6 +5,7 @@ import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerHealthRoutes } from "./health";
+import { registerLogsRoutes } from "./logsRoutes";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -50,6 +51,9 @@ async function startServer() {
 
   // Health check endpoints (before auth middleware)
   registerHealthRoutes(app);
+
+  // Admin logs endpoints (protected by API key)
+  registerLogsRoutes(app);
 
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
