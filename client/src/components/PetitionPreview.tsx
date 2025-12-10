@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { SummaryCard, SummaryData } from "./SummaryCard";
 import { Timeline, TimelineEvent } from "./Timeline";
@@ -17,39 +18,70 @@ interface PetitionPreviewProps {
   templateId: string;
 }
 
-export function PetitionPreview({ formData, templateId }: PetitionPreviewProps) {
-  const getTemplateTitle = () => {
-    const titles: Record<string, string> = {
-      civil: "Petição Civil",
-      trabalhista: "Petição Trabalhista",
-      criminal: "Petição Criminal",
-      tributaria: "Petição Tributária",
-      consumidor: "Direito do Consumidor"
-    };
-    return titles[templateId] || "Petição";
-  };
+/** Template title mapping - defined outside component to avoid recreation */
+const TEMPLATE_TITLES: Record<string, string> = {
+  civil: "Petição Civil",
+  trabalhista: "Petição Trabalhista",
+  criminal: "Petição Criminal",
+  tributaria: "Petição Tributária",
+  consumidor: "Direito do Consumidor",
+};
 
-  const summaryData: SummaryData = {
-    numeroProcesso: formData.numeroProcesso,
-    autor: formData.autor,
-    reu: formData.reu,
-    valorCausa: formData.valorCausa,
-    tipo: getTemplateTitle()
-  };
+export const PetitionPreview = memo(function PetitionPreview({
+  formData,
+  templateId,
+}: PetitionPreviewProps) {
+  // Memoize template title lookup
+  const templateTitle = useMemo(
+    () => TEMPLATE_TITLES[templateId] || "Petição",
+    [templateId]
+  );
 
-  // Exemplo de eventos para timeline (pode ser expandido para processar o texto de fatos)
-  const timelineEvents: TimelineEvent[] = formData.fatos ? [
-    {
-      date: "Janeiro/2024",
-      title: "Início dos Fatos",
-      description: formData.fatos.substring(0, 150) + (formData.fatos.length > 150 ? "..." : "")
-    }
-  ] : [];
+  // Memoize summary data to avoid object recreation on every render
+  const summaryData: SummaryData = useMemo(
+    () => ({
+      numeroProcesso: formData.numeroProcesso,
+      autor: formData.autor,
+      reu: formData.reu,
+      valorCausa: formData.valorCausa,
+      tipo: templateTitle,
+    }),
+    [formData.numeroProcesso, formData.autor, formData.reu, formData.valorCausa, templateTitle]
+  );
 
-  // Exemplo de dados para gráfico (pode ser expandido para processar valores)
-  const chartData: ChartData[] = formData.valorCausa ? [
-    { name: "Valor Principal", value: parseFloat(formData.valorCausa.replace(/[^\d,]/g, '').replace(',', '.')) || 0 }
-  ] : [];
+  // Memoize timeline events - only recalculate when fatos changes
+  const timelineEvents: TimelineEvent[] = useMemo(
+    () =>
+      formData.fatos
+        ? [
+            {
+              date: "Janeiro/2024",
+              title: "Início dos Fatos",
+              description:
+                formData.fatos.substring(0, 150) +
+                (formData.fatos.length > 150 ? "..." : ""),
+            },
+          ]
+        : [],
+    [formData.fatos]
+  );
+
+  // Memoize chart data - only recalculate when valorCausa changes
+  const chartData: ChartData[] = useMemo(
+    () =>
+      formData.valorCausa
+        ? [
+            {
+              name: "Valor Principal",
+              value:
+                parseFloat(
+                  formData.valorCausa.replace(/[^\d,]/g, "").replace(",", ".")
+                ) || 0,
+            },
+          ]
+        : [],
+    [formData.valorCausa]
+  );
 
   return (
     <div className="space-y-8 bg-background p-8 rounded-lg border">
@@ -158,4 +190,4 @@ export function PetitionPreview({ formData, templateId }: PetitionPreviewProps) 
       </div>
     </div>
   );
-}
+});

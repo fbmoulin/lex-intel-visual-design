@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Circle } from "lucide-react";
 
 export interface TimelineEvent {
@@ -10,7 +11,7 @@ interface TimelineProps {
   events: TimelineEvent[];
 }
 
-export function Timeline({ events }: TimelineProps) {
+export const Timeline = memo(function Timeline({ events }: TimelineProps) {
   return (
     <div className="relative">
       {/* Linha vertical conectora */}
@@ -41,4 +42,4 @@ export function Timeline({ events }: TimelineProps) {
       </div>
     </div>
   );
-}
+});

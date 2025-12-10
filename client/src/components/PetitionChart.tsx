@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
@@ -12,7 +13,11 @@ interface PetitionChartProps {
   description?: string;
 }
 
-export function PetitionChart({ data, title, description }: PetitionChartProps) {
+export const PetitionChart = memo(function PetitionChart({
+  data,
+  title,
+  description,
+}: PetitionChartProps) {
   return (
     <Card>
       <CardHeader>
@@ -53,4 +58,4 @@ export function PetitionChart({ data, title, description }: PetitionChartProps) 
       </CardContent>
     </Card>
   );
-}
+});

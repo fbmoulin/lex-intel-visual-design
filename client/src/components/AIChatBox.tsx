@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -136,41 +136,50 @@ export function AIChatBox({
     scrollToBottom,
   } = useChatScroll();
 
-  // Filter out system messages
-  const displayMessages = messages.filter((msg) => msg.role !== "system");
+  // Filter out system messages - memoized to avoid recalculation on every render
+  const displayMessages = useMemo(
+    () => messages.filter((msg) => msg.role !== "system"),
+    [messages]
+  );
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedInput = input.trim();
-    if (!trimmedInput || isLoading) return;
-
-    // Check rate limit before sending
-    const rateLimitResult = RateLimiters.aiChat();
-    if (!rateLimitResult.allowed) {
-      const seconds = Math.ceil(rateLimitResult.retryAfterMs / 1000);
-      toast.error(
-        `Muitas mensagens. Aguarde ${seconds} segundo${seconds !== 1 ? "s" : ""}.`,
-        { id: "chat-rate-limit" }
-      );
-      return;
-    }
-
-    onSendMessage(trimmedInput);
-    setInput("");
-
-    // Scroll immediately after sending
-    scrollToBottom();
-
-    // Keep focus on input
-    textareaRef.current?.focus();
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
       e.preventDefault();
-      handleSubmit(e);
-    }
-  };
+      const trimmedInput = input.trim();
+      if (!trimmedInput || isLoading) return;
+
+      // Check rate limit before sending
+      const rateLimitResult = RateLimiters.aiChat();
+      if (!rateLimitResult.allowed) {
+        const seconds = Math.ceil(rateLimitResult.retryAfterMs / 1000);
+        toast.error(
+          `Muitas mensagens. Aguarde ${seconds} segundo${seconds !== 1 ? "s" : ""}.`,
+          { id: "chat-rate-limit" }
+        );
+        return;
+      }
+
+      onSendMessage(trimmedInput);
+      setInput("");
+
+      // Scroll immediately after sending
+      scrollToBottom();
+
+      // Keep focus on input
+      textareaRef.current?.focus();
+    },
+    [input, isLoading, onSendMessage, scrollToBottom]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSubmit(e);
+      }
+    },
+    [handleSubmit]
+  );
 
   return (
     <div

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Scale, User, Building2, DollarSign } from "lucide-react";
 
@@ -13,7 +14,7 @@ interface SummaryCardProps {
   data: SummaryData;
 }
 
-export function SummaryCard({ data }: SummaryCardProps) {
+export const SummaryCard = memo(function SummaryCard({ data }: SummaryCardProps) {
   return (
     <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
       <CardHeader>
@@ -80,4 +81,4 @@ export function SummaryCard({ data }: SummaryCardProps) {
       </CardContent>
     </Card>
   );
-}
+});

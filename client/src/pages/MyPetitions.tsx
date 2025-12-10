@@ -1,3 +1,4 @@
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,6 @@ import { Footer } from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Search, FileText, Edit, Trash2, Plus, Filter } from "lucide-react";
-import { useState } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import {
@@ -20,6 +20,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+/** Template labels mapping - defined outside component to avoid recreation */
+const TEMPLATE_LABELS: Record<string, string> = {
+  civil: "Petição Civil",
+  trabalhista: "Petição Trabalhista",
+  criminal: "Petição Criminal",
+  tributaria: "Petição Tributária",
+  consumidor: "Petição do Consumidor",
+};
+
+function getTemplateLabel(type: string): string {
+  return TEMPLATE_LABELS[type] || type;
+}
 
 export default function MyPetitions() {
   const [, setLocation] = useLocation();
@@ -41,38 +54,42 @@ export default function MyPetitions() {
     },
     onError: (error) => {
       toast.error(`Erro ao excluir petição: ${error.message}`);
-    }
+    },
   });
 
-  const handleEdit = (petitionId: number, templateType: string) => {
-    setLocation(`/editor/${templateType}?id=${petitionId}`);
-  };
+  // Memoize handlers to prevent unnecessary re-renders of child components
+  const handleEdit = useCallback(
+    (petitionId: number, templateType: string) => {
+      setLocation(`/editor/${templateType}?id=${petitionId}`);
+    },
+    [setLocation]
+  );
 
-  const handleDelete = (petitionId: number) => {
-    deleteMutation.mutate({ id: petitionId });
-  };
+  const handleDelete = useCallback(
+    (petitionId: number) => {
+      deleteMutation.mutate({ id: petitionId });
+    },
+    [deleteMutation]
+  );
 
-  const getTemplateLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      civil: "Petição Civil",
-      trabalhista: "Petição Trabalhista",
-      criminal: "Petição Criminal",
-      tributaria: "Petição Tributária",
-      consumidor: "Petição do Consumidor"
-    };
-    return labels[type] || type;
-  };
+  // Memoize filtered petitions to avoid recalculation on every render
+  const filteredPetitions = useMemo(() => {
+    if (!petitions) return undefined;
 
-  const filteredPetitions = petitions?.filter((petition) => {
-    const matchesSearch = 
-      petition.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      petition.numeroProcesso?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      petition.autor?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesFilter = filterType === "all" || petition.templateType === filterType;
-    
-    return matchesSearch && matchesFilter;
-  });
+    const lowerSearchQuery = searchQuery.toLowerCase();
+
+    return petitions.filter((petition) => {
+      const matchesSearch =
+        petition.title.toLowerCase().includes(lowerSearchQuery) ||
+        petition.numeroProcesso?.toLowerCase().includes(lowerSearchQuery) ||
+        petition.autor?.toLowerCase().includes(lowerSearchQuery);
+
+      const matchesFilter =
+        filterType === "all" || petition.templateType === filterType;
+
+      return matchesSearch && matchesFilter;
+    });
+  }, [petitions, searchQuery, filterType]);
 
   if (!isAuthenticated) {
     return (

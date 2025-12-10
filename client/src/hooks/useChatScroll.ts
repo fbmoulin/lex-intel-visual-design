@@ -15,11 +15,11 @@ export interface UseChatScrollOptions {
 
 export interface UseChatScrollReturn {
   /** Ref para o container principal */
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   /** Ref para a área de scroll */
-  scrollAreaRef: React.RefObject<HTMLDivElement>;
+  scrollAreaRef: React.RefObject<HTMLDivElement | null>;
   /** Ref para a área de input */
-  inputAreaRef: React.RefObject<HTMLFormElement>;
+  inputAreaRef: React.RefObject<HTMLFormElement | null>;
   /** Min-height calculada para última mensagem */
   minHeightForLastMessage: number;
   /** Função para scroll suave até o final */
