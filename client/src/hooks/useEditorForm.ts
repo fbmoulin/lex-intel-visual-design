@@ -196,8 +196,7 @@ export function useEditorForm(options: UseEditorFormOptions): UseEditorFormRetur
         setSavedPetitionId(result.id);
         toast.success("Petição salva com sucesso!", { id: "save-petition" });
       }
-    } catch (error) {
-      console.error("Erro ao salvar petição:", error);
+    } catch {
       toast.error("Erro ao salvar petição. Tente novamente.", { id: "save-petition" });
     } finally {
       setIsSaving(false);

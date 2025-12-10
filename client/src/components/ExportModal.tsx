@@ -88,8 +88,7 @@ export function ExportModal({
         { id: "export" }
       );
       onOpenChange(false);
-    } catch (error) {
-      console.error("Erro ao exportar:", error);
+    } catch {
       toast.error("Erro ao exportar documento. Tente novamente.", { id: "export" });
     } finally {
       setIsExporting(false);

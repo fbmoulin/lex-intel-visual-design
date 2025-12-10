@@ -67,8 +67,7 @@ export async function generatePDFFromElement(
 
     // Salva o PDF
     pdf.save(filename);
-  } catch (error) {
-    console.error('Erro ao gerar PDF:', error);
+  } catch {
     throw new Error('Falha ao gerar PDF. Por favor, tente novamente.');
   }
 }

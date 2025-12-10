@@ -405,8 +405,7 @@ export async function generatePetitionDOCX(
     const blob = await Packer.toBlob(doc);
     const filename = `peticao_${data.templateId}_${data.processNumber.replace(/\//g, '-')}.docx`;
     saveAs(blob, filename);
-  } catch (error) {
-    console.error('Erro ao gerar DOCX:', error);
+  } catch {
     throw new Error('Falha ao gerar documento DOCX. Por favor, tente novamente.');
   }
 }

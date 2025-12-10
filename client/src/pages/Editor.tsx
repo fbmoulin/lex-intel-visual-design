@@ -96,7 +96,6 @@ export default function Editor() {
         }, config);
       }
     } catch (error) {
-      console.error("Erro ao exportar:", error);
       throw error;
     } finally {
       setIsGeneratingPDF(false);
