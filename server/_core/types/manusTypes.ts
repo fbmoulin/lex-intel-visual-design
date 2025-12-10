@@ -43,6 +43,8 @@ export interface GetUserInfoResponse {
   email?: string | null;
   platform?: string | null;
   loginMethod?: string | null;
+  /** Registered platforms from OAuth provider */
+  platforms?: string[];
 }
 
 export interface CanAccessRequest {
@@ -66,4 +68,6 @@ export interface GetUserInfoWithJwtResponse {
   email?: string | null;
   platform?: string | null;
   loginMethod?: string | null;
+  /** Registered platforms from OAuth provider */
+  platforms?: string[];
 }

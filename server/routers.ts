@@ -122,20 +122,20 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const auditContext = getAuditContextFromTrpc(ctx);
 
-        // Log tentativas de XSS para monitoramento
+        // Sanitiza todos os campos de texto antes de salvar
+        const sanitizedInput = sanitizePetitionData(input);
+
+        // Log tentativas de XSS para monitoramento (após sanitização)
         const fieldsToCheck = [input.fatos, input.fundamentosJuridicos, input.pedidos];
         if (fieldsToCheck.some(containsSuspiciousContent)) {
           auditSecurity(
             auditContext,
             "security.suspicious_content",
-            "blocked",
-            "XSS attempt detected",
+            "sanitized",
+            "Suspicious content detected and sanitized",
             { templateType: input.templateType }
           );
         }
-
-        // Sanitiza todos os campos de texto antes de salvar
-        const sanitizedInput = sanitizePetitionData(input);
 
         const petitionId = await db.createPetition({
           ...sanitizedInput,
@@ -173,20 +173,20 @@ export const appRouter = router({
         const auditContext = getAuditContextFromTrpc(ctx);
         const { id, ...data } = input;
 
-        // Log tentativas de XSS para monitoramento
+        // Sanitiza todos os campos de texto antes de salvar
+        const sanitizedData = sanitizePetitionData(data);
+
+        // Log tentativas de XSS para monitoramento (após sanitização)
         const fieldsToCheck = [data.fatos, data.fundamentosJuridicos, data.pedidos];
         if (fieldsToCheck.some(containsSuspiciousContent)) {
           auditSecurity(
             auditContext,
             "security.suspicious_content",
-            "blocked",
-            "XSS attempt detected",
+            "sanitized",
+            "Suspicious content detected and sanitized",
             { petitionId: id }
           );
         }
-
-        // Sanitiza todos os campos de texto antes de salvar
-        const sanitizedData = sanitizePetitionData(data);
 
         await db.updatePetition(id, ctx.user.id, sanitizedData);
 
