@@ -1,69 +1,83 @@
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Briefcase, Gavel, Building2, ShoppingCart, Search } from "lucide-react";
+import { FileText, Briefcase, Gavel, Building2, ShoppingCart, Search, LucideIcon } from "lucide-react";
 import { getAllTemplates, PetitionTemplate } from "@/data/petitionTemplates";
-import { useState } from "react";
 import { useLocation } from "wouter";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+
+/** Template icon mapping - defined outside component */
+const TEMPLATE_ICONS: Record<string, LucideIcon> = {
+  civil: FileText,
+  trabalhista: Briefcase,
+  criminal: Gavel,
+  tributaria: Building2,
+  consumidor: ShoppingCart,
+};
+
+/** Template color mapping - defined outside component */
+const TEMPLATE_COLORS: Record<string, string> = {
+  civil: "bg-blue-500/10 text-blue-500",
+  trabalhista: "bg-green-500/10 text-green-500",
+  criminal: "bg-red-500/10 text-red-500",
+  tributaria: "bg-purple-500/10 text-purple-500",
+  consumidor: "bg-amber-500/10 text-amber-500",
+};
+
+/** Template type labels - defined outside component */
+const TYPE_LABELS: Record<string, string> = {
+  civil: "Civil",
+  trabalhista: "Trabalhista",
+  criminal: "Criminal",
+  tributaria: "Tributária",
+  consumidor: "Consumidor",
+};
+
+function getTemplateIcon(type: string): LucideIcon {
+  return TEMPLATE_ICONS[type] || FileText;
+}
+
+function getTemplateColor(type: string): string {
+  return TEMPLATE_COLORS[type] || "bg-gray-500/10 text-gray-500";
+}
+
+function getTypeLabel(type: string): string {
+  return TYPE_LABELS[type] || type;
+}
 
 export default function Templates() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
-  
+
   const templates = getAllTemplates();
-  
-  // Filtrar templates
-  const filteredTemplates = templates.filter(template => {
-    const matchesSearch = template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         template.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = selectedType === "all" || template.templateType === selectedType;
-    return matchesSearch && matchesType;
-  });
-  
-  const handleUseTemplate = (template: PetitionTemplate) => {
-    // Redirecionar para o editor com o template selecionado
-    const params = new URLSearchParams();
-    params.set('template', template.id);
-    setLocation(`/editor/${template.templateType}?${params.toString()}`);
-  };
-  
-  const getTemplateIcon = (type: string) => {
-    switch(type) {
-      case 'civil': return FileText;
-      case 'trabalhista': return Briefcase;
-      case 'criminal': return Gavel;
-      case 'tributaria': return Building2;
-      case 'consumidor': return ShoppingCart;
-      default: return FileText;
-    }
-  };
-  
-  const getTemplateColor = (type: string) => {
-    switch(type) {
-      case 'civil': return 'bg-blue-500/10 text-blue-500';
-      case 'trabalhista': return 'bg-green-500/10 text-green-500';
-      case 'criminal': return 'bg-red-500/10 text-red-500';
-      case 'tributaria': return 'bg-purple-500/10 text-purple-500';
-      case 'consumidor': return 'bg-amber-500/10 text-amber-500';
-      default: return 'bg-gray-500/10 text-gray-500';
-    }
-  };
-  
-  const getTypeLabel = (type: string) => {
-    switch(type) {
-      case 'civil': return 'Civil';
-      case 'trabalhista': return 'Trabalhista';
-      case 'criminal': return 'Criminal';
-      case 'tributaria': return 'Tributária';
-      case 'consumidor': return 'Consumidor';
-      default: return type;
-    }
-  };
+
+  // Memoize filtered templates to avoid recalculation on every render
+  const filteredTemplates = useMemo(() => {
+    const lowerSearchTerm = searchTerm.toLowerCase();
+
+    return templates.filter((template) => {
+      const matchesSearch =
+        template.title.toLowerCase().includes(lowerSearchTerm) ||
+        template.description.toLowerCase().includes(lowerSearchTerm);
+      const matchesType =
+        selectedType === "all" || template.templateType === selectedType;
+      return matchesSearch && matchesType;
+    });
+  }, [templates, searchTerm, selectedType]);
+
+  const handleUseTemplate = useCallback(
+    (template: PetitionTemplate) => {
+      const params = new URLSearchParams();
+      params.set("template", template.id);
+      setLocation(`/editor/${template.templateType}?${params.toString()}`);
+    },
+    [setLocation]
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">

@@ -1,10 +1,10 @@
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FileDown, Eye, EyeOff, Save } from "lucide-react";
-import { useState, useRef } from "react";
 import { useParams, useSearch } from "wouter";
 import { toast } from "sonner";
 import { generatePetitionPDF, prepareElementForPDF } from "@/lib/pdfGenerator";
@@ -16,6 +16,15 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { ExportModal, ExportConfig } from "@/components/ExportModal";
 import { useEditorForm } from "@/hooks/useEditorForm";
 import { isValidTemplateType, type PetitionTemplateType } from "@shared/const";
+
+/** Template titles mapping - defined outside component to avoid recreation */
+const TEMPLATE_TITLES: Record<string, string> = {
+  civil: "Petição Civil",
+  trabalhista: "Petição Trabalhista",
+  criminal: "Petição Criminal",
+  tributaria: "Petição Tributária",
+  consumidor: "Direito do Consumidor",
+};
 
 export default function Editor() {
   const params = useParams();
@@ -46,72 +55,77 @@ export default function Editor() {
     isAuthenticated,
   });
 
-  const handleOpenExportModal = () => {
+  // Memoize template title
+  const templateTitle = useMemo(
+    () => TEMPLATE_TITLES[templateId] || "Petição",
+    [templateId]
+  );
+
+  const handleOpenExportModal = useCallback(() => {
     if (!previewRef.current) {
       toast.error("Preview não encontrado. Ative o preview para exportar.");
       return;
     }
     setShowExportModal(true);
-  };
+  }, []);
 
-  const handleExport = async (config: ExportConfig) => {
-    if (!previewRef.current) {
-      toast.error("Preview não encontrado. Ative o preview para exportar.");
-      return;
-    }
-
-    setIsGeneratingPDF(true);
-
-    try {
-      // Prepara o elemento para exportação
-      prepareElementForPDF(previewRef.current);
-
-      // Aguarda um momento para garantir que tudo foi renderizado
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      if (config.format === "pdf") {
-        // Gera o PDF com configurações personalizadas
-        await generatePetitionPDF(previewRef.current, {
-          processNumber: formData.numeroProcesso,
-          court: formData.tribunal,
-          plaintiff: formData.autor,
-          defendant: formData.reu,
-          facts: formData.fatos,
-          legalBasis: formData.fundamentosJuridicos,
-          requests: formData.pedidos,
-          templateId,
-        }, config);
-      } else if (config.format === "docx") {
-        // Gera o DOCX com configurações personalizadas
-        await generatePetitionDOCX({
-          processNumber: formData.numeroProcesso,
-          court: formData.tribunal,
-          plaintiff: formData.autor,
-          defendant: formData.reu,
-          facts: formData.fatos,
-          legalBasis: formData.fundamentosJuridicos,
-          requests: formData.pedidos,
-          caseValue: formData.valorCausa,
-          templateId,
-        }, config);
+  const handleExport = useCallback(
+    async (config: ExportConfig) => {
+      if (!previewRef.current) {
+        toast.error("Preview não encontrado. Ative o preview para exportar.");
+        return;
       }
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsGeneratingPDF(false);
-    }
-  };
 
-  const getTemplateTitle = () => {
-    const titles: Record<string, string> = {
-      civil: "Petição Civil",
-      trabalhista: "Petição Trabalhista",
-      criminal: "Petição Criminal",
-      tributaria: "Petição Tributária",
-      consumidor: "Direito do Consumidor"
-    };
-    return titles[templateId] || "Petição";
-  };
+      setIsGeneratingPDF(true);
+
+      try {
+        // Prepara o elemento para exportação
+        prepareElementForPDF(previewRef.current);
+
+        // Aguarda um momento para garantir que tudo foi renderizado
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        if (config.format === "pdf") {
+          // Gera o PDF com configurações personalizadas
+          await generatePetitionPDF(
+            previewRef.current,
+            {
+              processNumber: formData.numeroProcesso,
+              court: formData.tribunal,
+              plaintiff: formData.autor,
+              defendant: formData.reu,
+              facts: formData.fatos,
+              legalBasis: formData.fundamentosJuridicos,
+              requests: formData.pedidos,
+              templateId,
+            },
+            config
+          );
+        } else if (config.format === "docx") {
+          // Gera o DOCX com configurações personalizadas
+          await generatePetitionDOCX(
+            {
+              processNumber: formData.numeroProcesso,
+              court: formData.tribunal,
+              plaintiff: formData.autor,
+              defendant: formData.reu,
+              facts: formData.fatos,
+              legalBasis: formData.fundamentosJuridicos,
+              requests: formData.pedidos,
+              caseValue: formData.valorCausa,
+              templateId,
+            },
+            config
+          );
+        }
+      } catch (error) {
+        throw error;
+      } finally {
+        setIsGeneratingPDF(false);
+      }
+    },
+    [formData, templateId]
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -122,7 +136,7 @@ export default function Editor() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-foreground">Editor de Petição</h2>
-              <p className="text-sm text-muted-foreground mt-1">{getTemplateTitle()}</p>
+              <p className="text-sm text-muted-foreground mt-1">{templateTitle}</p>
             </div>
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setShowPreview(!showPreview)}>
