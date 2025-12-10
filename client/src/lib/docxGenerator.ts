@@ -14,18 +14,10 @@ import {
 } from 'docx';
 import { saveAs } from 'file-saver';
 import type { ExportConfig } from '@/components/ExportModal';
+import type { PetitionExportData } from './exportTypes';
 
-export interface PetitionDataDOCX {
-  processNumber: string;
-  court: string;
-  plaintiff: string;
-  defendant: string;
-  facts: string;
-  legalBasis: string;
-  requests: string;
-  templateId: string;
-  caseValue?: string;
-}
+/** @deprecated Use PetitionExportData instead */
+export type PetitionDataDOCX = PetitionExportData;
 
 /**
  * Gera um documento DOCX formatado profissionalmente

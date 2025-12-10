@@ -1,17 +1,10 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import type { ExportConfig } from '@/components/ExportModal';
+import type { PetitionExportData } from './exportTypes';
 
-export interface PetitionData {
-  processNumber: string;
-  court: string;
-  plaintiff: string;
-  defendant: string;
-  facts: string;
-  legalBasis: string;
-  requests: string;
-  templateId: string;
-}
+/** @deprecated Use PetitionExportData instead */
+export type PetitionData = PetitionExportData;
 
 /**
  * Gera um PDF a partir de um elemento HTML preservando estilos visuais
