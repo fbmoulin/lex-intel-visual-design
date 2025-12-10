@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FileDown, Eye, EyeOff, Save } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useParams, useSearch } from "wouter";
 import { toast } from "sonner";
 import { generatePetitionPDF, prepareElementForPDF } from "@/lib/pdfGenerator";
@@ -12,10 +12,9 @@ import { generatePetitionDOCX } from "@/lib/docxGenerator";
 import { PetitionPreview } from "@/components/PetitionPreview";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getTemplateById } from "@/data/petitionTemplates";
 import { ExportModal, ExportConfig } from "@/components/ExportModal";
+import { useEditorForm } from "@/hooks/useEditorForm";
 import { isValidTemplateType, type PetitionTemplateType } from "@shared/const";
 
 export default function Editor() {
@@ -25,80 +24,27 @@ export default function Editor() {
   const [showPreview, setShowPreview] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [savedPetitionId, setSavedPetitionId] = useState<number | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
-  const { user, isAuthenticated } = useAuth();
-  
-  const createPetitionMutation = trpc.petitions.create.useMutation();
-  const updatePetitionMutation = trpc.petitions.update.useMutation();
-  
+  const { isAuthenticated } = useAuth();
+
   // Obter ID da petição e template da URL
   const searchParams = new URLSearchParams(useSearch());
-  const petitionIdFromUrl = searchParams.get('id');
-  const templateIdFromUrl = searchParams.get('template');
-  
-  // Query para carregar petição
-  const { data: loadedPetition, isLoading: isLoadingPetition } = trpc.petitions.getById.useQuery(
-    { id: parseInt(petitionIdFromUrl || '0') },
-    { enabled: !!petitionIdFromUrl && isAuthenticated }
-  );
-  
-  const [formData, setFormData] = useState({
-    numeroProcesso: "",
-    tribunal: "",
-    autor: "",
-    reu: "",
-    fatos: "",
-    fundamentosJuridicos: "",
-    pedidos: "",
-    valorCausa: ""
+  const petitionIdFromUrl = searchParams.get("id");
+  const templateIdFromUrl = searchParams.get("template");
+
+  // Hook para gerenciar formulário
+  const {
+    formData,
+    handleChange,
+    isSaving,
+    savedPetitionId,
+    handleSavePetition,
+  } = useEditorForm({
+    petitionId: petitionIdFromUrl,
+    templateId: templateIdFromUrl,
+    templateType: templateId,
+    isAuthenticated,
   });
-
-  // Carregar dados da petição quando disponível
-  useEffect(() => {
-    if (loadedPetition) {
-      setFormData({
-        numeroProcesso: loadedPetition.numeroProcesso || "",
-        tribunal: loadedPetition.tribunal || "",
-        autor: loadedPetition.autor || "",
-        reu: loadedPetition.reu || "",
-        fatos: loadedPetition.fatos || "",
-        fundamentosJuridicos: loadedPetition.fundamentosJuridicos || "",
-        pedidos: loadedPetition.pedidos || "",
-        valorCausa: loadedPetition.valorCausa || ""
-      });
-      setSavedPetitionId(loadedPetition.id);
-      toast.success(`Petição "${loadedPetition.title}" carregada com sucesso!`);
-    }
-  }, [loadedPetition]);
-  
-  // Carregar template quando especificado na URL
-  useEffect(() => {
-    if (templateIdFromUrl && !petitionIdFromUrl) {
-      const template = getTemplateById(templateIdFromUrl);
-      if (template) {
-        setFormData({
-          numeroProcesso: template.content.numeroProcesso || "",
-          tribunal: template.content.tribunal || "",
-          autor: template.content.autor || "",
-          reu: template.content.reu || "",
-          fatos: template.content.fatos || "",
-          fundamentosJuridicos: template.content.fundamentosJuridicos || "",
-          pedidos: template.content.pedidos || "",
-          valorCausa: template.content.valorCausa || ""
-        });
-        toast.success(`Template "${template.title}" carregado com sucesso!`);
-      }
-    }
-  }, [templateIdFromUrl, petitionIdFromUrl]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
 
   const handleOpenExportModal = () => {
     if (!previewRef.current) {
@@ -154,56 +100,6 @@ export default function Editor() {
       throw error;
     } finally {
       setIsGeneratingPDF(false);
-    }
-  };
-
-  const handleSavePetition = async () => {
-    if (!isAuthenticated) {
-      toast.error("Você precisa estar logado para salvar petições.");
-      return;
-    }
-
-    if (!formData.numeroProcesso && !formData.autor) {
-      toast.error("Preencha pelo menos o número do processo ou o nome do autor.");
-      return;
-    }
-
-    setIsSaving(true);
-    toast.loading("Salvando petição...", { id: "save-petition" });
-
-    try {
-      const petitionData = {
-        templateType: templateId,
-        title: formData.numeroProcesso || `Petição ${templateId} - ${new Date().toLocaleDateString()}`,
-        numeroProcesso: formData.numeroProcesso,
-        tribunal: formData.tribunal,
-        autor: formData.autor,
-        reu: formData.reu,
-        fatos: formData.fatos,
-        fundamentosJuridicos: formData.fundamentosJuridicos,
-        pedidos: formData.pedidos,
-        valorCausa: formData.valorCausa,
-        status: "rascunho" as const,
-      };
-
-      if (savedPetitionId) {
-        // Atualizar petição existente
-        await updatePetitionMutation.mutateAsync({
-          id: savedPetitionId,
-          ...petitionData,
-        });
-        toast.success("Petição atualizada com sucesso!", { id: "save-petition" });
-      } else {
-        // Criar nova petição
-        const result = await createPetitionMutation.mutateAsync(petitionData);
-        setSavedPetitionId(result.id);
-        toast.success("Petição salva com sucesso!", { id: "save-petition" });
-      }
-    } catch (error) {
-      console.error("Erro ao salvar petição:", error);
-      toast.error("Erro ao salvar petição. Tente novamente.", { id: "save-petition" });
-    } finally {
-      setIsSaving(false);
     }
   };
 
