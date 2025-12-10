@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lex Intel Visual Design - Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#2563eb',
+              foreground: '#ffffff',
+            },
+            secondary: {
+              DEFAULT: '#f1f5f9',
+              foreground: '#0f172a',
+            },
+            destructive: {
+              DEFAULT: '#ef4444',
+              foreground: '#ffffff',
+            },
+            muted: {
+              DEFAULT: '#f1f5f9',
+              foreground: '#64748b',
+            },
+            accent: {
+              DEFAULT: '#f1f5f9',
+              foreground: '#0f172a',
+            },
+            card: {
+              DEFAULT: '#ffffff',
+              foreground: '#0f172a',
+            },
+            border: '#e2e8f0',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    .dark { --bg: #0f172a; --card: #1e293b; --border: #334155; --text: #f8fafc; --muted: #94a3b8; }
+    .dark body { background: var(--bg); color: var(--text); }
+    .dark .card { background: var(--card); border-color: var(--border); }
+    .dark .muted-text { color: var(--muted); }
+    .prose { max-width: 65ch; }
+    .btn-primary { @apply bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors; }
+    .btn-secondary { @apply bg-secondary text-secondary-foreground px-4 py-2 rounded-lg font-medium hover:bg-slate-200 transition-colors; }
+    .btn-ghost { @apply px-4 py-2 rounded-lg font-medium hover:bg-slate-100 transition-colors; }
+    .input { @apply w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary; }
+    .card { @apply bg-card border border-border rounded-xl shadow-sm; }
+    .badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+    .badge-blue { @apply bg-blue-100 text-blue-800; }
+    .badge-green { @apply bg-green-100 text-green-800; }
+    .badge-yellow { @apply bg-yellow-100 text-yellow-800; }
+    .badge-red { @apply bg-red-100 text-red-800; }
+    .toast { @apply fixed bottom-4 right-4 bg-card border border-border rounded-lg shadow-lg p-4 flex items-center gap-3 animate-slide-up; }
+    @keyframes slide-up { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .animate-slide-up { animation: slide-up 0.3s ease-out; }
+    .tab-active { @apply border-b-2 border-primary text-primary; }
+    .skeleton { @apply bg-slate-200 animate-pulse rounded; }
+    .dark .skeleton { @apply bg-slate-700; }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <!-- Theme Toggle Script -->
+  <script>
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('theme-icon').innerHTML = isDark ? '☀️' : '🌙';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+
+  <!-- Header -->
+  <header class="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <a href="#" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <svg class="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+          </svg>
+          <div>
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white">Lex Intel Visual Design</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Desenvolvido por Lex Intelligentia</p>
+          </div>
+        </a>
+        <nav class="flex items-center gap-4">
+          <a href="#templates" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors hidden md:block dark:text-slate-300">Templates</a>
+          <a href="#petitions" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors hidden md:block dark:text-slate-300">Minhas Petições</a>
+          <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Alternar tema">
+            <span id="theme-icon">🌙</span>
+          </button>
+          <a href="#templates" class="btn-primary">Começar Agora</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8">
+
+    <!-- Section: Hero -->
+    <section class="text-center py-16 mb-12">
+      <h2 class="text-4xl font-bold text-slate-900 dark:text-white mb-4">
+        Crie Petições Jurídicas <span class="text-primary">Profissionais</span>
+      </h2>
+      <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8">
+        Gerador inteligente de documentos jurídicos com IA, templates prontos e exportação em PDF/DOCX.
+      </p>
+      <div class="flex justify-center gap-4">
+        <a href="#editor" class="btn-primary text-lg px-6 py-3">Criar Petição</a>
+        <a href="#templates" class="btn-secondary text-lg px-6 py-3">Ver Templates</a>
+      </div>
+    </section>
+
+    <!-- Section: Stats -->
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+      <div class="card p-6 text-center">
+        <div class="text-3xl font-bold text-primary mb-1">12</div>
+        <div class="text-sm text-slate-500 dark:text-slate-400">Templates Disponíveis</div>
+      </div>
+      <div class="card p-6 text-center">
+        <div class="text-3xl font-bold text-green-600 mb-1">1,247</div>
+        <div class="text-sm text-slate-500 dark:text-slate-400">Petições Criadas</div>
+      </div>
+      <div class="card p-6 text-center">
+        <div class="text-3xl font-bold text-purple-600 mb-1">98%</div>
+        <div class="text-sm text-slate-500 dark:text-slate-400">Satisfação</div>
+      </div>
+      <div class="card p-6 text-center">
+        <div class="text-3xl font-bold text-orange-600 mb-1">24/7</div>
+        <div class="text-sm text-slate-500 dark:text-slate-400">Disponibilidade</div>
+      </div>
+    </section>
+
+    <!-- Section: Templates -->
+    <section id="templates" class="mb-12">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Templates de Petições</h3>
+        <div class="flex gap-2">
+          <button class="tab-active px-4 py-2 text-sm font-medium">Todos</button>
+          <button class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white">Civil</button>
+          <button class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white">Trabalhista</button>
+          <button class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white">Penal</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Template Card 1 -->
+        <div class="card p-6 hover:shadow-md transition-shadow cursor-pointer group">
+          <div class="flex items-start justify-between mb-4">
+            <div class="p-3 bg-blue-100 rounded-lg dark:bg-blue-900/30">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <span class="badge badge-blue">Civil</span>
+          </div>
+          <h4 class="font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors">Petição Inicial</h4>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Template completo para ações cíveis com todos os campos essenciais.</p>
+          <div class="flex items-center text-xs text-slate-400">
+            <span>Usado 423 vezes</span>
+          </div>
+        </div>
+
+        <!-- Template Card 2 -->
+        <div class="card p-6 hover:shadow-md transition-shadow cursor-pointer group">
+          <div class="flex items-start justify-between mb-4">
+            <div class="p-3 bg-green-100 rounded-lg dark:bg-green-900/30">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <span class="badge badge-green">Trabalhista</span>
+          </div>
+          <h4 class="font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors">Reclamação Trabalhista</h4>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Modelo para ações na Justiça do Trabalho com cálculos automáticos.</p>
+          <div class="flex items-center text-xs text-slate-400">
+            <span>Usado 312 vezes</span>
+          </div>
+        </div>
+
+        <!-- Template Card 3 -->
+        <div class="card p-6 hover:shadow-md transition-shadow cursor-pointer group">
+          <div class="flex items-start justify-between mb-4">
+            <div class="p-3 bg-red-100 rounded-lg dark:bg-red-900/30">
+              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </div>
+            <span class="badge badge-red">Penal</span>
+          </div>
+          <h4 class="font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors">Habeas Corpus</h4>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Template para impetração de HC com fundamentação completa.</p>
+          <div class="flex items-center text-xs text-slate-400">
+            <span>Usado 156 vezes</span>
+          </div>
+        </div>
+
+        <!-- Template Card 4 -->
+        <div class="card p-6 hover:shadow-md transition-shadow cursor-pointer group">
+          <div class="flex items-start justify-between mb-4">
+            <div class="p-3 bg-purple-100 rounded-lg dark:bg-purple-900/30">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </div>
+            <span class="badge badge-blue">Família</span>
+          </div>
+          <h4 class="font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors">Divórcio Consensual</h4>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Petição para divórcio amigável com partilha de bens.</p>
+          <div class="flex items-center text-xs text-slate-400">
+            <span>Usado 89 vezes</span>
+          </div>
+        </div>
+
+        <!-- Template Card 5 -->
+        <div class="card p-6 hover:shadow-md transition-shadow cursor-pointer group">
+          <div class="flex items-start justify-between mb-4">
+            <div class="p-3 bg-yellow-100 rounded-lg dark:bg-yellow-900/30">
+              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <span class="badge badge-yellow">Consumidor</span>
+          </div>
+          <h4 class="font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors">Ação de Indenização</h4>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Modelo para ações contra empresas por danos morais e materiais.</p>
+          <div class="flex items-center text-xs text-slate-400">
+            <span>Usado 267 vezes</span>
+          </div>
+        </div>
+
+        <!-- Template Card 6 -->
+        <div class="card p-6 hover:shadow-md transition-shadow cursor-pointer group">
+          <div class="flex items-start justify-between mb-4">
+            <div class="p-3 bg-indigo-100 rounded-lg dark:bg-indigo-900/30">
+              <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+            </div>
+            <span class="badge badge-blue">Administrativo</span>
+          </div>
+          <h4 class="font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors">Mandado de Segurança</h4>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Template para MS contra atos de autoridade pública.</p>
+          <div class="flex items-center text-xs text-slate-400">
+            <span>Usado 134 vezes</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: Editor Preview -->
+    <section id="editor" class="mb-12">
+      <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Editor de Petições</h3>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Form Side -->
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h4 class="font-semibold text-slate-900 dark:text-white">Dados da Petição</h4>
+            <span class="badge badge-blue">Petição Inicial</span>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Título</label>
+              <input type="text" class="input dark:bg-slate-800 dark:border-slate-600" placeholder="Ex: Ação de Cobrança" value="Ação de Indenização por Danos Morais">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nº do Processo</label>
+                <input type="text" class="input dark:bg-slate-800 dark:border-slate-600" placeholder="0000000-00.0000.0.00.0000" value="1234567-89.2024.8.26.0100">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tribunal</label>
+                <input type="text" class="input dark:bg-slate-800 dark:border-slate-600" placeholder="Ex: TJSP" value="TJSP - 1ª Vara Cível">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Autor</label>
+                <input type="text" class="input dark:bg-slate-800 dark:border-slate-600" placeholder="Nome do autor" value="João da Silva">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Réu</label>
+                <input type="text" class="input dark:bg-slate-800 dark:border-slate-600" placeholder="Nome do réu" value="Empresa XYZ Ltda">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fatos</label>
+              <textarea class="input dark:bg-slate-800 dark:border-slate-600 h-24" placeholder="Descreva os fatos...">O autor adquiriu produto defeituoso na data de 15/01/2024, conforme nota fiscal anexa. Após diversas tentativas de solução junto à empresa ré, não obteve êxito na resolução do problema.</textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fundamentos Jurídicos</label>
+              <textarea class="input dark:bg-slate-800 dark:border-slate-600 h-24" placeholder="Fundamentos legais...">Com base no Código de Defesa do Consumidor (Lei nº 8.078/90), art. 18 e seguintes, o consumidor tem direito à reparação dos danos causados por produto defeituoso.</textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Pedidos</label>
+              <textarea class="input dark:bg-slate-800 dark:border-slate-600 h-20" placeholder="Liste os pedidos...">a) Condenação da ré ao pagamento de R$ 10.000,00 a título de danos morais;
+b) Condenação ao pagamento de R$ 2.500,00 por danos materiais;
+c) Custas processuais e honorários advocatícios.</textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Valor da Causa</label>
+              <input type="text" class="input dark:bg-slate-800 dark:border-slate-600" placeholder="R$ 0,00" value="R$ 12.500,00">
+            </div>
+
+            <div class="flex gap-3 pt-4">
+              <button class="btn-primary flex-1">
+                <span class="flex items-center justify-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                  </svg>
+                  Salvar Rascunho
+                </span>
+              </button>
+              <button class="btn-secondary" onclick="document.getElementById('export-modal').classList.remove('hidden')">
+                <span class="flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  Exportar
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Side -->
+        <div class="card p-6 bg-white dark:bg-slate-800">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-semibold text-slate-900 dark:text-white">Pré-visualização</h4>
+            <div class="flex gap-2">
+              <button class="p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700" title="Zoom in">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                </svg>
+              </button>
+              <button class="p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700" title="Zoom out">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Simulated Document Preview -->
+          <div class="bg-white border rounded-lg p-8 shadow-inner max-h-[600px] overflow-y-auto" style="font-family: 'Times New Roman', serif;">
+            <div class="text-center mb-6">
+              <p class="font-bold">EXCELENTÍSSIMO SENHOR DOUTOR JUIZ DE DIREITO DA</p>
+              <p class="font-bold">1ª VARA CÍVEL DO FORO CENTRAL - COMARCA DE SÃO PAULO/SP</p>
+            </div>
+
+            <div class="mb-6">
+              <p class="mb-4"><strong>Processo nº:</strong> 1234567-89.2024.8.26.0100</p>
+            </div>
+
+            <div class="mb-6 text-justify">
+              <p class="mb-4"><strong>JOÃO DA SILVA</strong>, brasileiro, solteiro, portador do RG nº XXX e CPF nº XXX, residente e domiciliado na Rua XXX, nº XXX, Bairro XXX, São Paulo/SP, CEP XXX, vem, respeitosamente, à presença de Vossa Excelência, por seu advogado infra-assinado, propor a presente</p>
+
+              <p class="text-center font-bold my-4">AÇÃO DE INDENIZAÇÃO POR DANOS MORAIS E MATERIAIS</p>
+
+              <p class="mb-4">em face de <strong>EMPRESA XYZ LTDA</strong>, pessoa jurídica de direito privado, inscrita no CNPJ sob nº XXX, com sede na Rua XXX, nº XXX, Bairro XXX, São Paulo/SP, pelos fatos e fundamentos a seguir expostos:</p>
+            </div>
+
+            <div class="mb-6">
+              <p class="font-bold mb-2">I - DOS FATOS</p>
+              <p class="text-justify mb-4">O autor adquiriu produto defeituoso na data de 15/01/2024, conforme nota fiscal anexa. Após diversas tentativas de solução junto à empresa ré, não obteve êxito na resolução do problema.</p>
+            </div>
+
+            <div class="mb-6">
+              <p class="font-bold mb-2">II - DO DIREITO</p>
+              <p class="text-justify mb-4">Com base no Código de Defesa do Consumidor (Lei nº 8.078/90), art. 18 e seguintes, o consumidor tem direito à reparação dos danos causados por produto defeituoso.</p>
+            </div>
+
+            <div class="mb-6">
+              <p class="font-bold mb-2">III - DOS PEDIDOS</p>
+              <p class="text-justify">Ante o exposto, requer:</p>
+              <p class="ml-4">a) Condenação da ré ao pagamento de R$ 10.000,00 a título de danos morais;</p>
+              <p class="ml-4">b) Condenação ao pagamento de R$ 2.500,00 por danos materiais;</p>
+              <p class="ml-4">c) Custas processuais e honorários advocatícios.</p>
+            </div>
+
+            <div class="mb-6">
+              <p class="mb-4">Dá-se à causa o valor de <strong>R$ 12.500,00</strong> (doze mil e quinhentos reais).</p>
+            </div>
+
+            <div class="text-right mt-8">
+              <p>Nestes termos,</p>
+              <p>Pede deferimento.</p>
+              <p class="mt-4">São Paulo, 10 de dezembro de 2025.</p>
+              <p class="mt-8">_________________________________</p>
+              <p>Advogado - OAB/SP nº XXX.XXX</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: My Petitions -->
+    <section id="petitions" class="mb-12">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Minhas Petições</h3>
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <input type="text" class="input pl-10 w-64 dark:bg-slate-800 dark:border-slate-600" placeholder="Buscar petições...">
+            <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <select class="input w-40 dark:bg-slate-800 dark:border-slate-600">
+            <option>Todos</option>
+            <option>Rascunhos</option>
+            <option>Finalizadas</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card overflow-hidden">
+        <table class="w-full">
+          <thead class="bg-slate-50 dark:bg-slate-800">
+            <tr>
+              <th class="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Título</th>
+              <th class="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Tipo</th>
+              <th class="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+              <th class="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Atualizado</th>
+              <th class="text-right px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+              <td class="px-6 py-4">
+                <div class="font-medium text-slate-900 dark:text-white">Ação de Indenização por Danos Morais</div>
+                <div class="text-sm text-slate-500">João da Silva vs Empresa XYZ</div>
+              </td>
+              <td class="px-6 py-4"><span class="badge badge-blue">Civil</span></td>
+              <td class="px-6 py-4"><span class="badge badge-green">Finalizada</span></td>
+              <td class="px-6 py-4 text-sm text-slate-500">10/12/2025</td>
+              <td class="px-6 py-4 text-right">
+                <button class="p-2 hover:bg-slate-100 rounded dark:hover:bg-slate-700" title="Editar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                </button>
+                <button class="p-2 hover:bg-slate-100 rounded dark:hover:bg-slate-700" title="Exportar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                </button>
+                <button class="p-2 hover:bg-red-100 rounded text-red-600" title="Excluir">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+              <td class="px-6 py-4">
+                <div class="font-medium text-slate-900 dark:text-white">Reclamação Trabalhista</div>
+                <div class="text-sm text-slate-500">Maria Santos vs Tech Corp</div>
+              </td>
+              <td class="px-6 py-4"><span class="badge badge-green">Trabalhista</span></td>
+              <td class="px-6 py-4"><span class="badge badge-yellow">Rascunho</span></td>
+              <td class="px-6 py-4 text-sm text-slate-500">09/12/2025</td>
+              <td class="px-6 py-4 text-right">
+                <button class="p-2 hover:bg-slate-100 rounded dark:hover:bg-slate-700" title="Editar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                </button>
+                <button class="p-2 hover:bg-slate-100 rounded dark:hover:bg-slate-700" title="Exportar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                </button>
+                <button class="p-2 hover:bg-red-100 rounded text-red-600" title="Excluir">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+              <td class="px-6 py-4">
+                <div class="font-medium text-slate-900 dark:text-white">Habeas Corpus Preventivo</div>
+                <div class="text-sm text-slate-500">Pedro Oliveira</div>
+              </td>
+              <td class="px-6 py-4"><span class="badge badge-red">Penal</span></td>
+              <td class="px-6 py-4"><span class="badge badge-green">Finalizada</span></td>
+              <td class="px-6 py-4 text-sm text-slate-500">08/12/2025</td>
+              <td class="px-6 py-4 text-right">
+                <button class="p-2 hover:bg-slate-100 rounded dark:hover:bg-slate-700" title="Editar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                </button>
+                <button class="p-2 hover:bg-slate-100 rounded dark:hover:bg-slate-700" title="Exportar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                </button>
+                <button class="p-2 hover:bg-red-100 rounded text-red-600" title="Excluir">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section: AI Chat -->
+    <section id="ai-chat" class="mb-12">
+      <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Assistente Jurídico IA</h3>
+      <div class="card overflow-hidden" style="height: 500px;">
+        <div class="flex flex-col h-full">
+          <!-- Chat Messages -->
+          <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <div class="flex gap-3">
+              <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+              </div>
+              <div class="bg-slate-100 dark:bg-slate-700 rounded-lg px-4 py-2.5 max-w-[80%]">
+                <p class="text-sm text-slate-900 dark:text-white">Olá! Sou seu assistente jurídico. Posso ajudá-lo a elaborar petições, esclarecer dúvidas sobre legislação ou sugerir argumentos jurídicos. Como posso ajudar?</p>
+              </div>
+            </div>
+
+            <div class="flex gap-3 justify-end">
+              <div class="bg-primary text-white rounded-lg px-4 py-2.5 max-w-[80%]">
+                <p class="text-sm">Preciso saber os fundamentos legais para uma ação de danos morais contra uma empresa de telefonia.</p>
+              </div>
+              <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+              </div>
+              <div class="bg-slate-100 dark:bg-slate-700 rounded-lg px-4 py-2.5 max-w-[80%]">
+                <p class="text-sm text-slate-900 dark:text-white mb-2">Para ações de danos morais contra empresas de telefonia, você pode fundamentar com:</p>
+                <ul class="text-sm text-slate-900 dark:text-white list-disc list-inside space-y-1">
+                  <li><strong>CDC, Art. 14</strong> - Responsabilidade objetiva do fornecedor</li>
+                  <li><strong>CDC, Art. 22</strong> - Serviços públicos essenciais</li>
+                  <li><strong>CC, Art. 186 e 927</strong> - Reparação de danos</li>
+                  <li><strong>Súmula 479/STJ</strong> - Inscrição indevida em cadastro</li>
+                </ul>
+                <p class="text-sm text-slate-900 dark:text-white mt-2">Posso elaborar a fundamentação completa para sua petição?</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat Input -->
+          <div class="border-t p-4 bg-slate-50 dark:bg-slate-800">
+            <div class="flex gap-2">
+              <textarea class="input flex-1 resize-none dark:bg-slate-700 dark:border-slate-600" rows="1" placeholder="Digite sua mensagem..."></textarea>
+              <button class="btn-primary p-2.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t bg-white dark:bg-slate-900 py-8">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+          </svg>
+          <span class="text-sm text-slate-500 dark:text-slate-400">© 2025 Lex Intel Visual Design. Desenvolvido por Lex Intelligentia.</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+          <a href="#" class="hover:text-primary transition-colors">Termos de Uso</a>
+          <a href="#" class="hover:text-primary transition-colors">Privacidade (LGPD)</a>
+          <a href="#" class="hover:text-primary transition-colors">Suporte</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Export Modal -->
+  <div id="export-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="card w-full max-w-md mx-4 p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h4 class="text-lg font-semibold text-slate-900 dark:text-white">Exportar Petição</h4>
+        <button onclick="document.getElementById('export-modal').classList.add('hidden')" class="p-1 hover:bg-slate-100 rounded dark:hover:bg-slate-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Formato</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="card p-4 cursor-pointer border-2 border-primary bg-primary/5">
+              <input type="radio" name="format" value="pdf" checked class="sr-only">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-red-100 rounded-lg">
+                  <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                    <text x="7" y="17" font-size="6" font-weight="bold">PDF</text>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-medium text-slate-900 dark:text-white">PDF</div>
+                  <div class="text-xs text-slate-500">Documento fixo</div>
+                </div>
+              </div>
+            </label>
+            <label class="card p-4 cursor-pointer hover:border-primary/50">
+              <input type="radio" name="format" value="docx" class="sr-only">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-blue-100 rounded-lg">
+                  <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                    <text x="6" y="17" font-size="5" font-weight="bold">DOC</text>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-medium text-slate-900 dark:text-white">DOCX</div>
+                  <div class="text-xs text-slate-500">Editável (Word)</div>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Cabeçalho Personalizado</label>
+          <input type="text" class="input dark:bg-slate-700 dark:border-slate-600" placeholder="Nome do escritório" value="Escritório de Advocacia Silva & Associados">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Logo URL (opcional)</label>
+          <input type="text" class="input dark:bg-slate-700 dark:border-slate-600" placeholder="https://...">
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="include-footer" checked class="rounded border-slate-300">
+          <label for="include-footer" class="text-sm text-slate-700 dark:text-slate-300">Incluir rodapé com data e página</label>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-6">
+        <button onclick="document.getElementById('export-modal').classList.add('hidden')" class="btn-secondary flex-1">Cancelar</button>
+        <button onclick="alert('Exportação iniciada!'); document.getElementById('export-modal').classList.add('hidden');" class="btn-primary flex-1">
+          <span class="flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Exportar
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Demo -->
+  <div id="toast" class="toast hidden">
+    <div class="p-2 bg-green-100 rounded-full">
+      <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+    </div>
+    <div>
+      <div class="font-medium text-slate-900 dark:text-white">Sucesso!</div>
+      <div class="text-sm text-slate-500">Petição salva com sucesso.</div>
+    </div>
+    <button onclick="document.getElementById('toast').classList.add('hidden')" class="ml-4 text-slate-400 hover:text-slate-600">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <script>
+    // Initialize theme icon
+    document.addEventListener('DOMContentLoaded', () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('theme-icon').innerHTML = isDark ? '☀️' : '🌙';
+    });
+
+    // Demo: Show toast after 3 seconds
+    setTimeout(() => {
+      document.getElementById('toast').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('toast').classList.add('hidden');
+      }, 5000);
+    }, 3000);
+  </script>
+</body>
+</html>
