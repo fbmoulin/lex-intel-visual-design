@@ -21,7 +21,7 @@ export default function Home() {
               <img 
                 src="/images/logo-lex-retangular.jpeg" 
                 alt="Lex Intelligentia" 
-                className="h-16 md:h-20 lg:h-24 object-contain"
+                className="h-32 md:h-40 lg:h-48 object-contain"
               />
             </div>
           </div>
