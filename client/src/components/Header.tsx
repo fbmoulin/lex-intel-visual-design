@@ -23,10 +23,10 @@ export function Header() {
             </div>
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/templates" className="text-sm font-medium text-foreground hover:text-primary transition-colors hidden md:block">
+            <Link href="/templates" className="text-sm font-semibold lex-gradient-text hover:opacity-80 transition-opacity hidden md:block">
               Templates
             </Link>
-            <Link href="/my-petitions" className="text-sm font-medium text-foreground hover:text-primary transition-colors hidden md:block">
+            <Link href="/my-petitions" className="text-sm font-semibold lex-gradient-text hover:opacity-80 transition-opacity hidden md:block">
               Minhas Petições
             </Link>
             <Button 
@@ -34,7 +34,7 @@ export function Header() {
               size="icon" 
               onClick={toggleTheme} 
               title={`Alternar para modo ${theme === "dark" ? "claro" : "escuro"}`}
-              className="text-foreground hover:text-primary hover:bg-primary/10"
+              className="text-primary hover:text-primary hover:bg-primary/10"
             >
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>

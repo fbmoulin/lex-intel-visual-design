@@ -17,7 +17,7 @@ export default function Home() {
         {/* Logo Section - Centralizada em card preto como na referência */}
         <section className="container py-12">
           <div className="flex justify-center">
-            <div className="bg-black rounded-2xl px-12 py-10 shadow-2xl border border-primary/20">
+            <div className="bg-black rounded-2xl px-12 py-10 shadow-2xl border border-primary/20" style={{ boxShadow: '0 0 40px rgba(255, 140, 0, 0.3), 0 0 80px rgba(255, 107, 0, 0.15)' }}>
               <img 
                 src="/images/logo-lex-retangular.jpeg" 
                 alt="Lex Intelligentia" 
