@@ -9,6 +9,7 @@ import Editor from "./pages/Editor";
 import Templates from "./pages/Templates";
 import MyPetitions from "./pages/MyPetitions";
 import AdminJudicial from "./pages/AdminJudicial";
+import AIAssistant from "./pages/AIAssistant";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -19,6 +20,7 @@ function Router() {
       <Route path={"/editor/:templateId?"} component={Editor} />
       <Route path={"/my-petitions"} component={MyPetitions} />
       <Route path={"/admin/judicial"} component={AdminJudicial} />
+      <Route path={"/ai-assistant"} component={AIAssistant} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
