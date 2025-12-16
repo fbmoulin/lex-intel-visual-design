@@ -15,64 +15,66 @@ interface SummaryCardProps {
 
 export function SummaryCard({ data }: SummaryCardProps) {
   return (
-    <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
+    <Card className="lex-card border-0 lex-glow">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <Scale className="h-8 w-8 text-primary" />
-          <CardTitle className="text-2xl">Resumo da Petição</CardTitle>
+          <div className="h-12 w-12 rounded-lg lex-gradient flex items-center justify-center">
+            <Scale className="h-6 w-6 text-black" />
+          </div>
+          <CardTitle className="text-2xl lex-gradient-text">Resumo da Petição</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Scale className="h-5 w-5 text-primary" />
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10 transition-all duration-300 hover:border-primary/30">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg lex-gradient flex items-center justify-center">
+                <Scale className="h-5 w-5 text-black" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Processo Nº</p>
-                <p className="text-lg font-semibold">{data.numeroProcesso || "N/A"}</p>
+                <p className="text-lg font-semibold text-foreground">{data.numeroProcesso || "N/A"}</p>
               </div>
             </div>
             
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <User className="h-5 w-5 text-primary" />
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10 transition-all duration-300 hover:border-primary/30">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg lex-gradient flex items-center justify-center">
+                <User className="h-5 w-5 text-black" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Autor</p>
-                <p className="text-lg font-semibold">{data.autor || "N/A"}</p>
+                <p className="text-lg font-semibold text-foreground">{data.autor || "N/A"}</p>
               </div>
             </div>
           </div>
           
           <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
-                <Building2 className="h-5 w-5 text-secondary" />
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10 transition-all duration-300 hover:border-primary/30">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg lex-gradient flex items-center justify-center">
+                <Building2 className="h-5 w-5 text-black" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Réu</p>
-                <p className="text-lg font-semibold">{data.reu || "N/A"}</p>
+                <p className="text-lg font-semibold text-foreground">{data.reu || "N/A"}</p>
               </div>
             </div>
             
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
-                <DollarSign className="h-5 w-5 text-secondary" />
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10 transition-all duration-300 hover:border-primary/30">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg lex-gradient flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-black" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Valor da Causa</p>
-                <p className="text-lg font-semibold">{data.valorCausa || "N/A"}</p>
+                <p className="text-lg font-semibold text-foreground">{data.valorCausa || "N/A"}</p>
               </div>
             </div>
           </div>
         </div>
         
-        <div className="mt-6 pt-6 border-t">
+        <div className="mt-6 pt-6 border-t border-border">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Tipo de Ação</span>
-            <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+            <span className="px-4 py-1.5 rounded-full bg-primary/20 text-primary text-sm font-semibold">
               {data.tipo}
             </span>
           </div>
