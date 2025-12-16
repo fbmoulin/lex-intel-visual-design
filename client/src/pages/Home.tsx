@@ -14,14 +14,16 @@ export default function Home() {
       <Header />
 
       <main>
-        {/* Logo Section - Centralizada abaixo do Header */}
-        <section className="container py-8">
+        {/* Logo Section - Centralizada em card preto como na referência */}
+        <section className="container py-12">
           <div className="flex justify-center">
-            <img 
-              src="/images/logo-lex-intelligentia-horizontal.jpeg" 
-              alt="Lex Intelligentia" 
-              className="h-20 md:h-24 object-contain"
-            />
+            <div className="bg-black rounded-2xl px-12 py-10 shadow-2xl border border-primary/20">
+              <img 
+                src="/images/logo-lex-retangular.jpeg" 
+                alt="Lex Intelligentia" 
+                className="h-16 md:h-20 lg:h-24 object-contain"
+              />
+            </div>
           </div>
         </section>
 

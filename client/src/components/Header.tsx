@@ -13,10 +13,13 @@ export function Header() {
           <Link href="/">
             <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
               <img 
-                src="/images/logo-lex-intelligentia-horizontal.jpeg" 
+                src="/images/logo-lex-intelligentia.jpeg" 
                 alt="Lex Intelligentia" 
-                className="h-12 md:h-14 object-contain"
+                className="h-10 w-10 object-contain rounded-lg"
               />
+              <span className="text-lg font-bold lex-gradient-text hidden sm:block">
+                Lex • Intelligentia
+              </span>
             </div>
           </Link>
           <div className="flex items-center gap-4">
