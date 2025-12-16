@@ -215,3 +215,34 @@ Pesquisa identificou que tribunais brasileiros (TJDFT, TRF2) já utilizam:
 
 *Documento preparado para equipe de Marketing e SEO*
 *Lex Intelligentia - Dezembro 2024*
+
+---
+
+## Atualização de SEO e Copywriting para 2025
+
+**Data:** 16 de Dezembro de 2025
+
+### Novas Palavras-Chave Prioritárias
+
+- **IA Jurídica:** Inteligência Artificial para advogados
+- **RAG Jurídico:** Retrieval-Augmented Generation para direito
+- **Peticionamento Eletrônico Automatizado:** Integração com PJe e Jus.br
+- **Agentes de IA para Advogados:** Automação de tarefas jurídicas
+- **Next.js 15 para Legal Tech:** Performance e SEO
+- **Assinatura Digital ICP-Brasil:** Validade jurídica de documentos
+
+### Novas Headlines e Frases de Impacto
+
+- "Lex Intel: Onde a Inteligência Artificial encontra o Direito."
+- "A primeira plataforma Legal Tech do Brasil com RAG e integração nativa com tribunais."
+- "Deixe nossa IA trabalhar por você. Foque na estratégia, não na burocracia."
+- "Gere petições 10x mais rápido com a precisão de um especialista e a velocidade da IA."
+- "O futuro da advocacia é conectado. O futuro é Lex Intel."
+
+### Narrativa de Marketing 2025
+
+O foco da comunicação deve ser em **três pilares**:
+
+1.  **Inteligência:** Não somos apenas um gerador de documentos, somos uma plataforma de inteligência jurídica que aprende e melhora a cada uso.
+2.  **Conectividade:** Somos a ponte entre o advogado e o ecossistema jurídico digital brasileiro.
+3.  **Performance:** Nossa tecnologia de ponta garante uma experiência de uso sem precedentes em velocidade e fluidez.
