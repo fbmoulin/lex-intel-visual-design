@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Briefcase, Gavel, Building2, ShoppingCart, Search, Users, Building, Scale, Leaf } from "lucide-react";
-import { getAllTemplates, PetitionTemplate } from "@/data/petitionTemplates";
+import { FileText, Briefcase, Gavel, Building2, ShoppingCart, Search, Users, Building, Scale, Leaf, Sparkles, Crown } from "lucide-react";
+import { getAllTemplates, PetitionTemplate, countTemplatesByType } from "@/data/petitionTemplates";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Header } from "@/components/Header";
@@ -14,14 +14,25 @@ export default function Templates() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedStyle, setSelectedStyle] = useState<string>("all");
   
   const templates = getAllTemplates();
+  const templateCounts = countTemplatesByType();
+  
+  // Detecta o estilo do template pelo ID
+  const getTemplateStyle = (template: PetitionTemplate): 'padrao' | 'moderno' | 'classico' => {
+    if (template.id.includes('-moderno-')) return 'moderno';
+    if (template.id.includes('-classico-')) return 'classico';
+    return 'padrao';
+  };
   
   const filteredTemplates = templates.filter(template => {
     const matchesSearch = template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          template.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === "all" || template.templateType === selectedType;
-    return matchesSearch && matchesType;
+    const style = getTemplateStyle(template);
+    const matchesStyle = selectedStyle === "all" || style === selectedStyle;
+    return matchesSearch && matchesType && matchesStyle;
   });
   
   const handleUseTemplate = (template: PetitionTemplate) => {
@@ -46,11 +57,6 @@ export default function Templates() {
     }
   };
   
-  const getTemplateColor = (type: string) => {
-    // All use orange gradient theme for consistency
-    return 'bg-primary/10 text-primary';
-  };
-  
   const getTypeLabel = (type: string) => {
     switch(type) {
       case 'civil': return 'Civil';
@@ -66,6 +72,40 @@ export default function Templates() {
       default: return type.charAt(0).toUpperCase() + type.slice(1);
     }
   };
+  
+  const getStyleBadge = (template: PetitionTemplate) => {
+    const style = getTemplateStyle(template);
+    switch(style) {
+      case 'moderno':
+        return (
+          <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 flex items-center gap-1">
+            <Sparkles className="h-3 w-3" />
+            Moderno
+          </Badge>
+        );
+      case 'classico':
+        return (
+          <Badge className="bg-gradient-to-r from-amber-600 to-yellow-500 text-white border-0 flex items-center gap-1">
+            <Crown className="h-3 w-3" />
+            Clássico
+          </Badge>
+        );
+      default:
+        return (
+          <Badge className="bg-gray-600 text-white border-0">
+            Padrão
+          </Badge>
+        );
+    }
+  };
+
+  // Conta templates por estilo
+  const countByStyle = {
+    all: templates.length,
+    padrao: templates.filter(t => getTemplateStyle(t) === 'padrao').length,
+    moderno: templates.filter(t => getTemplateStyle(t) === 'moderno').length,
+    classico: templates.filter(t => getTemplateStyle(t) === 'classico').length,
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,9 +117,22 @@ export default function Templates() {
             <h2 className="text-4xl font-bold mb-4">
               <span className="lex-gradient-text">Templates de Petições</span>
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground mb-4">
               Escolha um template pré-preenchido e profissional para começar sua petição rapidamente
             </p>
+            <div className="flex justify-center gap-4 flex-wrap">
+              <Badge variant="outline" className="text-sm px-3 py-1">
+                {templates.length} templates disponíveis
+              </Badge>
+              <Badge variant="outline" className="text-sm px-3 py-1 border-blue-500 text-blue-400">
+                <Sparkles className="h-3 w-3 mr-1" />
+                {countByStyle.moderno} Modernos
+              </Badge>
+              <Badge variant="outline" className="text-sm px-3 py-1 border-amber-500 text-amber-400">
+                <Crown className="h-3 w-3 mr-1" />
+                {countByStyle.classico} Clássicos
+              </Badge>
+            </div>
           </div>
           
           {/* Search and filters */}
@@ -99,16 +152,27 @@ export default function Templates() {
               </SelectTrigger>
               <SelectContent className="bg-card border-border">
                 <SelectItem value="all">Todos os tipos</SelectItem>
-                <SelectItem value="civil">Civil</SelectItem>
-                <SelectItem value="trabalhista">Trabalhista</SelectItem>
-                <SelectItem value="criminal">Criminal</SelectItem>
-                <SelectItem value="tributario">Tributário</SelectItem>
-                <SelectItem value="consumidor">Consumidor</SelectItem>
-                <SelectItem value="familia">Família</SelectItem>
-                <SelectItem value="empresarial">Empresarial</SelectItem>
-                <SelectItem value="administrativo">Administrativo</SelectItem>
-                <SelectItem value="previdenciario">Previdenciário</SelectItem>
-                <SelectItem value="ambiental">Ambiental</SelectItem>
+                <SelectItem value="civil">Civil ({templateCounts['civil'] || 0})</SelectItem>
+                <SelectItem value="trabalhista">Trabalhista ({templateCounts['trabalhista'] || 0})</SelectItem>
+                <SelectItem value="criminal">Criminal ({templateCounts['criminal'] || 0})</SelectItem>
+                <SelectItem value="tributario">Tributário ({templateCounts['tributario'] || 0})</SelectItem>
+                <SelectItem value="consumidor">Consumidor ({templateCounts['consumidor'] || 0})</SelectItem>
+                <SelectItem value="familia">Família ({templateCounts['familia'] || 0})</SelectItem>
+                <SelectItem value="empresarial">Empresarial ({templateCounts['empresarial'] || 0})</SelectItem>
+                <SelectItem value="administrativo">Administrativo ({templateCounts['administrativo'] || 0})</SelectItem>
+                <SelectItem value="previdenciario">Previdenciário ({templateCounts['previdenciario'] || 0})</SelectItem>
+                <SelectItem value="ambiental">Ambiental ({templateCounts['ambiental'] || 0})</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedStyle} onValueChange={setSelectedStyle}>
+              <SelectTrigger className="w-full md:w-[180px] bg-card border-border">
+                <SelectValue placeholder="Filtrar por estilo" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border">
+                <SelectItem value="all">Todos os estilos</SelectItem>
+                <SelectItem value="padrao">Padrão ({countByStyle.padrao})</SelectItem>
+                <SelectItem value="moderno">Moderno ({countByStyle.moderno})</SelectItem>
+                <SelectItem value="classico">Clássico ({countByStyle.classico})</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -127,13 +191,16 @@ export default function Templates() {
                 return (
                   <Card key={template.id} className="lex-card border-0 transition-all duration-300 hover:scale-[1.02]">
                     <CardHeader>
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 rounded-lg lex-gradient">
-                          <Icon className="h-6 w-6 text-black" />
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg lex-gradient">
+                            <Icon className="h-6 w-6 text-black" />
+                          </div>
+                          <Badge className="bg-primary/20 text-primary border-0 hover:bg-primary/30">
+                            {getTypeLabel(template.templateType)}
+                          </Badge>
                         </div>
-                        <Badge className="bg-primary/20 text-primary border-0 hover:bg-primary/30">
-                          {getTypeLabel(template.templateType)}
-                        </Badge>
+                        {getStyleBadge(template)}
                       </div>
                       <CardTitle className="text-lg text-foreground">{template.title}</CardTitle>
                       <CardDescription className="min-h-[48px] text-muted-foreground">
@@ -153,6 +220,40 @@ export default function Templates() {
               })}
             </div>
           )}
+          
+          {/* Legend */}
+          <div className="mt-12 p-6 rounded-lg bg-card/50 border border-border">
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Estilos de Templates</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="flex items-start gap-3">
+                <Badge className="bg-gray-600 text-white border-0 mt-1">Padrão</Badge>
+                <div>
+                  <p className="font-medium text-foreground">Templates Padrão</p>
+                  <p className="text-sm text-muted-foreground">Modelos básicos e diretos, ideais para uso geral.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 flex items-center gap-1 mt-1">
+                  <Sparkles className="h-3 w-3" />
+                  Moderno
+                </Badge>
+                <div>
+                  <p className="font-medium text-foreground">Templates Modernos</p>
+                  <p className="text-sm text-muted-foreground">Design contemporâneo com Visual Law, ícones e formatação visual.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Badge className="bg-gradient-to-r from-amber-600 to-yellow-500 text-white border-0 flex items-center gap-1 mt-1">
+                  <Crown className="h-3 w-3" />
+                  Clássico
+                </Badge>
+                <div>
+                  <p className="font-medium text-foreground">Templates Clássicos</p>
+                  <p className="text-sm text-muted-foreground">Linguagem formal e elegante, estilo tradicional jurídico.</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
       
