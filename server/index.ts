@@ -3,6 +3,7 @@ import { createServer } from "http";
 import path from "path";
 import { fileURLToPath } from "url";
 import aiRoutes from "./routes/aiRoutes";
+import advancedRagRoutes from "./routes/advancedRagRoutes";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +28,7 @@ async function startServer() {
 
   // API Routes
   app.use("/api/ai", aiRoutes);
+  app.use("/api/rag/advanced", advancedRagRoutes);
 
   // Serve static files from dist/public in production
   const staticPath =
