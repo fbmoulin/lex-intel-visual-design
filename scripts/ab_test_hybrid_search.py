@@ -19,8 +19,10 @@ import json
 import os
 import subprocess
 import time
+import re
+import glob
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Tuple
 from datetime import datetime
 import statistics
 
@@ -94,6 +96,7 @@ class HybridSearchTester:
     def __init__(self, project_id: str = "nznbgenamiygvbbawcsk"):
         self.project_id = project_id
         self.gemini_client = None
+        self.mcp_results_dir = '/home/ubuntu/.mcp/tool-results/'
         if GEMINI_AVAILABLE:
             api_key = os.environ.get('GEMINI_API_KEY')
             if api_key:
@@ -110,6 +113,33 @@ class HybridSearchTester:
         )
         return result.embeddings[0].values
     
+    def parse_mcp_result(self) -> List[Dict]:
+        """Lê o resultado mais recente do MCP do arquivo"""
+        files = sorted(glob.glob(self.mcp_results_dir + '*_supabase_execute_sql.json'), reverse=True)
+        if not files:
+            return []
+        
+        try:
+            with open(files[0], 'r') as f:
+                content = f.read()
+            
+            # O arquivo contém uma string JSON que precisa ser parseada duas vezes
+            # Primeiro parse: extrair a string interna
+            outer_json = json.loads(content)
+            
+            # Se for string, extrair o array JSON interno
+            if isinstance(outer_json, str):
+                # Encontrar o array JSON dentro da string
+                match = re.search(r'\[\{.*\}\]', outer_json, re.DOTALL)
+                if match:
+                    return json.loads(match.group())
+            elif isinstance(outer_json, list):
+                return outer_json
+        except Exception as e:
+            print(f"    ⚠️ Erro ao parsear resultado: {e}")
+        
+        return []
+    
     def execute_hybrid_search(
         self,
         query: str,
@@ -125,10 +155,13 @@ class HybridSearchTester:
         embedding = self.generate_embedding(query)
         embedding_str = '[' + ','.join(str(x) for x in embedding) + ']'
         
+        # Escapar aspas simples na query
+        escaped_query = query.replace("'", "''")
+        
         # Montar SQL
         sql = f"""
         SELECT * FROM hybrid_search_legal_documents(
-            '{query.replace("'", "''")}',
+            '{escaped_query}',
             '{embedding_str}'::vector,
             {limit},
             {semantic_weight},
@@ -149,64 +182,100 @@ class HybridSearchTester:
             '--input', json.dumps(input_data)
         ]
         
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        subprocess.run(cmd, capture_output=True, text=True)
         latency_ms = (time.time() - start_time) * 1000
         
-        # Parse resultados
-        results = []
-        if 'untrusted-data' in result.stdout:
-            import re
-            # Encontrar o JSON array no output
-            match = re.search(r'\[.*\]', result.stdout, re.DOTALL)
-            if match:
-                try:
-                    results = json.loads(match.group())
-                except json.JSONDecodeError:
-                    pass
+        # Parse resultados do arquivo
+        results = self.parse_mcp_result()
         
         return results, latency_ms
     
     @staticmethod
-    def calculate_recall_at_k(results: List[Dict], expected: List[str], k: int) -> float:
+    def normalize_title(title: str) -> str:
+        """Normaliza título para comparação"""
+        # Remove acentos e converte para minúsculas
+        import unicodedata
+        normalized = unicodedata.normalize('NFKD', title.lower())
+        normalized = ''.join(c for c in normalized if not unicodedata.combining(c))
+        # Remove caracteres especiais
+        normalized = re.sub(r'[^\w\s]', ' ', normalized)
+        # Remove espaços extras
+        normalized = ' '.join(normalized.split())
+        return normalized
+    
+    @staticmethod
+    def titles_match(title1: str, title2: str) -> bool:
+        """Verifica se dois títulos são equivalentes"""
+        norm1 = HybridSearchTester.normalize_title(title1)
+        norm2 = HybridSearchTester.normalize_title(title2)
+        
+        # Match exato
+        if norm1 == norm2:
+            return True
+        
+        # Um contém o outro
+        if norm1 in norm2 or norm2 in norm1:
+            return True
+        
+        # Palavras-chave em comum (pelo menos 3 palavras significativas)
+        words1 = set(w for w in norm1.split() if len(w) > 3)
+        words2 = set(w for w in norm2.split() if len(w) > 3)
+        common = words1 & words2
+        
+        if len(common) >= 3:
+            return True
+        
+        # Verificar termos específicos (números de lei, temas, etc.)
+        patterns = [
+            r'tema\s*\d+',
+            r'sumula\s*\d+',
+            r'lei\s*n?o?\s*[\d.]+',
+            r'art\s*\d+',
+        ]
+        
+        for pattern in patterns:
+            match1 = re.search(pattern, norm1)
+            match2 = re.search(pattern, norm2)
+            if match1 and match2 and match1.group() == match2.group():
+                return True
+        
+        return False
+    
+    def calculate_recall_at_k(self, results: List[Dict], expected: List[str], k: int) -> float:
         """Calcula Recall@K"""
         if not expected:
             return 0.0
         
         result_titles = [r.get('title', '') for r in results[:k]]
         
-        # Match parcial (documento esperado contido no título ou vice-versa)
         found = 0
         for exp in expected:
-            exp_lower = exp.lower()
             for title in result_titles:
-                title_lower = title.lower()
-                if exp_lower in title_lower or title_lower in exp_lower:
+                if self.titles_match(exp, title):
                     found += 1
                     break
         
         return found / len(expected)
     
-    @staticmethod
-    def calculate_mrr(results: List[Dict], expected: List[str]) -> float:
+    def calculate_mrr(self, results: List[Dict], expected: List[str]) -> float:
         """Calcula Mean Reciprocal Rank"""
         for i, result in enumerate(results):
-            title = result.get('title', '').lower()
+            title = result.get('title', '')
             for exp in expected:
-                if exp.lower() in title or title in exp.lower():
+                if self.titles_match(exp, title):
                     return 1.0 / (i + 1)
         return 0.0
     
-    @staticmethod
-    def calculate_precision_at_k(results: List[Dict], expected: List[str], k: int) -> float:
+    def calculate_precision_at_k(self, results: List[Dict], expected: List[str], k: int) -> float:
         """Calcula Precision@K"""
         if not results[:k]:
             return 0.0
         
         relevant = 0
         for result in results[:k]:
-            title = result.get('title', '').lower()
+            title = result.get('title', '')
             for exp in expected:
-                if exp.lower() in title or title in exp.lower():
+                if self.titles_match(exp, title):
                     relevant += 1
                     break
         
@@ -220,21 +289,18 @@ class HybridSearchTester:
         def dcg(relevances: List[int], k: int) -> float:
             return sum(rel / math.log2(i + 2) for i, rel in enumerate(relevances[:k]))
         
-        # Calcular relevâncias (1 se relevante, 0 se não)
+        # Calcular relevâncias
         relevances = []
         for result in results[:k]:
-            title = result.get('title', '').lower()
+            title = result.get('title', '')
             is_relevant = 0
             for exp in expected:
-                if exp.lower() in title or title in exp.lower():
+                if HybridSearchTester.titles_match(exp, title):
                     is_relevant = 1
                     break
             relevances.append(is_relevant)
         
-        # DCG real
         dcg_real = dcg(relevances, k)
-        
-        # DCG ideal (todos os relevantes no topo)
         ideal_relevances = sorted(relevances, reverse=True)
         dcg_ideal = dcg(ideal_relevances, k)
         
@@ -291,6 +357,10 @@ class HybridSearchTester:
                     result = self.run_single_test(query, config)
                     results.append(result)
                     
+                    # Debug: mostrar métricas
+                    if result.recall_at_5 > 0 or result.mrr > 0:
+                        print(f"    ✅ Recall@5={result.recall_at_5:.1%}, MRR={result.mrr:.3f}")
+                    
                     # Agrupar por categoria
                     cat = result.category
                     if cat not in category_results:
@@ -301,7 +371,7 @@ class HybridSearchTester:
                     print(f"    ⚠️ Erro: {e}")
                 
                 # Pequena pausa para não sobrecarregar API
-                time.sleep(0.5)
+                time.sleep(0.3)
             
             # Calcular métricas agregadas
             if results:
@@ -330,6 +400,9 @@ class HybridSearchTester:
                     }
                 
                 summaries[config.name] = summary
+                
+                # Mostrar resumo da config
+                print(f"  📊 Resumo: Recall@5={summary.avg_recall_5:.1%}, MRR={summary.avg_mrr:.3f}, Latência={summary.avg_latency_ms:.0f}ms")
         
         return summaries
     
@@ -407,10 +480,12 @@ class HybridSearchTester:
         baseline = summaries.get('A_baseline')
         if baseline and best.config_name != 'A_baseline':
             report.append(f"\nComparação com baseline (A):")
-            mrr_diff = (best.avg_mrr - baseline.avg_mrr) / baseline.avg_mrr * 100
-            recall_diff = (best.avg_recall_5 - baseline.avg_recall_5) / baseline.avg_recall_5 * 100 if baseline.avg_recall_5 > 0 else 0
-            report.append(f"  - MRR: {'+' if mrr_diff > 0 else ''}{mrr_diff:.1f}%")
-            report.append(f"  - Recall@5: {'+' if recall_diff > 0 else ''}{recall_diff:.1f}%")
+            if baseline.avg_mrr > 0:
+                mrr_diff = (best.avg_mrr - baseline.avg_mrr) / baseline.avg_mrr * 100
+                report.append(f"  - MRR: {'+' if mrr_diff > 0 else ''}{mrr_diff:.1f}%")
+            if baseline.avg_recall_5 > 0:
+                recall_diff = (best.avg_recall_5 - baseline.avg_recall_5) / baseline.avg_recall_5 * 100
+                report.append(f"  - Recall@5: {'+' if recall_diff > 0 else ''}{recall_diff:.1f}%")
         
         report.append("\n" + "=" * 80)
         
