@@ -50,8 +50,9 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 appuser
 
-# Copy package files
+# Copy package files and patches
 COPY package.json pnpm-lock.yaml* ./
+COPY patches ./patches
 
 # Install production dependencies only
 RUN pnpm install --prod
