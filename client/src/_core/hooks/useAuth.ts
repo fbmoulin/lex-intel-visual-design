@@ -9,7 +9,8 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
-  const { redirectOnUnauthenticated = false, redirectPath = getLoginUrl() } =
+  const loginUrl = getLoginUrl();
+  const { redirectOnUnauthenticated = false, redirectPath = loginUrl ?? "/" } =
     options ?? {};
   const utils = trpc.useUtils();
 
@@ -66,6 +67,7 @@ export function useAuth(options?: UseAuthOptions) {
     if (state.user) return;
     if (typeof window === "undefined") return;
     if (window.location.pathname === redirectPath) return;
+    if (!redirectPath) return; // Don't redirect if no login URL configured
 
     window.location.href = redirectPath;
   }, [
