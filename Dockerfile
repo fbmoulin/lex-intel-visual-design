@@ -16,7 +16,7 @@ COPY package.json pnpm-lock.yaml* ./
 COPY patches ./patches
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile --prod=false
+RUN pnpm install --prod=false
 
 # =============================================================================
 # Stage 2: Builder
@@ -54,7 +54,7 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY package.json pnpm-lock.yaml* ./
 
 # Install production dependencies only
-RUN pnpm install --frozen-lockfile --prod
+RUN pnpm install --prod
 
 # Copy built application from builder
 COPY --from=builder --chown=appuser:nodejs /app/dist ./dist
