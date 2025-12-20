@@ -33,6 +33,23 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
+# Build arguments for VITE environment variables
+# These are passed from Railway using RAILWAY_BUILD_* prefix
+ARG VITE_APP_TITLE="Lex Intel Visual Design"
+ARG VITE_APP_LOGO=""
+ARG VITE_OAUTH_PORTAL_URL=""
+ARG VITE_APP_ID=""
+ARG VITE_ANALYTICS_ENDPOINT=""
+ARG VITE_ANALYTICS_WEBSITE_ID=""
+
+# Convert ARGs to ENVs for the build process
+ENV VITE_APP_TITLE=$VITE_APP_TITLE
+ENV VITE_APP_LOGO=$VITE_APP_LOGO
+ENV VITE_OAUTH_PORTAL_URL=$VITE_OAUTH_PORTAL_URL
+ENV VITE_APP_ID=$VITE_APP_ID
+ENV VITE_ANALYTICS_ENDPOINT=$VITE_ANALYTICS_ENDPOINT
+ENV VITE_ANALYTICS_WEBSITE_ID=$VITE_ANALYTICS_WEBSITE_ID
+
 # Build application
 ENV NODE_ENV=production
 RUN pnpm run build
