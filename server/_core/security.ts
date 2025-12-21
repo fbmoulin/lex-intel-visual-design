@@ -30,22 +30,26 @@ export function setupSecurityHeaders(app: Express) {
     const isDevelopment = process.env.NODE_ENV === "development";
 
     // CSP mais permissiva em desenvolvimento para hot reload
-    const scriptSrc = isDevelopment
-      ? "'self' 'unsafe-inline'" // Dev: permite inline para HMR
-      : "'self'";                 // Prod: apenas scripts do mesmo origem
+    // NOTA: 'unsafe-inline' é necessário em produção para:
+    // - CSS-in-JS (React/Tailwind)
+    // - Bibliotecas de exportação PDF (html2canvas/jspdf)
+    // - Geração dinâmica de canvas/blob
+    const scriptSrc = "'self' 'unsafe-inline' 'unsafe-eval' blob:"; // Permite inline e eval para PDF export
 
     const connectSrc = isDevelopment
-      ? "'self' ws: wss:"         // Dev: permite WebSocket para HMR
-      : "'self'";                 // Prod: apenas conexões do mesmo origem
+      ? "'self' ws: wss: blob:"   // Dev: permite WebSocket para HMR
+      : "'self' blob:";           // Prod: permite blob para exportação
 
     res.setHeader(
       "Content-Security-Policy",
       "default-src 'self'; " +
       `script-src ${scriptSrc}; ` +
       "style-src 'self' 'unsafe-inline'; " +  // Necessário para CSS-in-JS
-      "img-src 'self' data: https:; " +
+      "img-src 'self' data: blob: https:; " +  // blob: para canvas export
       "font-src 'self' data:; " +
       `connect-src ${connectSrc}; ` +
+      "worker-src 'self' blob:; " +           // Para Web Workers usados em PDF export
+      "child-src 'self' blob:; " +            // Para iframes e workers
       "base-uri 'self'; " +                   // Previne base tag injection
       "form-action 'self'; " +                // Previne form hijacking
       "frame-ancestors 'none'; " +            // Previne clickjacking (substitui X-Frame-Options)
