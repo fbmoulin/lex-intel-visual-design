@@ -44,10 +44,10 @@ export function setupSecurityHeaders(app: Express) {
       "Content-Security-Policy",
       "default-src 'self'; " +
       `script-src ${scriptSrc}; ` +
-      "style-src 'self' 'unsafe-inline' blob: data:; " +  // Necessário para CSS-in-JS e PDF export
-      "style-src-elem 'self' 'unsafe-inline' blob: data:; " +  // Para elementos de estilo
+      "style-src 'self' 'unsafe-inline' blob: data: https://fonts.googleapis.com; " +  // CSS-in-JS + Google Fonts
+      "style-src-elem 'self' 'unsafe-inline' blob: data: https://fonts.googleapis.com; " +  // Elementos de estilo + Google Fonts
       "img-src 'self' data: blob: https:; " +  // blob: para canvas export
-      "font-src 'self' data: https:; " +       // https: para fontes externas
+      "font-src 'self' data: https: https://fonts.gstatic.com; " +  // Google Fonts arquivos
       `connect-src ${connectSrc} https:; ` +    // https: para APIs externas
       "worker-src 'self' blob:; " +           // Para Web Workers usados em PDF export
       "child-src 'self' blob:; " +            // Para iframes e workers
