@@ -44,12 +44,14 @@ export function setupSecurityHeaders(app: Express) {
       "Content-Security-Policy",
       "default-src 'self'; " +
       `script-src ${scriptSrc}; ` +
-      "style-src 'self' 'unsafe-inline'; " +  // Necessário para CSS-in-JS
+      "style-src 'self' 'unsafe-inline' blob: data:; " +  // Necessário para CSS-in-JS e PDF export
+      "style-src-elem 'self' 'unsafe-inline' blob: data:; " +  // Para elementos de estilo
       "img-src 'self' data: blob: https:; " +  // blob: para canvas export
-      "font-src 'self' data:; " +
-      `connect-src ${connectSrc}; ` +
+      "font-src 'self' data: https:; " +       // https: para fontes externas
+      `connect-src ${connectSrc} https:; ` +    // https: para APIs externas
       "worker-src 'self' blob:; " +           // Para Web Workers usados em PDF export
       "child-src 'self' blob:; " +            // Para iframes e workers
+      "frame-src 'self' blob:; " +            // Para frames
       "base-uri 'self'; " +                   // Previne base tag injection
       "form-action 'self'; " +                // Previne form hijacking
       "frame-ancestors 'none'; " +            // Previne clickjacking (substitui X-Frame-Options)
