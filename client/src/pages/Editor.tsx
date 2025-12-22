@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { generatePetitionPDF, prepareElementForPDF } from "@/lib/pdfGenerator";
 import { generatePetitionDOCX } from "@/lib/docxGenerator";
 import { PetitionPreview } from "@/components/PetitionPreview";
+import { PetitionPreviewAdvanced } from "@/components/PetitionPreviewAdvanced";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
@@ -357,7 +358,7 @@ export default function Editor() {
             <div className="lg:sticky lg:top-8 h-fit">
               <h3 className="text-xl font-semibold mb-4 lex-gradient-text">Preview da Petição</h3>
               <div ref={previewRef} className="max-h-[calc(100vh-12rem)] overflow-y-auto bg-white rounded-lg shadow-lg p-8 lex-glow">
-                <PetitionPreview formData={formData} templateId={templateId} />
+                <PetitionPreviewAdvanced formData={formData} templateId={templateId} />
               </div>
             </div>
           )}
@@ -370,7 +371,7 @@ export default function Editor() {
         open={showExportModal}
         onOpenChange={setShowExportModal}
         onExport={handleExport}
-        previewElement={<PetitionPreview formData={formData} templateId={templateId} />}
+        previewElement={<PetitionPreviewAdvanced formData={formData} templateId={templateId} />}
       />
     </div>
   );
