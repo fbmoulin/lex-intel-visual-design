@@ -19,18 +19,45 @@ export interface PetitionData {
  * @returns String hex no formato "#RRGGBB" ou "rgba(R, G, B, A)"
  */
 function oklchToRgb(oklchString: string): string {
-  // Parse oklch values
-  const match = oklchString.match(/oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\s*\)/);
-  if (!match) return oklchString;
+  // Parse oklch values - handle various formats
+  const match = oklchString.match(/oklch\(\s*([\d.]+%?)\s+([\d.]+%?)\s+([\d.]+)(?:deg)?(?:\s*\/\s*([\d.]+%?))?\s*\)/i);
+  if (!match) {
+    // Fallback to a neutral color if parsing fails
+    return '#888888';
+  }
 
-  const L = parseFloat(match[1]);
-  const C = parseFloat(match[2]);
+  // Parse L (lightness) - can be 0-1 or 0%-100%
+  let L = parseFloat(match[1]);
+  if (match[1].includes('%')) {
+    L = L / 100;
+  }
+
+  // Parse C (chroma) - typically 0-0.4
+  let C = parseFloat(match[2]);
+  if (match[2].includes('%')) {
+    C = C / 100 * 0.4; // Convert percentage to chroma range
+  }
+
+  // Parse H (hue) - 0-360 degrees
   const H = parseFloat(match[3]);
-  const alpha = match[4] ? parseFloat(match[4]) : 1;
+
+  // Parse alpha if present
+  let alpha = 1;
+  if (match[4]) {
+    alpha = parseFloat(match[4]);
+    if (match[4].includes('%')) {
+      alpha = alpha / 100;
+    }
+  }
+
+  // Clamp values
+  L = Math.max(0, Math.min(1, L));
+  C = Math.max(0, Math.min(0.4, C));
 
   // Convert oklch to oklab
-  const a = C * Math.cos(H * Math.PI / 180);
-  const b = C * Math.sin(H * Math.PI / 180);
+  const hRad = H * Math.PI / 180;
+  const a = C * Math.cos(hRad);
+  const b = C * Math.sin(hRad);
 
   // Convert oklab to linear sRGB
   const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
@@ -49,7 +76,7 @@ function oklchToRgb(oklchString: string): string {
   // Apply gamma correction
   const gammaCorrect = (x: number) => {
     if (x >= 0.0031308) {
-      return 1.055 * Math.pow(x, 1 / 2.4) - 0.055;
+      return 1.055 * Math.pow(Math.abs(x), 1 / 2.4) - 0.055;
     }
     return 12.92 * x;
   };
@@ -64,7 +91,7 @@ function oklchToRgb(oklchString: string): string {
   const b8 = Math.round(bl * 255);
 
   if (alpha < 1) {
-    return `rgba(${r8}, ${g8}, ${b8}, ${alpha})`;
+    return `rgba(${r8}, ${g8}, ${b8}, ${alpha.toFixed(3)})`;
   }
 
   // Convert to hex
@@ -81,130 +108,194 @@ function convertOklchInCssValue(cssValue: string): string {
   if (!cssValue || typeof cssValue !== 'string') return cssValue;
   
   // Replace all oklch() occurrences
-  return cssValue.replace(/oklch\([^)]+\)/g, (match) => {
+  return cssValue.replace(/oklch\([^)]+\)/gi, (match) => {
     try {
       return oklchToRgb(match);
     } catch {
-      return match;
+      return '#888888'; // Fallback color
     }
   });
 }
 
 /**
- * Converte todas as cores oklch em um elemento e seus descendentes para RGB
- * @param element - Elemento HTML a ser processado
+ * Extrai e converte todas as cores oklch de todas as stylesheets
+ * Retorna um mapa de seletores CSS com cores convertidas
  */
-function convertOklchColorsInElement(element: HTMLElement): void {
-  const allElements = [element, ...Array.from(element.querySelectorAll('*'))] as HTMLElement[];
+function extractAndConvertStylesheets(): string {
+  const convertedRules: string[] = [];
   
-  const colorProperties = [
-    'color',
-    'backgroundColor',
-    'borderColor',
-    'borderTopColor',
-    'borderRightColor',
-    'borderBottomColor',
-    'borderLeftColor',
-    'outlineColor',
-    'textDecorationColor',
-    'fill',
-    'stroke',
-    'boxShadow',
-    'textShadow',
-    'caretColor',
-  ];
-
-  allElements.forEach((el) => {
-    if (!(el instanceof HTMLElement)) return;
-    
-    const computedStyle = window.getComputedStyle(el);
-    
-    colorProperties.forEach((prop) => {
-      const value = computedStyle.getPropertyValue(prop.replace(/([A-Z])/g, '-$1').toLowerCase());
-      if (value && value.includes('oklch')) {
-        const converted = convertOklchInCssValue(value);
-        el.style.setProperty(prop.replace(/([A-Z])/g, '-$1').toLowerCase(), converted, 'important');
+  // Process all stylesheets
+  for (let i = 0; i < document.styleSheets.length; i++) {
+    try {
+      const sheet = document.styleSheets[i];
+      const rules = sheet.cssRules || sheet.rules;
+      
+      if (!rules) continue;
+      
+      for (let j = 0; j < rules.length; j++) {
+        const rule = rules[j];
+        
+        if (rule instanceof CSSStyleRule) {
+          const cssText = rule.cssText;
+          if (cssText.includes('oklch')) {
+            const convertedCss = convertOklchInCssValue(cssText);
+            convertedRules.push(convertedCss);
+          }
+        }
       }
-    });
-
-    // Also check CSS custom properties (variables)
-    const style = el.getAttribute('style') || '';
-    if (style.includes('oklch')) {
-      el.setAttribute('style', convertOklchInCssValue(style));
-    }
-  });
-
-  // Convert CSS variables in :root
-  const rootStyles = document.documentElement.style;
-  for (let i = 0; i < rootStyles.length; i++) {
-    const prop = rootStyles[i];
-    const value = rootStyles.getPropertyValue(prop);
-    if (value && value.includes('oklch')) {
-      rootStyles.setProperty(prop, convertOklchInCssValue(value));
+    } catch {
+      // CORS may prevent access to external stylesheets
+      continue;
     }
   }
+  
+  return convertedRules.join('\n');
 }
 
 /**
- * Cria um clone do elemento com cores convertidas para RGB
- * @param element - Elemento original
- * @returns Clone do elemento com cores RGB
+ * Cria estilos inline para todas as propriedades de cor de um elemento
  */
-function createPdfReadyClone(element: HTMLElement): HTMLElement {
-  // Clone the element
-  const clone = element.cloneNode(true) as HTMLElement;
+function applyInlineColorsToElement(element: HTMLElement): void {
+  const colorProperties = [
+    'color',
+    'background-color',
+    'background',
+    'border-color',
+    'border-top-color',
+    'border-right-color',
+    'border-bottom-color',
+    'border-left-color',
+    'outline-color',
+    'text-decoration-color',
+    'fill',
+    'stroke',
+    'box-shadow',
+    'text-shadow',
+    'caret-color',
+  ];
+
+  const computedStyle = window.getComputedStyle(element);
   
-  // Create a temporary container
-  const container = document.createElement('div');
-  container.style.position = 'absolute';
-  container.style.left = '-9999px';
-  container.style.top = '0';
-  container.style.width = `${element.offsetWidth}px`;
-  container.appendChild(clone);
-  document.body.appendChild(container);
-
-  // Apply computed styles to the clone
-  const applyComputedStyles = (original: Element, cloned: Element) => {
-    if (!(original instanceof HTMLElement) || !(cloned instanceof HTMLElement)) return;
-    
-    const computedStyle = window.getComputedStyle(original);
-    const colorProperties = [
-      'color', 'background-color', 'background', 'border-color',
-      'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color',
-      'outline-color', 'box-shadow', 'text-shadow'
-    ];
-    
-    colorProperties.forEach((prop) => {
-      let value = computedStyle.getPropertyValue(prop);
-      if (value && value.includes('oklch')) {
-        value = convertOklchInCssValue(value);
-      }
-      if (value && value !== 'none' && value !== 'initial' && value !== 'inherit') {
-        cloned.style.setProperty(prop, value, 'important');
-      }
-    });
-
-    // Also copy font and layout properties for consistency
-    const layoutProps = ['font-family', 'font-size', 'font-weight', 'line-height', 'padding', 'margin'];
-    layoutProps.forEach((prop) => {
-      const value = computedStyle.getPropertyValue(prop);
-      if (value) {
-        cloned.style.setProperty(prop, value);
-      }
-    });
-  };
-
-  // Apply styles recursively
-  const originalElements = [element, ...Array.from(element.querySelectorAll('*'))];
-  const clonedElements = [clone, ...Array.from(clone.querySelectorAll('*'))];
-  
-  originalElements.forEach((orig, index) => {
-    if (clonedElements[index]) {
-      applyComputedStyles(orig, clonedElements[index]);
+  colorProperties.forEach((prop) => {
+    const value = computedStyle.getPropertyValue(prop);
+    if (value && value.includes('oklch')) {
+      const converted = convertOklchInCssValue(value);
+      element.style.setProperty(prop, converted, 'important');
     }
   });
+}
 
+/**
+ * Processa recursivamente todos os elementos e converte cores oklch
+ */
+function processAllElements(root: HTMLElement): void {
+  const walker = document.createTreeWalker(
+    root,
+    NodeFilter.SHOW_ELEMENT,
+    null
+  );
+
+  const elements: HTMLElement[] = [root];
+  let node: Node | null;
+  while ((node = walker.nextNode())) {
+    if (node instanceof HTMLElement) {
+      elements.push(node);
+    }
+  }
+
+  elements.forEach(applyInlineColorsToElement);
+}
+
+/**
+ * Cria um documento HTML isolado com cores convertidas para exportação
+ */
+async function createExportDocument(element: HTMLElement): Promise<HTMLElement> {
+  // Create a deep clone
+  const clone = element.cloneNode(true) as HTMLElement;
+  
+  // Create an iframe for isolated rendering
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position: fixed; left: -10000px; top: 0; width: 1200px; height: 800px; border: none;';
+  document.body.appendChild(iframe);
+  
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (!iframeDoc) {
+    document.body.removeChild(iframe);
+    throw new Error('Could not create export document');
+  }
+  
+  // Build CSS with converted colors
+  const baseStyles = `
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: white;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+  `;
+  
+  // Copy and convert stylesheets
+  let convertedStyles = '';
+  for (let i = 0; i < document.styleSheets.length; i++) {
+    try {
+      const sheet = document.styleSheets[i];
+      const rules = sheet.cssRules || sheet.rules;
+      if (!rules) continue;
+      
+      for (let j = 0; j < rules.length; j++) {
+        let cssText = rules[j].cssText;
+        if (cssText.includes('oklch')) {
+          cssText = convertOklchInCssValue(cssText);
+        }
+        convertedStyles += cssText + '\n';
+      }
+    } catch {
+      // Skip inaccessible stylesheets
+    }
+  }
+  
+  // Write the document
+  iframeDoc.open();
+  iframeDoc.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>${baseStyles}</style>
+      <style>${convertedStyles}</style>
+    </head>
+    <body></body>
+    </html>
+  `);
+  iframeDoc.close();
+  
+  // Append the clone
+  iframeDoc.body.appendChild(clone);
+  
+  // Process all elements in the clone
+  processAllElements(clone);
+  
+  // Wait for rendering
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  // Store iframe reference for cleanup
+  (clone as any).__exportIframe = iframe;
+  
   return clone;
+}
+
+/**
+ * Limpa recursos de exportação
+ */
+function cleanupExportDocument(clone: HTMLElement): void {
+  const iframe = (clone as any).__exportIframe;
+  if (iframe && iframe.parentElement) {
+    iframe.parentElement.removeChild(iframe);
+  }
 }
 
 /**
@@ -216,45 +307,57 @@ export async function generatePDFFromElement(
   element: HTMLElement,
   filename: string = 'peticao.pdf'
 ): Promise<void> {
-  let clone: HTMLElement | null = null;
-  let container: HTMLElement | null = null;
+  let exportClone: HTMLElement | null = null;
 
   try {
-    // Create a clone with converted colors
-    clone = createPdfReadyClone(element);
-    container = clone.parentElement;
+    // Create isolated export document with converted colors
+    exportClone = await createExportDocument(element);
+    
+    // Get the iframe for rendering
+    const iframe = (exportClone as any).__exportIframe as HTMLIFrameElement;
+    const iframeWindow = iframe.contentWindow;
+    
+    if (!iframeWindow) {
+      throw new Error('Export window not available');
+    }
 
-    // Wait for styles to apply
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // Configurações do html2canvas para melhor qualidade
-    const canvas = await html2canvas(clone, {
-      scale: 2, // Aumenta a resolução
-      useCORS: true, // Permite carregar imagens de outras origens
+    // Use html2canvas on the iframe content
+    const canvas = await html2canvas(exportClone, {
+      scale: 2,
+      useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
-      // Ignore oklch color parsing errors
-      onclone: (clonedDoc) => {
-        const clonedElement = clonedDoc.body.querySelector('[data-pdf-clone]') || clonedDoc.body;
-        convertOklchColorsInElement(clonedElement as HTMLElement);
+      windowWidth: 1200,
+      windowHeight: exportClone.scrollHeight,
+      foreignObjectRendering: false,
+      // Force all colors to be processed as-is (already converted)
+      onclone: (clonedDoc, clonedElement) => {
+        // Final pass to ensure no oklch remains
+        const allElements = clonedDoc.querySelectorAll('*');
+        allElements.forEach((el) => {
+          if (el instanceof HTMLElement) {
+            const style = el.getAttribute('style') || '';
+            if (style.includes('oklch')) {
+              el.setAttribute('style', convertOklchInCssValue(style));
+            }
+          }
+        });
       }
     });
 
     const imgData = canvas.toDataURL('image/png');
     
-    // Dimensões A4 em mm
+    // A4 dimensions in mm
     const pdfWidth = 210;
     const pdfHeight = 297;
     
-    // Calcula a altura proporcional da imagem
+    // Calculate proportional height
     const imgWidth = pdfWidth;
     const imgHeight = (canvas.height * pdfWidth) / canvas.width;
     
-    // Cria o PDF
+    // Create PDF
     const pdf = new jsPDF({
-      orientation: imgHeight > pdfWidth ? 'portrait' : 'portrait',
+      orientation: 'portrait',
       unit: 'mm',
       format: 'a4',
     });
@@ -262,11 +365,11 @@ export async function generatePDFFromElement(
     let heightLeft = imgHeight;
     let position = 0;
 
-    // Adiciona a primeira página
+    // Add first page
     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
     heightLeft -= pdfHeight;
 
-    // Adiciona páginas adicionais se necessário
+    // Add additional pages if needed
     while (heightLeft > 0) {
       position = heightLeft - imgHeight;
       pdf.addPage();
@@ -274,15 +377,15 @@ export async function generatePDFFromElement(
       heightLeft -= pdfHeight;
     }
 
-    // Salva o PDF
+    // Save PDF
     pdf.save(filename);
   } catch (error) {
     console.error('Erro ao gerar PDF:', error);
     throw new Error('Falha ao gerar PDF. Por favor, tente novamente.');
   } finally {
-    // Clean up the temporary clone
-    if (container && container.parentElement) {
-      container.parentElement.removeChild(container);
+    // Cleanup
+    if (exportClone) {
+      cleanupExportDocument(exportClone);
     }
   }
 }
