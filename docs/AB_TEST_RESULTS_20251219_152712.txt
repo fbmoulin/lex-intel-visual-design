@@ -1,0 +1,96 @@
+================================================================================
+RELATÓRIO DE TESTES A/B - BUSCA HÍBRIDA
+Data: 2025-12-19 15:27:12
+================================================================================
+
+📊 RESULTADOS GERAIS
+
+--------------------------------------------------------------------------------
+Config               Sem/Lex    Recall@5   MRR        NDCG@10    P95 (ms)  
+--------------------------------------------------------------------------------
+C_balanced_60_40     0.60/0.40   100.0%     0.963     0.896       452
+D_equal              0.50/0.50   100.0%     0.963     0.895      1222
+G_lexical_high       0.55/0.45   100.0%     0.963     0.895       487
+E_slight_adjust      0.65/0.35    95.0%     0.958     0.896       500
+A_baseline           0.70/0.30    95.0%     0.957     0.893       466
+B_semantic_high      0.80/0.20    92.5%     0.956     0.892       544
+F_semantic_mid       0.75/0.25    95.0%     0.956     0.895       413
+--------------------------------------------------------------------------------
+
+📂 ANÁLISE POR CATEGORIA
+
+
+  Categoria: CONCEITUAL
+  Config               Recall@5     MRR         
+  --------------------------------------------
+  A_baseline               100.0%        1.000
+  B_semantic_high           90.0%        1.000
+  C_balanced_60_40         100.0%        1.000
+  D_equal                  100.0%        1.000
+  E_slight_adjust          100.0%        1.000
+  F_semantic_mid           100.0%        1.000
+  G_lexical_high           100.0%        1.000
+
+  Categoria: JURISPRUDENCIAL
+  Config               Recall@5     MRR         
+  --------------------------------------------
+  A_baseline               100.0%        1.000
+  B_semantic_high          100.0%        1.000
+  C_balanced_60_40         100.0%        1.000
+  D_equal                  100.0%        1.000
+  E_slight_adjust          100.0%        1.000
+  F_semantic_mid           100.0%        1.000
+  G_lexical_high           100.0%        1.000
+
+  Categoria: MISTA
+  Config               Recall@5     MRR         
+  --------------------------------------------
+  A_baseline               100.0%        1.000
+  B_semantic_high          100.0%        1.000
+  C_balanced_60_40         100.0%        1.000
+  D_equal                  100.0%        1.000
+  E_slight_adjust          100.0%        1.000
+  F_semantic_mid           100.0%        1.000
+  G_lexical_high           100.0%        1.000
+
+  Categoria: PROCEDIMENTAL
+  Config               Recall@5     MRR         
+  --------------------------------------------
+  A_baseline               100.0%        1.000
+  B_semantic_high          100.0%        1.000
+  C_balanced_60_40         100.0%        1.000
+  D_equal                  100.0%        1.000
+  E_slight_adjust          100.0%        1.000
+  F_semantic_mid           100.0%        1.000
+  G_lexical_high           100.0%        1.000
+
+  Categoria: TECNICA
+  Config               Recall@5     MRR         
+  --------------------------------------------
+  C_balanced_60_40         100.0%        0.625
+  D_equal                  100.0%        0.625
+  G_lexical_high           100.0%        0.625
+  E_slight_adjust           50.0%        0.583
+  A_baseline                50.0%        0.571
+  B_semantic_high           50.0%        0.556
+  F_semantic_mid            50.0%        0.556
+
+================================================================================
+🏆 RECOMENDAÇÃO
+================================================================================
+
+Configuração recomendada: C_balanced_60_40
+  - semantic_weight: 0.6
+  - lexical_weight: 0.4
+
+Métricas:
+  - Recall@5: 100.0%
+  - MRR: 0.963
+  - NDCG@10: 0.896
+  - Latência P95: 452ms
+
+Comparação com baseline (A):
+  - MRR: +0.6%
+  - Recall@5: +5.3%
+
+================================================================================

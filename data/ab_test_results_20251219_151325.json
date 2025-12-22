@@ -1,0 +1,273 @@
+{
+  "timestamp": "2025-12-19T15:13:25.693126",
+  "configs_tested": 7,
+  "queries_tested": 20,
+  "summaries": {
+    "A_baseline": {
+      "semantic_weight": 0.7,
+      "lexical_weight": 0.3,
+      "avg_recall_5": 0.0,
+      "avg_recall_10": 0.0,
+      "avg_mrr": 0.0,
+      "avg_precision_3": 0.0,
+      "avg_ndcg_10": 0.0,
+      "avg_latency_ms": 585.2048993110657,
+      "p95_latency_ms": 4567.813873291016,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        }
+      }
+    },
+    "B_semantic_high": {
+      "semantic_weight": 0.8,
+      "lexical_weight": 0.2,
+      "avg_recall_5": 0.0,
+      "avg_recall_10": 0.0,
+      "avg_mrr": 0.0,
+      "avg_precision_3": 0.0,
+      "avg_ndcg_10": 0.0,
+      "avg_latency_ms": 354.09865379333496,
+      "p95_latency_ms": 459.4268798828125,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        }
+      }
+    },
+    "C_balanced_60_40": {
+      "semantic_weight": 0.6,
+      "lexical_weight": 0.4,
+      "avg_recall_5": 0.0,
+      "avg_recall_10": 0.0,
+      "avg_mrr": 0.0,
+      "avg_precision_3": 0.0,
+      "avg_ndcg_10": 0.0,
+      "avg_latency_ms": 351.4512896537781,
+      "p95_latency_ms": 393.2061195373535,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        }
+      }
+    },
+    "D_equal": {
+      "semantic_weight": 0.5,
+      "lexical_weight": 0.5,
+      "avg_recall_5": 0.0,
+      "avg_recall_10": 0.0,
+      "avg_mrr": 0.0,
+      "avg_precision_3": 0.0,
+      "avg_ndcg_10": 0.0,
+      "avg_latency_ms": 373.87967109680176,
+      "p95_latency_ms": 589.9884700775146,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        }
+      }
+    },
+    "E_slight_adjust": {
+      "semantic_weight": 0.65,
+      "lexical_weight": 0.35,
+      "avg_recall_5": 0.0,
+      "avg_recall_10": 0.0,
+      "avg_mrr": 0.0,
+      "avg_precision_3": 0.0,
+      "avg_ndcg_10": 0.0,
+      "avg_latency_ms": 422.4976181983948,
+      "p95_latency_ms": 1363.72709274292,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        }
+      }
+    },
+    "F_semantic_mid": {
+      "semantic_weight": 0.75,
+      "lexical_weight": 0.25,
+      "avg_recall_5": 0.0,
+      "avg_recall_10": 0.0,
+      "avg_mrr": 0.0,
+      "avg_precision_3": 0.0,
+      "avg_ndcg_10": 0.0,
+      "avg_latency_ms": 341.9252634048462,
+      "p95_latency_ms": 384.1822147369385,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        }
+      }
+    },
+    "G_lexical_high": {
+      "semantic_weight": 0.55,
+      "lexical_weight": 0.45,
+      "avg_recall_5": 0.0,
+      "avg_recall_10": 0.0,
+      "avg_mrr": 0.0,
+      "avg_precision_3": 0.0,
+      "avg_ndcg_10": 0.0,
+      "avg_latency_ms": 342.6926016807556,
+      "p95_latency_ms": 405.20548820495605,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 0.0,
+          "avg_mrr": 0.0
+        }
+      }
+    }
+  }
+}

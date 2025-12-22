@@ -7,6 +7,7 @@
  */
 
 import { PetitionTemplateType } from "@shared/const";
+import { newTemplates } from './newTemplates';
 
 export interface PetitionTemplate {
   id: string;
@@ -1230,25 +1231,28 @@ Pede deferimento.`
   }
 ];
 
+// Combina templates existentes com os novos (Modernos e Clássicos Elegantes)
+const allTemplates: PetitionTemplate[] = [...petitionTemplates, ...newTemplates];
+
 /**
  * Busca template por ID
  */
 export function getTemplateById(id: string): PetitionTemplate | undefined {
-  return petitionTemplates.find(template => template.id === id);
+  return allTemplates.find(template => template.id === id);
 }
 
 /**
  * Busca templates por tipo
  */
 export function getTemplatesByType(type: string): PetitionTemplate[] {
-  return petitionTemplates.filter(template => template.templateType === type);
+  return allTemplates.filter(template => template.templateType === type);
 }
 
 /**
  * Lista todos os templates disponíveis
  */
 export function getAllTemplates(): PetitionTemplate[] {
-  return petitionTemplates;
+  return allTemplates;
 }
 
 /**
@@ -1256,7 +1260,7 @@ export function getAllTemplates(): PetitionTemplate[] {
  */
 export function countTemplatesByType(): Record<string, number> {
   const counts: Record<string, number> = {};
-  for (const template of petitionTemplates) {
+  for (const template of allTemplates) {
     counts[template.templateType] = (counts[template.templateType] || 0) + 1;
   }
   return counts;

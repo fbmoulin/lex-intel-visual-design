@@ -1,0 +1,247 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-12-19",
+    "description": "Dataset de queries para testes A/B da busca híbrida",
+    "total_queries": 20,
+    "categories": ["tecnica", "conceitual", "procedimental", "jurisprudencial", "mista"]
+  },
+  "queries": [
+    {
+      "id": "Q001",
+      "query": "requisitos para ação de despejo por falta de pagamento",
+      "category": "procedimental",
+      "difficulty": "medium",
+      "expected_docs": [
+        "Lei do Inquilinato - Lei nº 8.245/1991 - Despejo por Falta de Pagamento",
+        "STJ - Tema 1.002 - Despejo por Falta de Pagamento e Purgação da Mora",
+        "Lei do Inquilinato - Ação de Despejo - Procedimentos"
+      ],
+      "relevant_terms": ["despejo", "falta de pagamento", "locação", "inquilinato"],
+      "notes": "Query comum em escritórios de direito imobiliário"
+    },
+    {
+      "id": "Q002",
+      "query": "art. 62 lei 8.245",
+      "category": "tecnica",
+      "difficulty": "easy",
+      "expected_docs": [
+        "Lei do Inquilinato - Lei nº 8.245/1991 - Despejo por Falta de Pagamento"
+      ],
+      "relevant_terms": ["art. 62", "8.245", "inquilinato", "purgação"],
+      "notes": "Busca por artigo específico - deve priorizar match exato"
+    },
+    {
+      "id": "Q003",
+      "query": "dano moral por negativação indevida",
+      "category": "conceitual",
+      "difficulty": "medium",
+      "expected_docs": [
+        "STJ - Tema 1.079 - Danos Morais por Negativação Indevida",
+        "Código Civil - Danos Morais e Materiais"
+      ],
+      "relevant_terms": ["dano moral", "negativação", "cadastro", "inadimplentes", "in re ipsa"],
+      "notes": "Tema muito comum em direito do consumidor"
+    },
+    {
+      "id": "Q004",
+      "query": "prazo para purgação da mora na locação",
+      "category": "procedimental",
+      "difficulty": "medium",
+      "expected_docs": [
+        "STJ - Tema 1.002 - Despejo por Falta de Pagamento e Purgação da Mora",
+        "Lei do Inquilinato - Lei nº 8.245/1991 - Despejo por Falta de Pagamento"
+      ],
+      "relevant_terms": ["purgação", "mora", "15 dias", "locação"],
+      "notes": "Prazo específico de 15 dias deve aparecer"
+    },
+    {
+      "id": "Q005",
+      "query": "súmula 596 STJ atraso voo",
+      "category": "tecnica",
+      "difficulty": "easy",
+      "expected_docs": [
+        "STJ - Súmula 596 - Danos Morais por Atraso de Voo"
+      ],
+      "relevant_terms": ["súmula 596", "atraso", "voo", "dano moral"],
+      "notes": "Busca por súmula específica"
+    },
+    {
+      "id": "Q006",
+      "query": "responsabilidade civil objetiva consumidor",
+      "category": "conceitual",
+      "difficulty": "medium",
+      "expected_docs": [
+        "Código de Defesa do Consumidor - Responsabilidade pelo Fato do Produto",
+        "Código Civil - Da Responsabilidade Civil"
+      ],
+      "relevant_terms": ["responsabilidade", "objetiva", "consumidor", "fato do produto"],
+      "notes": "Conceito fundamental do CDC"
+    },
+    {
+      "id": "Q007",
+      "query": "tutela de urgência irreversibilidade",
+      "category": "jurisprudencial",
+      "difficulty": "hard",
+      "expected_docs": [
+        "STJ - Tema 1.113 - Tutela de Urgência e Irreversibilidade",
+        "Código de Processo Civil - Tutela de Urgência"
+      ],
+      "relevant_terms": ["tutela", "urgência", "irreversibilidade", "art. 300"],
+      "notes": "Tema processual importante"
+    },
+    {
+      "id": "Q008",
+      "query": "busca e apreensão alienação fiduciária mora",
+      "category": "mista",
+      "difficulty": "medium",
+      "expected_docs": [
+        "STJ - Tema 1.124 - Alienação Fiduciária e Busca e Apreensão",
+        "Decreto-Lei nº 911/1969 - Alienação Fiduciária - Busca e Apreensão",
+        "CPC - Busca e Apreensão"
+      ],
+      "relevant_terms": ["busca", "apreensão", "fiduciária", "mora", "notificação"],
+      "notes": "Procedimento comum em financiamentos"
+    },
+    {
+      "id": "Q009",
+      "query": "prescrição intercorrente execução",
+      "category": "procedimental",
+      "difficulty": "hard",
+      "expected_docs": [
+        "STJ - Tema 1.105 - Prescrição Intercorrente no CPC/2015",
+        "CPC - Cumprimento de Sentença"
+      ],
+      "relevant_terms": ["prescrição", "intercorrente", "execução", "intimação pessoal"],
+      "notes": "Tema técnico processual"
+    },
+    {
+      "id": "Q010",
+      "query": "alimentos prisão civil três parcelas",
+      "category": "jurisprudencial",
+      "difficulty": "medium",
+      "expected_docs": [
+        "STJ - Tema 1.086 - Alimentos e Prisão Civil",
+        "Código Civil - Alimentos"
+      ],
+      "relevant_terms": ["alimentos", "prisão", "três parcelas", "execução"],
+      "notes": "Limitação importante na execução de alimentos"
+    },
+    {
+      "id": "Q011",
+      "query": "honorários advocatícios cumprimento de sentença",
+      "category": "procedimental",
+      "difficulty": "medium",
+      "expected_docs": [
+        "STJ - Tema 1.076 - Honorários Advocatícios em Cumprimento de Sentença",
+        "CPC - Cumprimento de Sentença"
+      ],
+      "relevant_terms": ["honorários", "cumprimento", "sentença", "15 dias", "10%"],
+      "notes": "Tema frequente em execuções"
+    },
+    {
+      "id": "Q012",
+      "query": "inversão do ônus da prova CDC",
+      "category": "conceitual",
+      "difficulty": "easy",
+      "expected_docs": [
+        "CDC - Inversão do Ônus da Prova",
+        "Código de Defesa do Consumidor - Responsabilidade pelo Fato do Produto"
+      ],
+      "relevant_terms": ["inversão", "ônus", "prova", "consumidor", "hipossuficiência"],
+      "notes": "Princípio fundamental do CDC"
+    },
+    {
+      "id": "Q013",
+      "query": "reintegração de posse função social",
+      "category": "jurisprudencial",
+      "difficulty": "hard",
+      "expected_docs": [
+        "STJ - Tema 1.067 - Reintegração de Posse e Função Social",
+        "CPC - Ação de Reintegração e Manutenção de Posse",
+        "Código Civil - Da Posse e Suas Ações"
+      ],
+      "relevant_terms": ["reintegração", "posse", "função social", "ocupação coletiva"],
+      "notes": "Tema sensível com aspectos sociais"
+    },
+    {
+      "id": "Q014",
+      "query": "juros de mora responsabilidade contratual citação",
+      "category": "jurisprudencial",
+      "difficulty": "hard",
+      "expected_docs": [
+        "STJ - Tema 952 - Juros de Mora em Responsabilidade Contratual"
+      ],
+      "relevant_terms": ["juros", "mora", "contratual", "citação", "art. 405"],
+      "notes": "Distinção importante entre contratual e extracontratual"
+    },
+    {
+      "id": "Q015",
+      "query": "correção monetária dano moral arbitramento",
+      "category": "jurisprudencial",
+      "difficulty": "hard",
+      "expected_docs": [
+        "STJ - Tema 1.046 - Correção Monetária e Juros em Indenizações"
+      ],
+      "relevant_terms": ["correção", "monetária", "dano moral", "arbitramento", "súmula 362"],
+      "notes": "Termo inicial da correção monetária"
+    },
+    {
+      "id": "Q016",
+      "query": "cláusulas abusivas contrato bancário",
+      "category": "mista",
+      "difficulty": "medium",
+      "expected_docs": [
+        "STJ - Súmula 659 - Contrato Bancário e Juros",
+        "CDC - Práticas Abusivas e Cláusulas Abusivas"
+      ],
+      "relevant_terms": ["cláusulas", "abusivas", "bancário", "juros", "12%"],
+      "notes": "Tema comum em revisões contratuais"
+    },
+    {
+      "id": "Q017",
+      "query": "vazamento de dados LGPD indenização",
+      "category": "conceitual",
+      "difficulty": "medium",
+      "expected_docs": [
+        "STJ - Tema 1.095 - Responsabilidade Civil por Vazamento de Dados"
+      ],
+      "relevant_terms": ["vazamento", "dados", "LGPD", "indenização", "art. 42"],
+      "notes": "Tema atual e crescente"
+    },
+    {
+      "id": "Q018",
+      "query": "desconto em folha alimentos limite 50%",
+      "category": "jurisprudencial",
+      "difficulty": "medium",
+      "expected_docs": [
+        "STJ - Tema 1.141 - Execução de Alimentos e Desconto em Folha"
+      ],
+      "relevant_terms": ["desconto", "folha", "alimentos", "50%", "limite"],
+      "notes": "Limite importante na execução de alimentos"
+    },
+    {
+      "id": "Q019",
+      "query": "dano moral coletivo ação civil pública",
+      "category": "conceitual",
+      "difficulty": "hard",
+      "expected_docs": [
+        "STF - RE 1.307.334 - Danos Morais Coletivos"
+      ],
+      "relevant_terms": ["dano moral", "coletivo", "ação civil pública", "transindividuais"],
+      "notes": "Decisão importante do STF"
+    },
+    {
+      "id": "Q020",
+      "query": "obrigação de fazer não fazer tutela específica",
+      "category": "procedimental",
+      "difficulty": "medium",
+      "expected_docs": [
+        "Código Civil - Obrigações de Fazer e Não Fazer",
+        "Código de Processo Civil - Tutela de Urgência"
+      ],
+      "relevant_terms": ["obrigação", "fazer", "não fazer", "tutela específica", "astreintes"],
+      "notes": "Tema processual e material"
+    }
+  ]
+}

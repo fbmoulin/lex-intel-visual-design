@@ -16,7 +16,7 @@ COPY package.json pnpm-lock.yaml* ./
 COPY patches ./patches
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile --prod=false
+RUN pnpm install --prod=false
 
 # =============================================================================
 # Stage 2: Builder
@@ -32,6 +32,23 @@ COPY --from=deps /app/node_modules ./node_modules
 
 # Copy source code
 COPY . .
+
+# Build arguments for VITE environment variables
+# These are passed from Railway using RAILWAY_BUILD_* prefix
+ARG VITE_APP_TITLE="Lex Intel Visual Design"
+ARG VITE_APP_LOGO=""
+ARG VITE_OAUTH_PORTAL_URL=""
+ARG VITE_APP_ID=""
+ARG VITE_ANALYTICS_ENDPOINT=""
+ARG VITE_ANALYTICS_WEBSITE_ID=""
+
+# Convert ARGs to ENVs for the build process
+ENV VITE_APP_TITLE=$VITE_APP_TITLE
+ENV VITE_APP_LOGO=$VITE_APP_LOGO
+ENV VITE_OAUTH_PORTAL_URL=$VITE_OAUTH_PORTAL_URL
+ENV VITE_APP_ID=$VITE_APP_ID
+ENV VITE_ANALYTICS_ENDPOINT=$VITE_ANALYTICS_ENDPOINT
+ENV VITE_ANALYTICS_WEBSITE_ID=$VITE_ANALYTICS_WEBSITE_ID
 
 # Build application
 ENV NODE_ENV=production
@@ -50,11 +67,12 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 appuser
 
-# Copy package files
+# Copy package files and patches
 COPY package.json pnpm-lock.yaml* ./
+COPY patches ./patches
 
 # Install production dependencies only
-RUN pnpm install --frozen-lockfile --prod
+RUN pnpm install --prod
 
 # Copy built application from builder
 COPY --from=builder --chown=appuser:nodejs /app/dist ./dist

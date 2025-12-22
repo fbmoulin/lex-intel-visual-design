@@ -5,6 +5,108 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - 2025-12-20
+
+### 🚀 Nova Versão com IA e RAG
+
+Esta versão traz funcionalidades avançadas de Inteligência Artificial e busca semântica, elevando o Lex Intel ao estado da arte em Legal Tech.
+
+### ✨ Funcionalidades Adicionadas
+
+#### Assistente Jurídico com IA
+- **Chat com IA Jurídica** integrado com Gemini 2.0 Flash
+- Streaming de respostas em tempo real
+- Sugestões rápidas de perguntas jurídicas
+- Filtro por área do direito (Civil, Trabalhista, Criminal, Tributário, Consumidor)
+- Interface moderna com formatação Markdown
+
+#### Sistema RAG (Retrieval-Augmented Generation)
+- **Busca Semântica** com pgvector no Supabase
+- **Busca Híbrida** combinando semântica (60%) e léxica (40%)
+- Embeddings gerados com Google Gemini `text-embedding-004`
+- Índice HNSW para busca vetorial de alta performance
+- Função `hybrid_search_legal_documents` otimizada via testes A/B
+- **35 documentos jurídicos indexados** (legislação e jurisprudência cível)
+
+#### Novos Templates de Petições
+- **13 novos templates** adicionados (7 modernos + 6 clássicos)
+- Templates Modernos com Visual Law (ícones, linhas, marcadores visuais)
+- Templates Clássicos com linguagem formal elegante
+- Badges de estilo na página de templates
+- **Total: 39 templates disponíveis**
+
+#### Templates Judiciais (Área Admin)
+- **9 templates de decisões judiciais** para testes
+- Decisões Interlocutórias e Despachos
+- Mandados (Busca e Apreensão, Reintegração de Posse, Despejo)
+- Ofícios Judiciais
+- Sentenças Cíveis
+- Área admin em `/admin/judicial`
+
+#### Serviços de IA Avançados
+- **Query Expansion** - Expande queries com sinônimos jurídicos
+- **Reranking** - Reordena resultados por relevância usando LLM
+- **CRAG** - Corrective RAG para validação de contexto
+- **Grounding** - Respostas com citações obrigatórias das fontes
+
+### 🔧 Melhorias Técnicas
+
+#### Otimizações de RAG
+- Pesos otimizados via testes A/B (semantic: 0.60, lexical: 0.40)
+- Recall@5 de 100% nos testes
+- MRR de 0.963
+- Latência P95 de 452ms
+
+#### Novas APIs
+- `POST /api/ai/chat` - Chat com RAG
+- `POST /api/ai/chat/stream` - Chat com streaming
+- `POST /api/ai/analyze` - Análise de documentos
+- `POST /api/ai/petition/suggestions` - Sugestões de petição
+- `POST /api/ai/rag/search` - Busca semântica
+- `POST /api/rag/advanced/search` - Busca avançada com todas as otimizações
+
+#### Banco de Dados
+- Extensão `pgvector` habilitada
+- Extensão `pg_trgm` para busca léxica
+- Tabela `legal_documents` com embeddings (768 dimensões)
+- Tabela `ai_conversations` para histórico
+- Índices HNSW e GIN trigram
+
+### 📚 Documentação
+
+#### Novos Documentos
+- `RESEARCH_2025_CONSOLIDATED.md` - Pesquisa de tendências 2025
+- `ROADMAP_2025_STATE_OF_THE_ART.md` - Roadmap atualizado
+- `LANDING_PAGE_IMPROVEMENTS_2025.md` - Plano de melhorias UI/UX
+- `SEO_COPYWRITING_DATA.md` - Dados para marketing
+- `RAG_OPTIMIZATION_RESEARCH.md` - Técnicas de otimização RAG
+- `AB_TEST_PLAN_HYBRID_SEARCH.md` - Plano de testes A/B
+- `CHROME_EXTENSION_REQUIREMENTS.md` - Requisitos para extensão Chrome
+
+#### Scripts
+- `scripts/index_with_gemini.py` - Indexação de documentos
+- `scripts/ab_test_hybrid_search.py` - Framework de testes A/B
+
+### 📊 Métricas
+
+- **Build Time:** 12.29s
+- **Bundle Size:** ~3.1 MB (dist total)
+- **Modules:** 3,047
+- **Templates:** 39 petições + 9 judiciais
+- **Documentos RAG:** 35 indexados
+- **TypeScript:** 100% tipado
+
+### 🎯 Próximas Funcionalidades (Roadmap)
+
+- Integração com assinatura digital gov.br
+- Integração com Jus.br (CNJ)
+- Migração para Next.js 15
+- Extensão Chrome
+- Colaboração em tempo real
+- Dashboard de BI jurídico
+
+---
+
 ## [1.0.0-beta] - 2025-11-26
 
 ### 🎉 Lançamento Inicial (Beta)
@@ -84,23 +186,6 @@ Esta é a primeira versão beta do **Lex Intel Visual Design**, uma aplicação 
 - Workflow de release automatizado
 - Dependabot configurado para atualizações
 
-#### Documentação
-- README.md completo com badges
-- Guia de Deploy detalhado
-- Guia de Segurança
-- Guia de Monitoramento
-- Guia de Contribuição
-- Código de Conduta
-- Templates de issues e PRs
-
-### 🔧 Configurações
-
-- `.env.example` com todas as variáveis
-- `.gitignore` e `.npmignore` configurados
-- `.dockerignore` para otimização
-- `railway.json` para deploy no Railway
-- Scripts de deploy automatizados
-
 ### 📊 Métricas
 
 - **Build Time:** 11.89s
@@ -109,44 +194,9 @@ Esta é a primeira versão beta do **Lex Intel Visual Design**, uma aplicação 
 - **Tests:** 7/7 passando
 - **TypeScript:** 100% tipado
 
-### ⚠️ Limitações Conhecidas (Beta)
-
-- Exportação DOCX não preserva 100% dos estilos visuais
-- Timeline limitada a eventos pré-definidos (sem editor interativo)
-- Sem suporte para múltiplos idiomas
-- Sem integração com outros apps do ecossistema Lex Intelligentia (planejado)
-
-### 🎯 Próximas Funcionalidades (Roadmap)
-
-- Editor de timeline interativo
-- Assinatura digital integrada
-- Exportação em lote
-- Templates customizáveis pelo usuário
-- Integração com outros apps Lex Intelligentia
-- Suporte a múltiplos idiomas
-- Modo offline
-- Aplicativo mobile
-
-### 🐛 Bugs Conhecidos
-
-Nenhum bug crítico conhecido no momento. Reporte bugs em: https://github.com/fbmoulin/lex-intel-visual-design/issues
-
-### 📚 Documentação
-
-- Documentação completa disponível em `/docs`
-- Guia de início rápido no README.md
-- Exemplos de uso nos templates
-
-### 🙏 Agradecimentos
-
-- Stanford Legal Design Lab - Inspiração e pesquisa sobre Visual Law
-- Shadcn/UI - Componentes UI de alta qualidade
-- Recharts - Biblioteca de gráficos
-- tRPC - Type-safe API
-- Drizzle ORM - ORM moderno para PostgreSQL
-
 ---
 
 **Desenvolvido por Lex Intelligentia** - Transformando a advocacia através da tecnologia.
 
+[1.1.0]: https://github.com/fbmoulin/lex-intel-visual-design/compare/v1.0.0-beta...v1.1.0
 [1.0.0-beta]: https://github.com/fbmoulin/lex-intel-visual-design/releases/tag/v1.0.0-beta

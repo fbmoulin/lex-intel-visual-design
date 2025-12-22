@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { generatePetitionPDF, prepareElementForPDF } from "@/lib/pdfGenerator";
 import { generatePetitionDOCX } from "@/lib/docxGenerator";
 import { PetitionPreview } from "@/components/PetitionPreview";
+import { PetitionPreviewAdvanced } from "@/components/PetitionPreviewAdvanced";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
@@ -219,30 +220,30 @@ export default function Editor() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="border-b bg-card/30">
+      <div className="border-b border-border bg-card/50">
         <div className="container py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-foreground">Editor de Petição</h2>
+              <h2 className="text-2xl font-bold lex-gradient-text">Editor de Petição</h2>
               <p className="text-sm text-muted-foreground mt-1">{getTemplateTitle()}</p>
             </div>
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setShowPreview(!showPreview)}>
+            <div className="flex gap-3 flex-wrap">
+              <Button className="lex-button-outline" onClick={() => setShowPreview(!showPreview)}>
                 {showPreview ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
                 {showPreview ? "Ocultar" : "Mostrar"} Preview
               </Button>
               <Button 
-                variant="default" 
+                className="lex-button-outline" 
                 onClick={handleSavePetition} 
                 disabled={isSaving || !isAuthenticated}
               >
                 <Save className="mr-2 h-4 w-4" />
                 {isSaving ? "Salvando..." : savedPetitionId ? "Atualizar" : "Salvar"}
               </Button>
-              <Button onClick={handleOpenExportModal} disabled={isGeneratingPDF || !showPreview}>
+              <Button className="lex-button" onClick={handleOpenExportModal} disabled={isGeneratingPDF || !showPreview}>
                 <FileDown className="mr-2 h-4 w-4" />
                 Exportar
               </Button>
@@ -253,9 +254,9 @@ export default function Editor() {
 
       <main className="container py-8">
         <div className={`grid gap-8 ${showPreview ? 'lg:grid-cols-2' : 'max-w-4xl mx-auto'}`}>
-          <Card className="h-fit">
+          <Card className="h-fit lex-card border-0">
             <CardHeader>
-              <CardTitle>Informações da Petição</CardTitle>
+              <CardTitle className="lex-gradient-text">Informações da Petição</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -355,9 +356,9 @@ export default function Editor() {
           
           {showPreview && (
             <div className="lg:sticky lg:top-8 h-fit">
-              <h3 className="text-xl font-semibold mb-4">Preview da Petição</h3>
-              <div ref={previewRef} className="max-h-[calc(100vh-12rem)] overflow-y-auto bg-white rounded-lg shadow-lg p-8">
-                <PetitionPreview formData={formData} templateId={templateId} />
+              <h3 className="text-xl font-semibold mb-4 lex-gradient-text">Preview da Petição</h3>
+              <div ref={previewRef} className="max-h-[calc(100vh-12rem)] overflow-y-auto bg-white rounded-lg shadow-lg p-8 lex-glow">
+                <PetitionPreviewAdvanced formData={formData} templateId={templateId} />
               </div>
             </div>
           )}
@@ -370,7 +371,7 @@ export default function Editor() {
         open={showExportModal}
         onOpenChange={setShowExportModal}
         onExport={handleExport}
-        previewElement={<PetitionPreview formData={formData} templateId={templateId} />}
+        previewElement={<PetitionPreviewAdvanced formData={formData} templateId={templateId} />}
       />
     </div>
   );

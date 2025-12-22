@@ -1,4 +1,4 @@
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
 import type { ExportConfig } from '@/components/ExportModal';
 
@@ -15,6 +15,7 @@ export interface PetitionData {
 
 /**
  * Gera um PDF a partir de um elemento HTML preservando estilos visuais
+ * Usa html2canvas-pro que suporta cores oklch nativamente
  * @param element - Elemento HTML a ser convertido
  * @param filename - Nome do arquivo PDF
  */
@@ -23,12 +24,12 @@ export async function generatePDFFromElement(
   filename: string = 'peticao.pdf'
 ): Promise<void> {
   try {
-    // Configurações do html2canvas para melhor qualidade
+    // html2canvas-pro suporta oklch nativamente
     const canvas = await html2canvas(element, {
-      scale: 2, // Aumenta a resolução
+      scale: 2, // Aumenta a resolução para melhor qualidade
       useCORS: true, // Permite carregar imagens de outras origens
-      logging: false,
-      backgroundColor: '#ffffff',
+      logging: false, // Desativa logs de debug
+      backgroundColor: '#ffffff', // Fundo branco
       windowWidth: element.scrollWidth,
       windowHeight: element.scrollHeight,
     });
@@ -45,7 +46,7 @@ export async function generatePDFFromElement(
     
     // Cria o PDF
     const pdf = new jsPDF({
-      orientation: imgHeight > pdfWidth ? 'portrait' : 'portrait',
+      orientation: 'portrait',
       unit: 'mm',
       format: 'a4',
     });
@@ -84,7 +85,8 @@ export async function generatePetitionPDF(
   data: PetitionData,
   config?: ExportConfig
 ): Promise<void> {
-  const filename = `peticao_${data.templateId}_${data.processNumber.replace(/\//g, '-')}.pdf`;
+  const processNum = data.processNumber || 'sem-numero';
+  const filename = `peticao_${data.templateId}_${processNum.replace(/\//g, '-')}.pdf`;
   
   // Se houver configurações de cabeçalho/rodapé, aplicá-las ao elemento antes da conversão
   if (config) {
@@ -122,10 +124,6 @@ async function applyExportConfig(
   element: HTMLElement,
   config: ExportConfig
 ): Promise<void> {
-  // Cria um wrapper temporário para adicionar cabeçalho e rodapé
-  const wrapper = document.createElement('div');
-  wrapper.style.padding = '20px';
-  
   // Adiciona cabeçalho se habilitado
   if (config.header.enabled) {
     const header = document.createElement('div');
@@ -148,6 +146,7 @@ async function applyExportConfig(
       text.style.fontSize = '14px';
       text.style.fontWeight = '500';
       text.style.margin = '0';
+      text.style.color = '#1f2937';
       header.appendChild(text);
     }
     

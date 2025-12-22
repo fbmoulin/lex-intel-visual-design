@@ -4,8 +4,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
-    "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "dev": "NODE_ENV=development tsx watch server/_core/dev.ts",
+    "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --external:vite --external:@vitejs/* --external:vite-plugin-* --external:@builder.io/vite-plugin-jsx-loc --external:@tailwindcss/vite --define:process.env.NODE_ENV='\"production\"'",
     "build:production": "NODE_ENV=production pnpm run build",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc --noEmit",
@@ -24,8 +24,11 @@
     "prepare:deploy": "pnpm run deploy:check && pnpm run build:production"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.47",
+    "@ai-sdk/openai": "^2.0.87",
     "@aws-sdk/client-s3": "^3.693.0",
     "@aws-sdk/s3-request-presigner": "^3.693.0",
+    "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -54,9 +57,10 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@supabase/supabase-js": "^2.86.0",
     "@tanstack/react-query": "^5.90.2",
-    "@trpc/client": "^11.6.0",
-    "@trpc/react-query": "^11.6.0",
-    "@trpc/server": "^11.6.0",
+    "@trpc/client": "^11.8.0",
+    "@trpc/react-query": "^11.8.0",
+    "@trpc/server": "^11.8.0",
+    "ai": "^5.0.114",
     "axios": "^1.12.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -70,7 +74,7 @@
     "express": "^4.21.2",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.23.22",
-    "html2canvas": "^1.4.1",
+    "html2canvas-pro": "^1.6.1",
     "input-otp": "^1.4.2",
     "jose": "6.1.0",
     "jspdf": "^3.0.4",
@@ -86,7 +90,7 @@
     "react-resizable-panels": "^3.0.6",
     "recharts": "^2.15.2",
     "sonner": "^2.0.7",
-    "streamdown": "^1.4.0",
+    "streamdown": "^1.6.10",
     "superjson": "^1.13.3",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
@@ -97,7 +101,7 @@
   "devDependencies": {
     "@builder.io/vite-plugin-jsx-loc": "^0.1.1",
     "@tailwindcss/typography": "^0.5.15",
-    "@tailwindcss/vite": "^4.1.3",
+    "@tailwindcss/vite": "^4.1.18",
     "@types/express": "4.17.21",
     "@types/file-saver": "^2.0.7",
     "@types/google.maps": "^3.58.1",
@@ -107,7 +111,7 @@
     "@vitejs/plugin-react": "^5.0.4",
     "add": "^2.0.6",
     "autoprefixer": "^10.4.20",
-    "drizzle-kit": "^0.31.7",
+    "drizzle-kit": "^0.31.8",
     "esbuild": "^0.25.0",
     "pnpm": "^10.15.1",
     "postcss": "^8.4.47",
@@ -126,7 +130,8 @@
       "wouter@3.7.1": "patches/wouter@3.7.1.patch"
     },
     "overrides": {
-      "tailwindcss>nanoid": "3.3.7"
+      "tailwindcss>nanoid": "3.3.7",
+      "esbuild": ">=0.25.0"
     }
   }
 }

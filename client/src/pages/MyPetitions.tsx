@@ -76,18 +76,18 @@ export default function MyPetitions() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-background">
         <Header />
         <main className="flex-1 container py-12">
-          <Card className="max-w-md mx-auto">
+          <Card className="max-w-md mx-auto lex-card border-0">
             <CardHeader>
-              <CardTitle>Autenticação Necessária</CardTitle>
-              <CardDescription>
+              <CardTitle className="lex-gradient-text">Autenticação Necessária</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Faça login para visualizar suas petições salvas.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => setLocation("/")} className="w-full">
+              <Button onClick={() => setLocation("/")} className="w-full lex-button">
                 Voltar para Home
               </Button>
             </CardContent>
@@ -99,12 +99,12 @@ export default function MyPetitions() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
       <main className="flex-1 container py-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Minhas Petições</h1>
+          <h1 className="text-3xl font-bold mb-2 lex-gradient-text">Minhas Petições</h1>
           <p className="text-muted-foreground">
             Gerencie todas as suas petições salvas em um só lugar
           </p>
@@ -118,17 +118,17 @@ export default function MyPetitions() {
               placeholder="Buscar por título, número do processo ou autor..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
             />
           </div>
           
           <div className="flex gap-2">
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-[200px]">
-                <Filter className="h-4 w-4 mr-2" />
+              <SelectTrigger className="w-[200px] bg-card border-border text-foreground">
+                <Filter className="h-4 w-4 mr-2 text-primary" />
                 <SelectValue placeholder="Filtrar por tipo" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card border-border">
                 <SelectItem value="all">Todos os tipos</SelectItem>
                 <SelectItem value="civil">Civil</SelectItem>
                 <SelectItem value="trabalhista">Trabalhista</SelectItem>
@@ -138,7 +138,7 @@ export default function MyPetitions() {
               </SelectContent>
             </Select>
 
-            <Button onClick={() => setLocation("/templates")}>
+            <Button onClick={() => setLocation("/templates")} className="lex-button">
               <Plus className="h-4 w-4 mr-2" />
               Nova Petição
             </Button>
@@ -148,37 +148,39 @@ export default function MyPetitions() {
         {/* Lista de Petições */}
         {isLoading ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Carregando petições...</p>
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent"></div>
+            <p className="text-muted-foreground mt-4">Carregando petições...</p>
           </div>
         ) : filteredPetitions && filteredPetitions.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPetitions.map((petition) => (
-              <Card key={petition.id} className="hover:shadow-lg transition-shadow">
+              <Card key={petition.id} className="lex-card border-0 transition-all duration-300 hover:scale-[1.02]">
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <FileText className="h-8 w-8 text-primary" />
-                    <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">
+                    <div className="h-10 w-10 rounded-lg lex-gradient flex items-center justify-center">
+                      <FileText className="h-5 w-5 text-black" />
+                    </div>
+                    <span className="text-xs px-3 py-1 bg-primary/20 text-primary rounded-full font-medium">
                       {getTemplateLabel(petition.templateType)}
                     </span>
                   </div>
-                  <CardTitle className="line-clamp-2 mt-4">{petition.title}</CardTitle>
+                  <CardTitle className="line-clamp-2 mt-4 text-foreground">{petition.title}</CardTitle>
                   <CardDescription className="space-y-1">
                     {petition.numeroProcesso && (
-                      <p className="text-sm">Processo: {petition.numeroProcesso}</p>
+                      <p className="text-sm text-muted-foreground">Processo: <span className="text-primary">{petition.numeroProcesso}</span></p>
                     )}
                     {petition.autor && (
-                      <p className="text-sm">Autor: {petition.autor}</p>
+                      <p className="text-sm text-muted-foreground">Autor: {petition.autor}</p>
                     )}
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground/70">
                       Atualizado em {new Date(petition.updatedAt).toLocaleDateString('pt-BR')}
                     </p>
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex gap-2">
                   <Button
-                    variant="default"
                     size="sm"
-                    className="flex-1"
+                    className="flex-1 lex-button"
                     onClick={() => handleEdit(petition.id, petition.templateType)}
                   >
                     <Edit className="h-4 w-4 mr-2" />
@@ -187,6 +189,7 @@ export default function MyPetitions() {
                   <Button
                     variant="destructive"
                     size="sm"
+                    className="bg-red-600 hover:bg-red-700"
                     onClick={() => setPetitionToDelete(petition.id)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -196,10 +199,12 @@ export default function MyPetitions() {
             ))}
           </div>
         ) : (
-          <Card className="py-12">
+          <Card className="py-12 lex-card border-0">
             <CardContent className="text-center">
-              <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">
+              <div className="h-20 w-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <FileText className="h-10 w-10 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">
                 {searchQuery || filterType !== "all" 
                   ? "Nenhuma petição encontrada" 
                   : "Nenhuma petição salva ainda"}
@@ -209,7 +214,7 @@ export default function MyPetitions() {
                   ? "Tente ajustar os filtros de busca"
                   : "Comece criando sua primeira petição com Visual Law"}
               </p>
-              <Button onClick={() => setLocation("/templates")}>
+              <Button onClick={() => setLocation("/templates")} className="lex-button">
                 <Plus className="h-4 w-4 mr-2" />
                 Criar Primeira Petição
               </Button>
@@ -222,18 +227,18 @@ export default function MyPetitions() {
 
       {/* Dialog de Confirmação de Exclusão */}
       <AlertDialog open={petitionToDelete !== null} onOpenChange={() => setPetitionToDelete(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-card border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
               Tem certeza que deseja excluir esta petição? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel className="bg-card border-border text-foreground hover:bg-muted">Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => petitionToDelete && handleDelete(petitionToDelete)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-red-600 text-white hover:bg-red-700"
             >
               Excluir
             </AlertDialogAction>

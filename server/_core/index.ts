@@ -7,9 +7,9 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerHealthRoutes } from "./health";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { serveStatic, setupVite } from "./vite";
 import { setupSecurity } from "./security";
 import { loggers } from "./logger";
+import { serveStatic } from "./static";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -54,12 +54,10 @@ async function startServer() {
       createContext,
     })
   );
-  // development mode uses Vite, production mode uses static files
-  if (process.env.NODE_ENV === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
+  
+  // Serve static files (production mode)
+  // For development, use: pnpm run dev (which uses tsx and vite directly)
+  serveStatic(app);
 
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);

@@ -1,0 +1,273 @@
+{
+  "timestamp": "2025-12-19T15:27:12.516719",
+  "configs_tested": 7,
+  "queries_tested": 20,
+  "summaries": {
+    "A_baseline": {
+      "semantic_weight": 0.7,
+      "lexical_weight": 0.3,
+      "avg_recall_5": 0.95,
+      "avg_recall_10": 1.0,
+      "avg_mrr": 0.9571428571428572,
+      "avg_precision_3": 0.5499999999999999,
+      "avg_ndcg_10": 0.8928251093090916,
+      "avg_latency_ms": 343.7177538871765,
+      "p95_latency_ms": 465.75379371643066,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 0.5,
+          "avg_mrr": 0.5714285714285714
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        }
+      }
+    },
+    "B_semantic_high": {
+      "semantic_weight": 0.8,
+      "lexical_weight": 0.2,
+      "avg_recall_5": 0.925,
+      "avg_recall_10": 1.0,
+      "avg_mrr": 0.9555555555555556,
+      "avg_precision_3": 0.5666666666666667,
+      "avg_ndcg_10": 0.8920070280845317,
+      "avg_latency_ms": 369.91506814956665,
+      "p95_latency_ms": 544.0883636474609,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 0.5,
+          "avg_mrr": 0.5555555555555556
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 0.9,
+          "avg_mrr": 1.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        }
+      }
+    },
+    "C_balanced_60_40": {
+      "semantic_weight": 0.6,
+      "lexical_weight": 0.4,
+      "avg_recall_5": 1.0,
+      "avg_recall_10": 1.0,
+      "avg_mrr": 0.9625,
+      "avg_precision_3": 0.5499999999999999,
+      "avg_ndcg_10": 0.8959795842777966,
+      "avg_latency_ms": 339.14963006973267,
+      "p95_latency_ms": 451.6181945800781,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 0.625
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        }
+      }
+    },
+    "D_equal": {
+      "semantic_weight": 0.5,
+      "lexical_weight": 0.5,
+      "avg_recall_5": 1.0,
+      "avg_recall_10": 1.0,
+      "avg_mrr": 0.9625,
+      "avg_precision_3": 0.5499999999999999,
+      "avg_ndcg_10": 0.8948464428944463,
+      "avg_latency_ms": 377.36613750457764,
+      "p95_latency_ms": 1221.5147018432617,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 0.625
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        }
+      }
+    },
+    "E_slight_adjust": {
+      "semantic_weight": 0.65,
+      "lexical_weight": 0.35,
+      "avg_recall_5": 0.95,
+      "avg_recall_10": 1.0,
+      "avg_mrr": 0.9583333333333334,
+      "avg_precision_3": 0.5499999999999999,
+      "avg_ndcg_10": 0.8960103215895581,
+      "avg_latency_ms": 361.3069176673889,
+      "p95_latency_ms": 499.74560737609863,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 0.5,
+          "avg_mrr": 0.5833333333333334
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        }
+      }
+    },
+    "F_semantic_mid": {
+      "semantic_weight": 0.75,
+      "lexical_weight": 0.25,
+      "avg_recall_5": 0.95,
+      "avg_recall_10": 1.0,
+      "avg_mrr": 0.9555555555555556,
+      "avg_precision_3": 0.5666666666666667,
+      "avg_ndcg_10": 0.8949545761056804,
+      "avg_latency_ms": 344.27483081817627,
+      "p95_latency_ms": 412.7621650695801,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 0.5,
+          "avg_mrr": 0.5555555555555556
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        }
+      }
+    },
+    "G_lexical_high": {
+      "semantic_weight": 0.55,
+      "lexical_weight": 0.45,
+      "avg_recall_5": 1.0,
+      "avg_recall_10": 1.0,
+      "avg_mrr": 0.9625,
+      "avg_precision_3": 0.5499999999999999,
+      "avg_ndcg_10": 0.894927173698579,
+      "avg_latency_ms": 348.050320148468,
+      "p95_latency_ms": 486.53173446655273,
+      "category_breakdown": {
+        "procedimental": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "tecnica": {
+          "count": 2,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 0.625
+        },
+        "conceitual": {
+          "count": 5,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "jurisprudencial": {
+          "count": 6,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        },
+        "mista": {
+          "count": 2,
+          "avg_recall_5": 1.0,
+          "avg_mrr": 1.0
+        }
+      }
+    }
+  }
+}

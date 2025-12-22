@@ -30,22 +30,28 @@ export function setupSecurityHeaders(app: Express) {
     const isDevelopment = process.env.NODE_ENV === "development";
 
     // CSP mais permissiva em desenvolvimento para hot reload
-    const scriptSrc = isDevelopment
-      ? "'self' 'unsafe-inline'" // Dev: permite inline para HMR
-      : "'self'";                 // Prod: apenas scripts do mesmo origem
+    // NOTA: 'unsafe-inline' é necessário em produção para:
+    // - CSS-in-JS (React/Tailwind)
+    // - Bibliotecas de exportação PDF (html2canvas/jspdf)
+    // - Geração dinâmica de canvas/blob
+    const scriptSrc = "'self' 'unsafe-inline' 'unsafe-eval' blob:"; // Permite inline e eval para PDF export
 
     const connectSrc = isDevelopment
-      ? "'self' ws: wss:"         // Dev: permite WebSocket para HMR
-      : "'self'";                 // Prod: apenas conexões do mesmo origem
+      ? "'self' ws: wss: blob:"   // Dev: permite WebSocket para HMR
+      : "'self' blob:";           // Prod: permite blob para exportação
 
     res.setHeader(
       "Content-Security-Policy",
       "default-src 'self'; " +
       `script-src ${scriptSrc}; ` +
-      "style-src 'self' 'unsafe-inline'; " +  // Necessário para CSS-in-JS
-      "img-src 'self' data: https:; " +
-      "font-src 'self' data:; " +
-      `connect-src ${connectSrc}; ` +
+      "style-src 'self' 'unsafe-inline' blob: data: https://fonts.googleapis.com; " +  // CSS-in-JS + Google Fonts
+      "style-src-elem 'self' 'unsafe-inline' blob: data: https://fonts.googleapis.com; " +  // Elementos de estilo + Google Fonts
+      "img-src 'self' data: blob: https:; " +  // blob: para canvas export
+      "font-src 'self' data: https: https://fonts.gstatic.com; " +  // Google Fonts arquivos
+      `connect-src ${connectSrc} https:; ` +    // https: para APIs externas
+      "worker-src 'self' blob:; " +           // Para Web Workers usados em PDF export
+      "child-src 'self' blob:; " +            // Para iframes e workers
+      "frame-src 'self' blob:; " +            // Para frames
       "base-uri 'self'; " +                   // Previne base tag injection
       "form-action 'self'; " +                // Previne form hijacking
       "frame-ancestors 'none'; " +            // Previne clickjacking (substitui X-Frame-Options)

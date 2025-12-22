@@ -1,14 +1,13 @@
 # Lex Intel Visual Design
 
-[![Version](https://img.shields.io/badge/version-1.0.0--beta-blue.svg)](https://github.com/fbmoulin/lex-intel-visual-design/releases)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/fbmoulin/lex-intel-visual-design/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/typescript-5.x-blue.svg)](https://www.typescriptlang.org/)
-[![Status](https://img.shields.io/badge/status-beta-yellow.svg)](https://github.com/fbmoulin/lex-intel-visual-design)
+[![AI Powered](https://img.shields.io/badge/AI-Gemini%202.0-purple.svg)](https://ai.google.dev/)
+[![RAG](https://img.shields.io/badge/RAG-pgvector-orange.svg)](https://github.com/pgvector/pgvector)
 
-**Aplicação SaaS profissional para geração de petições jurídicas com Visual Law e Legal Design**
-
-> ⚠️ **VERSÃO BETA** - Esta é uma versão beta do projeto. Algumas funcionalidades ainda estão em desenvolvimento e podem apresentar instabilidades. Feedback e contribuições são muito bem-vindos!
+**Aplicação SaaS profissional para geração de petições jurídicas com Visual Law, Legal Design e Inteligência Artificial**
 
 Desenvolvido por **Lex Intelligentia** - Transformando a advocacia através da tecnologia.
 
@@ -16,19 +15,41 @@ Desenvolvido por **Lex Intelligentia** - Transformando a advocacia através da t
 
 ## 📋 Sobre o Projeto
 
-O **Lex Intel Visual Design** é uma aplicação full-stack moderna que permite advogados criarem, editarem, salvarem e exportarem petições jurídicas com design profissional e elementos visuais que facilitam a compreensão. A aplicação implementa princípios de **Visual Law** e **Legal Design**, tornando documentos jurídicos mais acessíveis e compreensíveis.
+O **Lex Intel Visual Design** é uma aplicação full-stack moderna que permite advogados criarem, editarem, salvarem e exportarem petições jurídicas com design profissional e elementos visuais que facilitam a compreensão. A aplicação implementa princípios de **Visual Law** e **Legal Design**, com um **Assistente Jurídico com IA** integrado e **busca semântica** em legislação e jurisprudência.
 
 ### Principais Funcionalidades
 
-- ✅ **Editor de Petições:** Interface intuitiva com preview em tempo real
-- ✅ **Templates Profissionais:** 8 templates pré-preenchidos (Civil, Trabalhista, Criminal, Tributária, Consumidor)
-- ✅ **Componentes Visuais:** Timeline, Cards de Resumo, Gráficos (Recharts)
-- ✅ **Exportação Avançada:** PDF e DOCX com personalização de cabeçalho/rodapé
-- ✅ **Autenticação Segura:** Manus OAuth integrado
-- ✅ **Banco de Dados:** PostgreSQL com Drizzle ORM
-- ✅ **API tRPC:** Type-safe API com 7 testes unitários
-- ✅ **Modo Escuro:** Tema configurável
-- ✅ **Gerenciamento de Petições:** Busca, filtros, edição e exclusão
+| Categoria | Funcionalidades |
+|-----------|-----------------|
+| **Editor de Petições** | Interface intuitiva com preview em tempo real, salvamento automático |
+| **Templates** | 39 templates profissionais (Civil, Trabalhista, Criminal, Tributária, Consumidor) |
+| **Visual Law** | Timeline, Cards de Resumo, Gráficos, Ícones temáticos |
+| **Assistente IA** | Chat jurídico com Gemini 2.0, streaming em tempo real |
+| **Busca Semântica** | RAG com pgvector, 35 documentos indexados (legislação e jurisprudência) |
+| **Exportação** | PDF e DOCX com personalização de cabeçalho/rodapé |
+| **Segurança** | OAuth 2.0, Rate Limiting, CSP, HSTS |
+
+---
+
+## 🤖 Assistente Jurídico com IA
+
+O Lex Intel inclui um assistente jurídico inteligente que utiliza:
+
+- **Gemini 2.0 Flash** para geração de respostas
+- **RAG (Retrieval-Augmented Generation)** para contexto jurídico
+- **Busca Híbrida** otimizada (60% semântica + 40% léxica)
+- **35 documentos indexados** de legislação e jurisprudência cível
+
+### Funcionalidades do Assistente
+
+- Chat com streaming em tempo real
+- Sugestões rápidas de perguntas jurídicas
+- Filtro por área do direito
+- Citações automáticas das fontes
+- Análise de documentos
+- Sugestões de petição
+
+Acesse em: `/ai-assistant`
 
 ---
 
@@ -38,7 +59,7 @@ O **Lex Intel Visual Design** é uma aplicação full-stack moderna que permite 
 
 - **Node.js:** 18+ 
 - **pnpm:** 8+
-- **PostgreSQL:** 14+
+- **PostgreSQL:** 14+ com extensão pgvector
 
 ### Instalação
 
@@ -78,9 +99,15 @@ A aplicação estará disponível em `http://localhost:3000`
 ### Backend
 - **Node.js** + **Express**
 - **tRPC** (API)
-- **PostgreSQL** (banco de dados)
+- **PostgreSQL** + **pgvector** (banco de dados)
 - **Drizzle ORM** (ORM)
 - **Manus OAuth** (autenticação)
+
+### Inteligência Artificial
+- **Vercel AI SDK** (integração com LLMs)
+- **Google Gemini 2.0** (chat e embeddings)
+- **pgvector** (busca vetorial)
+- **pg_trgm** (busca léxica)
 
 ### Exportação
 - **html2canvas** + **jsPDF** (PDF)
@@ -149,31 +176,18 @@ pnpm run docker:build
 pnpm run docker:run
 ```
 
-### Deploy Automatizado
-
-```bash
-# Execute o script de deploy
-./scripts/deploy.sh
-```
-
-O script irá guiá-lo através de:
-1. Instalação de dependências
-2. Checagem de tipos
-3. Testes
-4. Auditoria de segurança
-5. Build de produção
-6. Migrações de banco
-7. Seleção da plataforma (Railway/Docker/Manual)
-
 ---
 
 ## 📚 Documentação
 
-- **[Guia de Deploy](docs/DEPLOY.md)** - Instruções completas de deploy
-- **[Guia de Segurança](docs/SECURITY.md)** - Práticas e medidas de segurança
-- **[Guia de Monitoramento](docs/MONITORING.md)** - Estratégias de monitoramento
-- **[Design System](design_system_visual_law_completo.md)** - Documentação do Design System
-- **[Arquitetura de Integração](arquitetura_integracao_ecossistema.md)** - Integração com ecossistema Lex Intelligentia
+| Documento | Descrição |
+|-----------|-----------|
+| [Guia de Deploy](docs/DEPLOY.md) | Instruções completas de deploy |
+| [Guia de Segurança](docs/SECURITY.md) | Práticas e medidas de segurança |
+| [Guia de Monitoramento](docs/MONITORING.md) | Estratégias de monitoramento |
+| [Otimização RAG](docs/RAG_OPTIMIZATION_RESEARCH.md) | Técnicas de otimização da busca semântica |
+| [Testes A/B](docs/AB_TEST_PLAN_HYBRID_SEARCH.md) | Plano de testes para busca híbrida |
+| [Roadmap 2025](ROADMAP_2025_STATE_OF_THE_ART.md) | Roadmap de evolução do projeto |
 
 ---
 
@@ -181,61 +195,43 @@ O script irá guiá-lo através de:
 
 O Lex Intel Visual Design implementa múltiplas camadas de segurança:
 
-- ✅ **Autenticação OAuth 2.0** com Manus
-- ✅ **Security Headers** (CSP, HSTS, X-Frame-Options, etc.)
-- ✅ **Rate Limiting** para prevenir DoS
-- ✅ **Validação de Input** com Zod
-- ✅ **Prepared Statements** para prevenir SQL Injection
-- ✅ **CORS** configurável
-- ✅ **Criptografia TLS/SSL** em produção
-- ✅ **Auditoria de Dependências** automatizada
-
-Consulte o [Guia de Segurança](docs/SECURITY.md) para mais detalhes.
-
----
-
-## 🎨 Design System
-
-O projeto segue um Design System completo baseado em:
-
-- **Paleta de Cores:** Azul primário (#2563eb), Âmbar secundário (#f59e0b)
-- **Tipografia:** Inter (14px-36px)
-- **Espaçamento:** Sistema baseado em 4px
-- **Componentes:** Shadcn/UI + componentes customizados
-- **Modo Escuro:** Totalmente suportado
+| Camada | Implementação |
+|--------|---------------|
+| **Autenticação** | OAuth 2.0 com Manus |
+| **Headers** | CSP, HSTS, X-Frame-Options, X-Content-Type-Options |
+| **Rate Limiting** | Proteção contra DoS com cleanup automático |
+| **Validação** | Input validation com Zod |
+| **SQL** | Prepared Statements via Drizzle ORM |
+| **CORS** | Configurável por ambiente |
+| **TLS** | Criptografia em produção |
 
 ---
 
-## 🧪 Testes
+## 📊 Métricas
 
-```bash
-# Executa todos os testes
-pnpm run test
-
-# Testes com cobertura
-pnpm run test:coverage
-```
-
-O projeto inclui 7 testes unitários para a API tRPC, cobrindo:
-- Criação de petições
-- Listagem de petições
-- Busca por ID
-- Atualização
-- Exclusão
-- Controle de acesso
+| Métrica | Valor |
+|---------|-------|
+| **Build Time** | 12.29s |
+| **Bundle Size** | ~3.1 MB |
+| **Modules** | 3,047 |
+| **Templates** | 39 petições + 9 judiciais |
+| **Documentos RAG** | 35 indexados |
+| **Recall@5** | 100% |
+| **MRR** | 0.963 |
+| **TypeScript** | 100% tipado |
 
 ---
 
-## 📊 Monitoramento
+## 🎯 Roadmap
 
-A aplicação expõe endpoints de health check e está preparada para integração com:
+### Próximas Funcionalidades
 
-- **Sentry** (error tracking)
-- **Datadog / Logtail** (logging)
-- **Prometheus / Grafana** (métricas)
-- **UptimeRobot** (uptime monitoring)
-
-Consulte o [Guia de Monitoramento](docs/MONITORING.md) para mais detalhes.
+1. **Integração gov.br** - Assinatura digital
+2. **Integração Jus.br** - Consulta processual (CNJ)
+3. **Migração Next.js 15** - Performance otimizada
+4. **Extensão Chrome** - Assistente no navegador
+5. **Colaboração Real-time** - Edição simultânea
+6. **Dashboard BI** - Métricas jurídicas
 
 ---
 
@@ -270,10 +266,10 @@ Este projeto está licenciado sob a licença MIT. Veja o arquivo `LICENSE` para 
 ## 🙏 Agradecimentos
 
 - **Stanford Legal Design Lab** - Inspiração e pesquisa sobre Visual Law
+- **Google Gemini** - Modelos de IA generativa
 - **Shadcn/UI** - Componentes UI de alta qualidade
-- **Recharts** - Biblioteca de gráficos
-- **tRPC** - Type-safe API
-- **Drizzle ORM** - ORM moderno para PostgreSQL
+- **pgvector** - Extensão PostgreSQL para busca vetorial
+- **Vercel AI SDK** - Integração com LLMs
 
 ---
 
