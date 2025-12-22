@@ -74,7 +74,7 @@
     "express": "^4.21.2",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.23.22",
-    "html2canvas": "^1.4.1",
+    "html2canvas-pro": "^1.6.1",
     "input-otp": "^1.4.2",
     "jose": "6.1.0",
     "jspdf": "^3.0.4",

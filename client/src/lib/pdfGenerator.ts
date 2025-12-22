@@ -1,4 +1,4 @@
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
 import type { ExportConfig } from '@/components/ExportModal';
 
@@ -14,292 +14,8 @@ export interface PetitionData {
 }
 
 /**
- * Converte uma cor oklch para RGB hex
- * @param oklchString - String no formato "oklch(L C H)" ou "oklch(L C H / A)"
- * @returns String hex no formato "#RRGGBB" ou "rgba(R, G, B, A)"
- */
-function oklchToRgb(oklchString: string): string {
-  // Parse oklch values - handle various formats
-  const match = oklchString.match(/oklch\(\s*([\d.]+%?)\s+([\d.]+%?)\s+([\d.]+)(?:deg)?(?:\s*\/\s*([\d.]+%?))?\s*\)/i);
-  if (!match) {
-    // Fallback to a neutral color if parsing fails
-    return '#888888';
-  }
-
-  // Parse L (lightness) - can be 0-1 or 0%-100%
-  let L = parseFloat(match[1]);
-  if (match[1].includes('%')) {
-    L = L / 100;
-  }
-
-  // Parse C (chroma) - typically 0-0.4
-  let C = parseFloat(match[2]);
-  if (match[2].includes('%')) {
-    C = C / 100 * 0.4; // Convert percentage to chroma range
-  }
-
-  // Parse H (hue) - 0-360 degrees
-  const H = parseFloat(match[3]);
-
-  // Parse alpha if present
-  let alpha = 1;
-  if (match[4]) {
-    alpha = parseFloat(match[4]);
-    if (match[4].includes('%')) {
-      alpha = alpha / 100;
-    }
-  }
-
-  // Clamp values
-  L = Math.max(0, Math.min(1, L));
-  C = Math.max(0, Math.min(0.4, C));
-
-  // Convert oklch to oklab
-  const hRad = H * Math.PI / 180;
-  const a = C * Math.cos(hRad);
-  const b = C * Math.sin(hRad);
-
-  // Convert oklab to linear sRGB
-  const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
-  const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
-  const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
-
-  const l = l_ * l_ * l_;
-  const m = m_ * m_ * m_;
-  const s = s_ * s_ * s_;
-
-  // Convert linear sRGB to sRGB
-  let r = +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
-  let g = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
-  let bl = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s;
-
-  // Apply gamma correction
-  const gammaCorrect = (x: number) => {
-    if (x >= 0.0031308) {
-      return 1.055 * Math.pow(Math.abs(x), 1 / 2.4) - 0.055;
-    }
-    return 12.92 * x;
-  };
-
-  r = Math.max(0, Math.min(1, gammaCorrect(r)));
-  g = Math.max(0, Math.min(1, gammaCorrect(g)));
-  bl = Math.max(0, Math.min(1, gammaCorrect(bl)));
-
-  // Convert to 8-bit values
-  const r8 = Math.round(r * 255);
-  const g8 = Math.round(g * 255);
-  const b8 = Math.round(bl * 255);
-
-  if (alpha < 1) {
-    return `rgba(${r8}, ${g8}, ${b8}, ${alpha.toFixed(3)})`;
-  }
-
-  // Convert to hex
-  const toHex = (n: number) => n.toString(16).padStart(2, '0');
-  return `#${toHex(r8)}${toHex(g8)}${toHex(b8)}`;
-}
-
-/**
- * Converte todas as cores oklch em um valor CSS para RGB
- * @param cssValue - Valor CSS que pode conter oklch
- * @returns Valor CSS com oklch convertido para RGB
- */
-function convertOklchInCssValue(cssValue: string): string {
-  if (!cssValue || typeof cssValue !== 'string') return cssValue;
-  
-  // Replace all oklch() occurrences
-  return cssValue.replace(/oklch\([^)]+\)/gi, (match) => {
-    try {
-      return oklchToRgb(match);
-    } catch {
-      return '#888888'; // Fallback color
-    }
-  });
-}
-
-/**
- * Extrai e converte todas as cores oklch de todas as stylesheets
- * Retorna um mapa de seletores CSS com cores convertidas
- */
-function extractAndConvertStylesheets(): string {
-  const convertedRules: string[] = [];
-  
-  // Process all stylesheets
-  for (let i = 0; i < document.styleSheets.length; i++) {
-    try {
-      const sheet = document.styleSheets[i];
-      const rules = sheet.cssRules || sheet.rules;
-      
-      if (!rules) continue;
-      
-      for (let j = 0; j < rules.length; j++) {
-        const rule = rules[j];
-        
-        if (rule instanceof CSSStyleRule) {
-          const cssText = rule.cssText;
-          if (cssText.includes('oklch')) {
-            const convertedCss = convertOklchInCssValue(cssText);
-            convertedRules.push(convertedCss);
-          }
-        }
-      }
-    } catch {
-      // CORS may prevent access to external stylesheets
-      continue;
-    }
-  }
-  
-  return convertedRules.join('\n');
-}
-
-/**
- * Cria estilos inline para todas as propriedades de cor de um elemento
- */
-function applyInlineColorsToElement(element: HTMLElement): void {
-  const colorProperties = [
-    'color',
-    'background-color',
-    'background',
-    'border-color',
-    'border-top-color',
-    'border-right-color',
-    'border-bottom-color',
-    'border-left-color',
-    'outline-color',
-    'text-decoration-color',
-    'fill',
-    'stroke',
-    'box-shadow',
-    'text-shadow',
-    'caret-color',
-  ];
-
-  const computedStyle = window.getComputedStyle(element);
-  
-  colorProperties.forEach((prop) => {
-    const value = computedStyle.getPropertyValue(prop);
-    if (value && value.includes('oklch')) {
-      const converted = convertOklchInCssValue(value);
-      element.style.setProperty(prop, converted, 'important');
-    }
-  });
-}
-
-/**
- * Processa recursivamente todos os elementos e converte cores oklch
- */
-function processAllElements(root: HTMLElement): void {
-  const walker = document.createTreeWalker(
-    root,
-    NodeFilter.SHOW_ELEMENT,
-    null
-  );
-
-  const elements: HTMLElement[] = [root];
-  let node: Node | null;
-  while ((node = walker.nextNode())) {
-    if (node instanceof HTMLElement) {
-      elements.push(node);
-    }
-  }
-
-  elements.forEach(applyInlineColorsToElement);
-}
-
-/**
- * Cria um documento HTML isolado com cores convertidas para exportação
- */
-async function createExportDocument(element: HTMLElement): Promise<HTMLElement> {
-  // Create a deep clone
-  const clone = element.cloneNode(true) as HTMLElement;
-  
-  // Create an iframe for isolated rendering
-  const iframe = document.createElement('iframe');
-  iframe.style.cssText = 'position: fixed; left: -10000px; top: 0; width: 1200px; height: 800px; border: none;';
-  document.body.appendChild(iframe);
-  
-  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-  if (!iframeDoc) {
-    document.body.removeChild(iframe);
-    throw new Error('Could not create export document');
-  }
-  
-  // Build CSS with converted colors
-  const baseStyles = `
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    body {
-      margin: 0;
-      padding: 0;
-      background: white;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-  `;
-  
-  // Copy and convert stylesheets
-  let convertedStyles = '';
-  for (let i = 0; i < document.styleSheets.length; i++) {
-    try {
-      const sheet = document.styleSheets[i];
-      const rules = sheet.cssRules || sheet.rules;
-      if (!rules) continue;
-      
-      for (let j = 0; j < rules.length; j++) {
-        let cssText = rules[j].cssText;
-        if (cssText.includes('oklch')) {
-          cssText = convertOklchInCssValue(cssText);
-        }
-        convertedStyles += cssText + '\n';
-      }
-    } catch {
-      // Skip inaccessible stylesheets
-    }
-  }
-  
-  // Write the document
-  iframeDoc.open();
-  iframeDoc.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <style>${baseStyles}</style>
-      <style>${convertedStyles}</style>
-    </head>
-    <body></body>
-    </html>
-  `);
-  iframeDoc.close();
-  
-  // Append the clone
-  iframeDoc.body.appendChild(clone);
-  
-  // Process all elements in the clone
-  processAllElements(clone);
-  
-  // Wait for rendering
-  await new Promise(resolve => setTimeout(resolve, 200));
-  
-  // Store iframe reference for cleanup
-  (clone as any).__exportIframe = iframe;
-  
-  return clone;
-}
-
-/**
- * Limpa recursos de exportação
- */
-function cleanupExportDocument(clone: HTMLElement): void {
-  const iframe = (clone as any).__exportIframe;
-  if (iframe && iframe.parentElement) {
-    iframe.parentElement.removeChild(iframe);
-  }
-}
-
-/**
  * Gera um PDF a partir de um elemento HTML preservando estilos visuais
+ * Usa html2canvas-pro que suporta cores oklch nativamente
  * @param element - Elemento HTML a ser convertido
  * @param filename - Nome do arquivo PDF
  */
@@ -307,55 +23,28 @@ export async function generatePDFFromElement(
   element: HTMLElement,
   filename: string = 'peticao.pdf'
 ): Promise<void> {
-  let exportClone: HTMLElement | null = null;
-
   try {
-    // Create isolated export document with converted colors
-    exportClone = await createExportDocument(element);
-    
-    // Get the iframe for rendering
-    const iframe = (exportClone as any).__exportIframe as HTMLIFrameElement;
-    const iframeWindow = iframe.contentWindow;
-    
-    if (!iframeWindow) {
-      throw new Error('Export window not available');
-    }
-
-    // Use html2canvas on the iframe content
-    const canvas = await html2canvas(exportClone, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      windowWidth: 1200,
-      windowHeight: exportClone.scrollHeight,
-      foreignObjectRendering: false,
-      // Force all colors to be processed as-is (already converted)
-      onclone: (clonedDoc, clonedElement) => {
-        // Final pass to ensure no oklch remains
-        const allElements = clonedDoc.querySelectorAll('*');
-        allElements.forEach((el) => {
-          if (el instanceof HTMLElement) {
-            const style = el.getAttribute('style') || '';
-            if (style.includes('oklch')) {
-              el.setAttribute('style', convertOklchInCssValue(style));
-            }
-          }
-        });
-      }
+    // html2canvas-pro suporta oklch nativamente
+    const canvas = await html2canvas(element, {
+      scale: 2, // Aumenta a resolução para melhor qualidade
+      useCORS: true, // Permite carregar imagens de outras origens
+      logging: false, // Desativa logs de debug
+      backgroundColor: '#ffffff', // Fundo branco
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight,
     });
 
     const imgData = canvas.toDataURL('image/png');
     
-    // A4 dimensions in mm
+    // Dimensões A4 em mm
     const pdfWidth = 210;
     const pdfHeight = 297;
     
-    // Calculate proportional height
+    // Calcula a altura proporcional da imagem
     const imgWidth = pdfWidth;
     const imgHeight = (canvas.height * pdfWidth) / canvas.width;
     
-    // Create PDF
+    // Cria o PDF
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -365,11 +54,11 @@ export async function generatePDFFromElement(
     let heightLeft = imgHeight;
     let position = 0;
 
-    // Add first page
+    // Adiciona a primeira página
     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
     heightLeft -= pdfHeight;
 
-    // Add additional pages if needed
+    // Adiciona páginas adicionais se necessário
     while (heightLeft > 0) {
       position = heightLeft - imgHeight;
       pdf.addPage();
@@ -377,16 +66,11 @@ export async function generatePDFFromElement(
       heightLeft -= pdfHeight;
     }
 
-    // Save PDF
+    // Salva o PDF
     pdf.save(filename);
   } catch (error) {
     console.error('Erro ao gerar PDF:', error);
     throw new Error('Falha ao gerar PDF. Por favor, tente novamente.');
-  } finally {
-    // Cleanup
-    if (exportClone) {
-      cleanupExportDocument(exportClone);
-    }
   }
 }
 
@@ -401,7 +85,8 @@ export async function generatePetitionPDF(
   data: PetitionData,
   config?: ExportConfig
 ): Promise<void> {
-  const filename = `peticao_${data.templateId}_${data.processNumber.replace(/\//g, '-')}.pdf`;
+  const processNum = data.processNumber || 'sem-numero';
+  const filename = `peticao_${data.templateId}_${processNum.replace(/\//g, '-')}.pdf`;
   
   // Se houver configurações de cabeçalho/rodapé, aplicá-las ao elemento antes da conversão
   if (config) {
@@ -439,10 +124,6 @@ async function applyExportConfig(
   element: HTMLElement,
   config: ExportConfig
 ): Promise<void> {
-  // Cria um wrapper temporário para adicionar cabeçalho e rodapé
-  const wrapper = document.createElement('div');
-  wrapper.style.padding = '20px';
-  
   // Adiciona cabeçalho se habilitado
   if (config.header.enabled) {
     const header = document.createElement('div');
@@ -465,6 +146,7 @@ async function applyExportConfig(
       text.style.fontSize = '14px';
       text.style.fontWeight = '500';
       text.style.margin = '0';
+      text.style.color = '#1f2937';
       header.appendChild(text);
     }
     
