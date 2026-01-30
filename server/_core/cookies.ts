@@ -18,31 +18,56 @@ function isSecureRequest(req: Request) {
     ? forwardedProto
     : forwardedProto.split(",");
 
-  return protoList.some(proto => proto.trim().toLowerCase() === "https");
+  return protoList.some((proto) => proto.trim().toLowerCase() === "https");
+}
+
+/**
+ * Determine appropriate SameSite value based on environment and request
+ *
+ * - "lax": Default, provides CSRF protection while allowing OAuth redirects
+ * - "none": Required for cross-origin scenarios (requires secure=true)
+ * - "strict": Maximum security but may break OAuth flows
+ *
+ * Note: OAuth top-level redirects work with "lax" because they are
+ * top-level navigations, not embedded requests.
+ */
+function getSameSiteValue(req: Request): "lax" | "none" | "strict" {
+  const isSecure = isSecureRequest(req);
+
+  // In development without HTTPS, we can't use "none" (requires secure)
+  // Use "lax" which still allows OAuth redirects
+  if (!isSecure) {
+    return "lax";
+  }
+
+  // Check if cross-origin cookies are explicitly required
+  // This can be configured via environment variable if needed
+  const requireCrossOrigin = process.env.COOKIE_CROSS_ORIGIN === "true";
+
+  if (requireCrossOrigin) {
+    // "none" allows cross-origin but requires secure=true
+    return "none";
+  }
+
+  // Default to "lax" for better CSRF protection
+  // OAuth redirects still work because they are top-level navigations
+  return "lax";
 }
 
 export function getSessionCookieOptions(
   req: Request
 ): Pick<CookieOptions, "domain" | "httpOnly" | "path" | "sameSite" | "secure"> {
-  // const hostname = req.hostname;
-  // const shouldSetDomain =
-  //   hostname &&
-  //   !LOCAL_HOSTS.has(hostname) &&
-  //   !isIpAddress(hostname) &&
-  //   hostname !== "127.0.0.1" &&
-  //   hostname !== "::1";
+  const isSecure = isSecureRequest(req);
+  const sameSite = getSameSiteValue(req);
 
-  // const domain =
-  //   shouldSetDomain && !hostname.startsWith(".")
-  //     ? `.${hostname}`
-  //     : shouldSetDomain
-  //       ? hostname
-  //       : undefined;
+  // If sameSite is "none", secure MUST be true
+  // This is enforced by browsers
+  const secure = sameSite === "none" ? true : isSecure;
 
   return {
     httpOnly: true,
     path: "/",
-    sameSite: "none",
-    secure: isSecureRequest(req),
+    sameSite,
+    secure,
   };
 }

@@ -15,9 +15,55 @@ import type {
   GetUserInfoWithJwtRequest,
   GetUserInfoWithJwtResponse,
 } from "./types/manusTypes";
+
 // Utility function
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.length > 0;
+
+/**
+ * Validate that a redirect URI is allowed
+ * Prevents open redirect vulnerabilities in OAuth flow
+ */
+function isValidRedirectUri(uri: string): boolean {
+  try {
+    const url = new URL(uri);
+
+    // Allow relative paths (same origin)
+    if (uri.startsWith("/")) {
+      return true;
+    }
+
+    // In development, allow localhost
+    if (process.env.NODE_ENV === "development") {
+      if (url.hostname === "localhost" || url.hostname === "127.0.0.1") {
+        return true;
+      }
+    }
+
+    // Check against allowed origins from environment
+    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",").map(o => o.trim()) || [];
+
+    // Always allow same-origin requests
+    const appUrl = process.env.VITE_APP_URL || process.env.APP_URL;
+    if (appUrl) {
+      allowedOrigins.push(appUrl);
+    }
+
+    // Validate against whitelist
+    const urlOrigin = url.origin;
+    return allowedOrigins.some(allowed => {
+      try {
+        const allowedUrl = new URL(allowed);
+        return allowedUrl.origin === urlOrigin;
+      } catch {
+        return allowed === urlOrigin;
+      }
+    });
+  } catch {
+    // If not a valid URL, only allow paths starting with /
+    return uri.startsWith("/") && !uri.startsWith("//");
+  }
+}
 
 export type SessionPayload = {
   openId: string;
@@ -37,8 +83,28 @@ class OAuthService {
     }
   }
 
+  /**
+   * Decode and validate OAuth state parameter
+   * @throws Error if state is invalid or redirect URI is not allowed
+   */
   private decodeState(state: string): string {
-    const redirectUri = atob(state);
+    let redirectUri: string;
+
+    try {
+      redirectUri = atob(state);
+    } catch {
+      loggers.oauth.warn("Invalid base64 state parameter", { state: state.substring(0, 20) });
+      throw new Error("Invalid OAuth state parameter");
+    }
+
+    // Validate the redirect URI against whitelist
+    if (!isValidRedirectUri(redirectUri)) {
+      loggers.oauth.warn("Invalid redirect URI in OAuth state", {
+        redirectUri: redirectUri.substring(0, 100),
+      });
+      throw new Error("Invalid redirect URI");
+    }
+
     return redirectUri;
   }
 

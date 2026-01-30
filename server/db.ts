@@ -235,7 +235,17 @@ export async function createPetition(petition: InsertPetition) {
   return result[0].id;
 }
 
-export async function getUserPetitions(userId: number) {
+/** Default limit for unpaginated queries to prevent memory issues */
+const DEFAULT_PETITION_LIMIT = 100;
+
+/**
+ * Get user petitions with a default limit
+ * For large datasets, use getUserPetitionsPaginated instead
+ */
+export async function getUserPetitions(
+  userId: number,
+  limit: number = DEFAULT_PETITION_LIMIT
+) {
   const db = await getDb();
   if (!db) {
     return [];
@@ -245,7 +255,8 @@ export async function getUserPetitions(userId: number) {
     .select()
     .from(petitions)
     .where(eq(petitions.userId, userId))
-    .orderBy(desc(petitions.updatedAt));
+    .orderBy(desc(petitions.updatedAt))
+    .limit(limit);
 }
 
 export async function getPetitionById(id: number, userId: number) {

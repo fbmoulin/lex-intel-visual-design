@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import { createServer } from "http";
+import { createServer, Server } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
@@ -11,7 +11,14 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { setupSecurity } from "./security";
 import { loggers } from "./logger";
-import { initSentry, setupErrorTracking, setupErrorHandler as setupSentryErrorHandler } from "./errorTracking";
+import {
+  initSentry,
+  setupErrorTracking,
+  setupErrorHandler as setupSentryErrorHandler,
+} from "./errorTracking";
+import { closeDb } from "../db";
+import { closeRateLimitStore } from "./rateLimitStore";
+import { closeCache } from "./cache";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -30,6 +37,84 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
     }
   }
   throw new Error(`No available port found starting from ${startPort}`);
+}
+
+/**
+ * Graceful shutdown handler
+ * Closes all connections and resources cleanly
+ */
+async function gracefulShutdown(
+  server: Server,
+  signal: string
+): Promise<void> {
+  loggers.server.info(`Received ${signal}, starting graceful shutdown...`);
+
+  // Stop accepting new connections
+  server.close((err) => {
+    if (err) {
+      loggers.server.error("Error closing HTTP server", err);
+    } else {
+      loggers.server.info("HTTP server closed");
+    }
+  });
+
+  // Close all resources with timeout
+  const shutdownTimeout = 30000; // 30 seconds
+  const shutdownPromise = Promise.allSettled([
+    closeDb().catch((err) => {
+      loggers.server.error("Error closing database", err);
+    }),
+    closeRateLimitStore().catch((err) => {
+      loggers.server.error("Error closing rate limit store", err);
+    }),
+    closeCache().catch((err) => {
+      loggers.server.error("Error closing cache", err);
+    }),
+  ]);
+
+  // Race between shutdown and timeout
+  const timeoutPromise = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      loggers.server.warn("Shutdown timeout reached, forcing exit");
+      resolve();
+    }, shutdownTimeout);
+  });
+
+  await Promise.race([shutdownPromise, timeoutPromise]);
+
+  loggers.server.info("Graceful shutdown completed");
+  process.exit(0);
+}
+
+/**
+ * Setup signal handlers for graceful shutdown
+ */
+function setupGracefulShutdown(server: Server): void {
+  let isShuttingDown = false;
+
+  const shutdown = (signal: string) => {
+    if (isShuttingDown) {
+      loggers.server.warn("Shutdown already in progress, ignoring signal");
+      return;
+    }
+    isShuttingDown = true;
+    gracefulShutdown(server, signal);
+  };
+
+  // Handle termination signals
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
+
+  // Handle uncaught exceptions (log and exit)
+  process.on("uncaughtException", (error) => {
+    loggers.server.error("Uncaught exception", error);
+    shutdown("uncaughtException");
+  });
+
+  // Handle unhandled promise rejections
+  process.on("unhandledRejection", (reason, promise) => {
+    loggers.server.error("Unhandled promise rejection", { reason, promise });
+  });
 }
 
 async function startServer() {
@@ -87,6 +172,9 @@ async function startServer() {
       port,
       env: process.env.NODE_ENV,
     });
+
+    // Setup graceful shutdown after server is listening
+    setupGracefulShutdown(server);
   });
 }
 
