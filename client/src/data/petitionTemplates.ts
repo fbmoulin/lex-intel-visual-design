@@ -297,6 +297,343 @@ Termos em que,
 Pede deferimento.`
     }
   },
+  {
+    id: 'trabalhista-assedio-moral',
+    templateType: 'trabalhista',
+    title: 'Reclamação Trabalhista - Assédio Moral',
+    description: 'Template para ação de indenização por assédio moral no trabalho',
+    content: {
+      tribunal: 'Vara do Trabalho de [CIDADE/UF]',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O RECLAMANTE foi admitido pela RECLAMADA em [DATA DE ADMISSÃO], exercendo a função de [CARGO], com salário mensal de R$ [VALOR].
+
+Durante o período laboral, o RECLAMANTE foi vítima de assédio moral praticado por [SUPERIOR HIERÁRQUICO/COLEGA], consistente em condutas abusivas, reiteradas e prolongadas.
+
+As condutas assediadoras incluíram: [DESCREVER: humilhações públicas, críticas excessivas, isolamento, sobrecarga de trabalho, metas inatingíveis, ameaças veladas, etc.].
+
+Os fatos ocorreram no período de [DATA INÍCIO] a [DATA FIM], causando ao RECLAMANTE grave abalo psicológico, conforme atestado médico anexo que comprova [ESPECIFICAR: depressão, ansiedade, síndrome do pânico, etc.].
+
+O ambiente de trabalho tornou-se hostil e degradante, caracterizando a rescisão indireta do contrato de trabalho.`,
+      fundamentosJuridicos: `O assédio moral no ambiente de trabalho viola o princípio constitucional da dignidade da pessoa humana (CF/88, art. 1º, III) e o direito à honra e à imagem (CF/88, art. 5º, X).
+
+A CLT, em seu artigo 483, alíneas 'a', 'b' e 'e', prevê a rescisão indireta quando o empregador ou seus prepostos praticam atos lesivos contra o empregado.
+
+O artigo 186 do Código Civil estabelece que comete ato ilícito aquele que, por ação ou omissão, viola direito e causa dano a outrem. O artigo 927 do mesmo diploma determina a obrigação de reparar o dano.
+
+A jurisprudência do TST consolidou entendimento de que o assédio moral enseja indenização por danos morais, independentemente de prova específica do prejuízo psicológico.`,
+      pedidos: `Ante o exposto, requer-se:
+
+a) A declaração da rescisão indireta do contrato de trabalho, com base no art. 483 da CLT;
+
+b) A condenação da RECLAMADA ao pagamento das verbas rescisórias: aviso prévio, 13º salário proporcional, férias proporcionais + 1/3, liberação do FGTS + multa de 40%;
+
+c) A condenação ao pagamento de indenização por danos morais no valor de R$ [VALOR];
+
+d) A condenação ao pagamento de honorários advocatícios de 15%;
+
+e) A produção de todos os meios de prova em direito admitidos.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'assedio',
+      legalBasis: [
+        { law: 'CF/88', article: 'Art. 1º, III', description: 'Dignidade da pessoa humana' },
+        { law: 'CF/88', article: 'Art. 5º, X', description: 'Direito à honra e imagem' },
+        { law: 'CLT', article: 'Art. 483', description: 'Rescisão indireta' },
+        { law: 'CC', article: 'Art. 186/927', description: 'Responsabilidade civil' }
+      ],
+      requiredDocuments: [
+        'CTPS ou contrato de trabalho',
+        'Atestados médicos/psicológicos',
+        'E-mails ou mensagens comprobatórias',
+        'Relação de testemunhas'
+      ],
+      courtCompetency: ['justica_trabalho'],
+      proceduralType: 'sumarissimo'
+    },
+    visualConfig: {
+      icon: 'Briefcase',
+      colorScheme: 'amber',
+      showTimeline: true,
+      showValueChart: true
+    }
+  },
+  {
+    id: 'trabalhista-acidente-trabalho',
+    templateType: 'trabalhista',
+    title: 'Reclamação Trabalhista - Acidente de Trabalho',
+    description: 'Template para ação por acidente de trabalho ou doença ocupacional',
+    content: {
+      tribunal: 'Vara do Trabalho de [CIDADE/UF]',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O RECLAMANTE foi admitido pela RECLAMADA em [DATA], exercendo a função de [CARGO], com salário mensal de R$ [VALOR].
+
+Em [DATA DO ACIDENTE], o RECLAMANTE sofreu acidente de trabalho típico/doença ocupacional, durante o exercício de suas funções, consistente em [DESCREVER O ACIDENTE/DOENÇA].
+
+O acidente resultou em [DESCREVER LESÕES/SEQUELAS], conforme laudo médico anexo, com afastamento de [PERÍODO] e redução da capacidade laborativa em [PERCENTUAL]%.
+
+A empresa não forneceu EPI adequado / não observou as normas de segurança / não emitiu a CAT (Comunicação de Acidente de Trabalho) no prazo legal.
+
+O RECLAMANTE foi dispensado em [DATA], ainda incapacitado para o trabalho.`,
+      fundamentosJuridicos: `A Constituição Federal, em seu artigo 7º, XXVIII, assegura ao trabalhador "seguro contra acidentes de trabalho, a cargo do empregador, sem excluir a indenização a que este está obrigado, quando incorrer em dolo ou culpa".
+
+A CLT, nos artigos 19 a 21, define acidente de trabalho e equipara a doença profissional e do trabalho.
+
+A Lei 8.213/91 estabelece os direitos previdenciários decorrentes de acidente de trabalho, incluindo a estabilidade provisória de 12 meses (art. 118).
+
+O artigo 927, parágrafo único, do Código Civil prevê a responsabilidade objetiva do empregador em atividades de risco.
+
+A Súmula 378 do TST garante a estabilidade acidentária ao empregado afastado por período superior a 15 dias.`,
+      pedidos: `Ante o exposto, requer-se:
+
+a) A declaração da nulidade da dispensa por violação à estabilidade acidentária;
+
+b) A reintegração ao emprego ou, alternativamente, indenização correspondente ao período de estabilidade;
+
+c) A condenação ao pagamento de indenização por danos morais no valor de R$ [VALOR];
+
+d) A condenação ao pagamento de indenização por danos materiais (lucros cessantes e danos emergentes);
+
+e) A condenação ao pagamento de pensão mensal vitalícia correspondente à redução da capacidade laborativa;
+
+f) Honorários advocatícios de 15%.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'acidente',
+      legalBasis: [
+        { law: 'CF/88', article: 'Art. 7º, XXVIII', description: 'Seguro contra acidentes' },
+        { law: 'CLT', article: 'Art. 19-21', description: 'Acidente de trabalho' },
+        { law: 'Lei 8.213/91', article: 'Art. 118', description: 'Estabilidade provisória' },
+        { law: 'CC', article: 'Art. 927', description: 'Responsabilidade civil' }
+      ],
+      requiredDocuments: [
+        'CAT - Comunicação de Acidente de Trabalho',
+        'Laudos médicos e exames',
+        'Perícia médica do INSS',
+        'Comprovantes de despesas médicas',
+        'PPP - Perfil Profissiográfico Previdenciário'
+      ],
+      courtCompetency: ['justica_trabalho'],
+      proceduralType: 'ordinario'
+    },
+    visualConfig: {
+      icon: 'Briefcase',
+      colorScheme: 'amber',
+      showTimeline: true,
+      showValueChart: true
+    }
+  },
+  {
+    id: 'trabalhista-adicional-insalubridade',
+    templateType: 'trabalhista',
+    title: 'Reclamação Trabalhista - Adicional de Insalubridade',
+    description: 'Template para ação de adicional de insalubridade',
+    content: {
+      tribunal: 'Vara do Trabalho de [CIDADE/UF]',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O RECLAMANTE foi admitido pela RECLAMADA em [DATA], exercendo a função de [CARGO], com salário mensal de R$ [VALOR].
+
+Durante todo o contrato de trabalho, o RECLAMANTE laborou em condições insalubres, exposto a [AGENTE NOCIVO: ruído, calor, agentes químicos, agentes biológicos, etc.], sem a devida proteção e sem receber o adicional de insalubridade.
+
+As atividades desempenhadas pelo RECLAMANTE estão elencadas na NR-15 como insalubres em grau [mínimo/médio/máximo].
+
+A empresa não forneceu EPI adequado para neutralizar a insalubridade, ou os EPIs fornecidos eram insuficientes/inadequados.
+
+O contrato foi rescindido em [DATA], sem que a RECLAMADA efetuasse o pagamento do adicional devido.`,
+      fundamentosJuridicos: `A CLT, em seu artigo 189, estabelece que serão consideradas atividades insalubres aquelas que exponham os empregados a agentes nocivos à saúde, acima dos limites de tolerância.
+
+O artigo 192 da CLT prevê o adicional de insalubridade de 40%, 20% e 10% do salário mínimo, conforme o grau máximo, médio e mínimo, respectivamente.
+
+A NR-15 do Ministério do Trabalho relaciona as atividades e operações insalubres e os respectivos limites de tolerância.
+
+A Súmula 80 do TST estabelece que "a eliminação da insalubridade mediante fornecimento de EPI eficaz não gera direito à percepção do adicional".
+
+A Súmula 289 do TST dispõe que "o simples fornecimento do EPI não exime o empregador do pagamento do adicional de insalubridade".`,
+      pedidos: `Ante o exposto, requer-se:
+
+a) A condenação da RECLAMADA ao pagamento do adicional de insalubridade em grau [GRAU], sobre todo o período contratual;
+
+b) Os reflexos do adicional de insalubridade em: férias + 1/3, 13º salário, FGTS, aviso prévio, DSR;
+
+c) A realização de perícia técnica para comprovação da insalubridade;
+
+d) A produção de prova testemunhal;
+
+e) Honorários advocatícios de 15%.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'insalubridade',
+      legalBasis: [
+        { law: 'CLT', article: 'Art. 189-192', description: 'Atividades insalubres' },
+        { law: 'NR-15', article: 'Anexos', description: 'Limites de tolerância' },
+        { law: 'TST', article: 'Súmula 80', description: 'Eliminação da insalubridade' },
+        { law: 'TST', article: 'Súmula 289', description: 'Fornecimento de EPI' }
+      ],
+      requiredDocuments: [
+        'CTPS ou contrato de trabalho',
+        'Contracheques',
+        'PPP - Perfil Profissiográfico Previdenciário',
+        'LTCAT (se disponível)',
+        'Relação de testemunhas'
+      ],
+      courtCompetency: ['justica_trabalho'],
+      proceduralType: 'sumarissimo'
+    },
+    visualConfig: {
+      icon: 'Briefcase',
+      colorScheme: 'amber',
+      showTimeline: false,
+      showValueChart: true
+    }
+  },
+  {
+    id: 'trabalhista-equiparacao-salarial',
+    templateType: 'trabalhista',
+    title: 'Reclamação Trabalhista - Equiparação Salarial',
+    description: 'Template para ação de equiparação salarial',
+    content: {
+      tribunal: 'Vara do Trabalho de [CIDADE/UF]',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O RECLAMANTE foi admitido pela RECLAMADA em [DATA], exercendo a função de [CARGO], com salário mensal de R$ [VALOR].
+
+Durante o contrato de trabalho, o RECLAMANTE exerceu as mesmas funções do paradigma [NOME DO PARADIGMA], que recebia salário de R$ [VALOR DO PARADIGMA].
+
+Ambos trabalhavam no mesmo estabelecimento, com a mesma produtividade e perfeição técnica, havendo diferença de tempo na função inferior a 4 anos e diferença de tempo no emprego inferior a 2 anos.
+
+A diferença salarial não se justifica por qualquer critério objetivo, configurando clara discriminação.`,
+      fundamentosJuridicos: `O artigo 461 da CLT estabelece: "Sendo idêntica a função, a todo trabalho de igual valor, prestado ao mesmo empregador, no mesmo estabelecimento empresarial, corresponderá igual salário, sem distinção de sexo, etnia, nacionalidade ou idade".
+
+O §1º define trabalho de igual valor como "o que for feito com igual produtividade e com a mesma perfeição técnica, entre pessoas cuja diferença de tempo de serviço para o mesmo empregador não seja superior a quatro anos e a diferença de tempo na função não seja superior a dois anos".
+
+A Constituição Federal, artigo 7º, XXX, proíbe diferença de salários por motivo de sexo, idade, cor ou estado civil.
+
+A Súmula 6 do TST consolida os requisitos para a equiparação salarial.`,
+      pedidos: `Ante o exposto, requer-se:
+
+a) A condenação da RECLAMADA ao pagamento das diferenças salariais decorrentes da equiparação com o paradigma;
+
+b) Os reflexos das diferenças em: férias + 1/3, 13º salário, FGTS + 40%, aviso prévio, DSR;
+
+c) A retificação da CTPS para constar a função correta;
+
+d) Honorários advocatícios de 15%;
+
+e) A produção de prova testemunhal e documental.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'equiparacao',
+      legalBasis: [
+        { law: 'CLT', article: 'Art. 461', description: 'Equiparação salarial' },
+        { law: 'CF/88', article: 'Art. 7º, XXX', description: 'Proibição de discriminação' },
+        { law: 'TST', article: 'Súmula 6', description: 'Requisitos da equiparação' }
+      ],
+      requiredDocuments: [
+        'CTPS ou contrato de trabalho',
+        'Contracheques do reclamante',
+        'Contracheques do paradigma (se disponíveis)',
+        'Descrição das funções exercidas',
+        'Relação de testemunhas'
+      ],
+      courtCompetency: ['justica_trabalho'],
+      proceduralType: 'sumarissimo'
+    },
+    visualConfig: {
+      icon: 'Briefcase',
+      colorScheme: 'amber',
+      showTimeline: false,
+      showValueChart: true
+    }
+  },
+  {
+    id: 'trabalhista-reconhecimento-vinculo',
+    templateType: 'trabalhista',
+    title: 'Reclamação Trabalhista - Reconhecimento de Vínculo',
+    description: 'Template para ação de reconhecimento de vínculo empregatício',
+    content: {
+      tribunal: 'Vara do Trabalho de [CIDADE/UF]',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O RECLAMANTE prestou serviços para a RECLAMADA no período de [DATA INÍCIO] a [DATA FIM], exercendo a função de [FUNÇÃO], sem que fosse formalizado o contrato de trabalho.
+
+A relação de emprego estava caracterizada pela presença de todos os requisitos do artigo 3º da CLT:
+
+a) PESSOALIDADE: O RECLAMANTE era obrigado a prestar os serviços pessoalmente, não podendo ser substituído;
+
+b) NÃO EVENTUALIDADE: O trabalho era contínuo, [DIAS/SEMANA], no horário de [HORÁRIO];
+
+c) ONEROSIDADE: O RECLAMANTE recebia remuneração mensal de R$ [VALOR];
+
+d) SUBORDINAÇÃO: O RECLAMANTE estava subordinado às ordens da RECLAMADA, que determinava [FORMA DE CONTROLE].
+
+Apesar da relação de emprego, a RECLAMADA não efetuou o registro na CTPS nem pagou as verbas trabalhistas devidas.`,
+      fundamentosJuridicos: `O artigo 3º da CLT define empregado como "toda pessoa física que prestar serviços de natureza não eventual a empregador, sob a dependência deste e mediante salário".
+
+O artigo 2º da CLT define empregador como "a empresa, individual ou coletiva, que, assumindo os riscos da atividade econômica, admite, assalaria e dirige a prestação pessoal de serviço".
+
+A Súmula 212 do TST estabelece: "O ônus de provar o término do contrato de trabalho, quando negados a prestação de serviço e o despedimento, é do empregador".
+
+O princípio da primazia da realidade determina que os fatos prevalecem sobre a forma, independentemente da denominação dada pelas partes ao contrato.`,
+      pedidos: `Ante o exposto, requer-se:
+
+a) O reconhecimento do vínculo empregatício no período de [DATA] a [DATA], com a função de [FUNÇÃO] e salário de R$ [VALOR];
+
+b) A anotação do contrato de trabalho na CTPS;
+
+c) O pagamento de todas as verbas rescisórias: aviso prévio, 13º salário, férias + 1/3, FGTS + 40%;
+
+d) O recolhimento do FGTS de todo o período;
+
+e) A entrega das guias para saque do FGTS e seguro-desemprego;
+
+f) Honorários advocatícios de 15%.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'vinculo',
+      legalBasis: [
+        { law: 'CLT', article: 'Art. 2º', description: 'Definição de empregador' },
+        { law: 'CLT', article: 'Art. 3º', description: 'Definição de empregado' },
+        { law: 'TST', article: 'Súmula 212', description: 'Ônus da prova' }
+      ],
+      requiredDocuments: [
+        'Comprovantes de pagamento recebidos',
+        'E-mails, mensagens ou comunicações de trabalho',
+        'Fotos ou vídeos no local de trabalho',
+        'Crachá ou uniforme (se houver)',
+        'Relação de testemunhas'
+      ],
+      courtCompetency: ['justica_trabalho'],
+      proceduralType: 'ordinario'
+    },
+    visualConfig: {
+      icon: 'Briefcase',
+      colorScheme: 'amber',
+      showTimeline: true,
+      showValueChart: true
+    }
+  },
 
   // ===== TEMPLATES CRIMINAIS =====
   {
@@ -708,6 +1045,295 @@ Termos em que,
 Pede deferimento.`
     }
   },
+  {
+    id: 'tributario-embargos-execucao-fiscal',
+    templateType: 'tributario',
+    title: 'Embargos à Execução Fiscal',
+    description: 'Template para embargos à execução fiscal',
+    content: {
+      tribunal: 'Vara da Fazenda Pública / Vara Federal',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O EMBARGANTE foi citado nos autos da Execução Fiscal nº [NÚMERO], ajuizada pelo EMBARGADO, para pagamento de R$ [VALOR], referente a [TIPO DO TRIBUTO: IPTU, ISS, ICMS, IR, etc.].
+
+A garantia do juízo foi efetivada mediante [DEPÓSITO/PENHORA/FIANÇA] no valor de R$ [VALOR], conforme comprovante anexo.
+
+A Certidão de Dívida Ativa que embasa a execução contém irregularidades que a tornam nula/inexigível, conforme será demonstrado.
+
+[DESCREVER OS VÍCIOS: ausência de notificação prévia, erro no cálculo, prescrição, pagamento já efetuado, ilegitimidade passiva, etc.]`,
+      fundamentosJuridicos: `Os Embargos à Execução Fiscal são regulados pela Lei 6.830/80 (LEF) e subsidiariamente pelo CPC.
+
+O artigo 16 da LEF estabelece que "o executado oferecerá embargos, no prazo de 30 dias, contados do depósito, da juntada da prova da fiança bancária ou do seguro garantia ou da intimação da penhora".
+
+O artigo 2º, §5º da LEF elenca os requisitos da CDA, cuja inobservância acarreta nulidade (§8º).
+
+O artigo 174 do CTN estabelece a prescrição quinquenal do crédito tributário: "A ação para a cobrança do crédito tributário prescreve em cinco anos, contados da data da sua constituição definitiva".
+
+O artigo 156, V do CTN prevê a extinção do crédito pela prescrição.`,
+      pedidos: `Ante o exposto, requer-se:
+
+a) O recebimento dos presentes embargos com efeito suspensivo;
+
+b) A intimação do EMBARGADO para impugná-los;
+
+c) A procedência dos embargos para:
+   - Declarar a nulidade da CDA por [MOTIVO];
+   - Reconhecer a prescrição do crédito tributário;
+   - Extinguir a execução fiscal;
+
+d) A condenação do EMBARGADO ao pagamento de honorários advocatícios;
+
+e) A liberação da garantia após o trânsito em julgado.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'execucao-fiscal',
+      legalBasis: [
+        { law: 'Lei 6.830/80', article: 'Art. 16', description: 'Embargos à execução' },
+        { law: 'Lei 6.830/80', article: 'Art. 2º, §5º', description: 'Requisitos da CDA' },
+        { law: 'CTN', article: 'Art. 174', description: 'Prescrição' },
+        { law: 'CTN', article: 'Art. 156', description: 'Extinção do crédito' }
+      ],
+      requiredDocuments: [
+        'Certidão de Dívida Ativa',
+        'Comprovante de garantia do juízo',
+        'Comprovantes de pagamento (se houver)',
+        'Documentos que comprovem os vícios alegados'
+      ],
+      deadlines: [
+        { type: 'prazo processual', days: 30, description: 'Prazo para oposição de embargos' }
+      ],
+      courtCompetency: ['justica_estadual', 'justica_federal'],
+      proceduralType: 'especial'
+    },
+    visualConfig: {
+      icon: 'Building2',
+      colorScheme: 'green',
+      showTimeline: true,
+      showValueChart: true
+    }
+  },
+  {
+    id: 'tributario-mandado-seguranca',
+    templateType: 'tributario',
+    title: 'Mandado de Segurança Tributário',
+    description: 'Template para mandado de segurança em matéria tributária',
+    content: {
+      tribunal: 'Vara da Fazenda Pública / Vara Federal',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O IMPETRANTE é contribuinte de [TRIBUTO], exercendo atividade de [DESCRIÇÃO DA ATIVIDADE].
+
+Em [DATA], a autoridade coatora [DESCREVER O ATO COATOR: autuação fiscal, exigência indevida, negativa de certidão, cobrança ilegal, etc.].
+
+O ato é manifestamente ilegal/abusivo porque [FUNDAMENTAR].
+
+O IMPETRANTE possui direito líquido e certo de não se submeter à exigência ilegal, conforme provas pré-constituídas anexas.
+
+Não há recurso administrativo com efeito suspensivo, sendo necessária a tutela judicial.`,
+      fundamentosJuridicos: `O mandado de segurança é garantia constitucional prevista no artigo 5º, LXIX da CF/88: "conceder-se-á mandado de segurança para proteger direito líquido e certo, não amparado por habeas corpus ou habeas data, quando o responsável pela ilegalidade ou abuso de poder for autoridade pública".
+
+A Lei 12.016/2009 regulamenta o mandado de segurança.
+
+O artigo 7º, III da Lei 12.016/2009 permite a suspensão liminar do ato impugnado quando "houver fundamento relevante e do ato impugnado puder resultar a ineficácia da medida".
+
+A Súmula 266 do STF não impede o mandado de segurança contra lei tributária de efeitos concretos.
+
+A Súmula 213 do STJ determina que "o mandado de segurança constitui ação adequada para a declaração do direito à compensação tributária".`,
+      pedidos: `Ante o exposto, requer-se:
+
+a) A concessão de LIMINAR para suspender a exigibilidade do crédito tributário / permitir a expedição de certidão / afastar a exigência ilegal;
+
+b) A notificação da autoridade coatora para prestar informações;
+
+c) A intimação do órgão de representação judicial da pessoa jurídica interessada;
+
+d) A oitiva do Ministério Público;
+
+e) A concessão definitiva da segurança para:
+   - Declarar a ilegalidade do ato coator;
+   - Assegurar o direito do IMPETRANTE de [ESPECIFICAR];
+
+f) A condenação ao pagamento de honorários advocatícios.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'mandado-seguranca',
+      legalBasis: [
+        { law: 'CF/88', article: 'Art. 5º, LXIX', description: 'Mandado de segurança' },
+        { law: 'Lei 12.016/2009', article: 'Art. 1º', description: 'Cabimento' },
+        { law: 'Lei 12.016/2009', article: 'Art. 7º', description: 'Liminar' },
+        { law: 'CTN', article: 'Art. 151, IV', description: 'Suspensão da exigibilidade' }
+      ],
+      requiredDocuments: [
+        'Prova pré-constituída do direito',
+        'Ato coator (notificação, auto de infração)',
+        'Documentos que comprovem a ilegalidade',
+        'Procuração com poderes especiais'
+      ],
+      deadlines: [
+        { type: 'decadência', days: 120, description: 'Prazo para impetração' }
+      ],
+      courtCompetency: ['justica_estadual', 'justica_federal'],
+      proceduralType: 'especial'
+    },
+    visualConfig: {
+      icon: 'Building2',
+      colorScheme: 'green',
+      showTimeline: true,
+      showValueChart: true
+    }
+  },
+  {
+    id: 'tributario-anulatoria-debito',
+    templateType: 'tributario',
+    title: 'Ação Anulatória de Débito Fiscal',
+    description: 'Template para ação anulatória de lançamento tributário',
+    content: {
+      tribunal: 'Vara da Fazenda Pública / Vara Federal',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O AUTOR foi autuado pela FAZENDA PÚBLICA RÉ através do Auto de Infração nº [NÚMERO], lavrado em [DATA], no valor de R$ [VALOR], referente a [TRIBUTO].
+
+O lançamento tributário é nulo/inexigível pelos seguintes motivos:
+
+[DESCREVER OS VÍCIOS: erro de fato, erro de direito, ausência de fato gerador, base de cálculo incorreta, alíquota indevida, isenção/imunidade, decadência do direito de lançar, etc.]
+
+O AUTOR apresentou impugnação administrativa em [DATA], que foi [indeferida/não apreciada no prazo legal].
+
+O crédito tributário encontra-se em cobrança, gerando risco de inscrição em dívida ativa e restrições ao AUTOR.`,
+      fundamentosJuridicos: `A ação anulatória encontra fundamento no artigo 38 da Lei 6.830/80, que assegura ao contribuinte o direito de discutir a dívida em ação judicial.
+
+O artigo 145 do CTN prevê as hipóteses de alteração do lançamento, incluindo a impugnação do sujeito passivo.
+
+O artigo 173 do CTN estabelece a decadência do direito de a Fazenda constituir o crédito tributário: "O direito de a Fazenda Pública constituir o crédito tributário extingue-se após 5 (cinco) anos".
+
+[INCLUIR FUNDAMENTAÇÃO ESPECÍFICA DO VÍCIO ALEGADO]
+
+O contribuinte não é obrigado a pagar tributo indevido, sendo legítima a resistência à pretensão fazendária contrária à lei.`,
+      pedidos: `Ante o exposto, requer-se:
+
+a) A concessão de tutela de urgência para suspender a exigibilidade do crédito tributário, mediante depósito judicial ou sem garantia;
+
+b) A citação da RÉ para contestar;
+
+c) A procedência da ação para:
+   - Declarar a nulidade do Auto de Infração nº [NÚMERO];
+   - Cancelar o crédito tributário inscrito/a inscrever;
+   - Impedir a inscrição em dívida ativa e cadastros restritivos;
+
+d) A condenação da RÉ ao pagamento de honorários advocatícios;
+
+e) A produção de provas.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'anulatoria',
+      legalBasis: [
+        { law: 'Lei 6.830/80', article: 'Art. 38', description: 'Ação judicial' },
+        { law: 'CTN', article: 'Art. 145', description: 'Alteração do lançamento' },
+        { law: 'CTN', article: 'Art. 173', description: 'Decadência' },
+        { law: 'CPC', article: 'Art. 19', description: 'Interesse de agir' }
+      ],
+      requiredDocuments: [
+        'Auto de infração ou notificação',
+        'Documentos contábeis/fiscais',
+        'Impugnação administrativa e decisão',
+        'Provas do vício alegado'
+      ],
+      courtCompetency: ['justica_estadual', 'justica_federal'],
+      proceduralType: 'ordinario'
+    },
+    visualConfig: {
+      icon: 'Building2',
+      colorScheme: 'green',
+      showTimeline: true,
+      showValueChart: true
+    }
+  },
+  {
+    id: 'tributario-repeticao-indebito',
+    templateType: 'tributario',
+    title: 'Ação de Repetição de Indébito Tributário',
+    description: 'Template para restituição de tributo pago indevidamente',
+    content: {
+      tribunal: 'Vara da Fazenda Pública / Vara Federal',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O AUTOR é contribuinte de [TRIBUTO], tendo efetuado recolhimentos no período de [DATA INÍCIO] a [DATA FIM].
+
+Ocorre que os pagamentos foram efetuados indevidamente / a maior, pelos seguintes motivos:
+
+[DESCREVER: tributo declarado inconstitucional, base de cálculo incorreta, alíquota indevida, pagamento em duplicidade, erro de fato, etc.]
+
+O total pago indevidamente perfaz R$ [VALOR], conforme planilha de cálculo e comprovantes de pagamento anexos.
+
+O AUTOR requereu administrativamente a restituição em [DATA], obtendo [negativa/silêncio da administração].`,
+      fundamentosJuridicos: `O direito à repetição de indébito tributário está previsto no artigo 165 do CTN:
+
+"O sujeito passivo tem direito, independentemente de prévio protesto, à restituição total ou parcial do tributo, seja qual for a modalidade do seu pagamento (...), nos seguintes casos:
+I - cobrança ou pagamento espontâneo de tributo indevido ou maior que o devido;
+II - erro na identificação do sujeito passivo, na determinação da alíquota aplicável, no cálculo do montante do débito ou na elaboração ou conferência de qualquer documento relativo ao pagamento".
+
+O artigo 167 do CTN assegura a restituição com juros e correção monetária.
+
+A Súmula 162 do STJ determina que "na repetição de indébito tributário, a correção monetária incide a partir do pagamento indevido".
+
+O prazo prescricional é de 5 anos, nos termos do artigo 168 do CTN.`,
+      pedidos: `Ante o exposto, requer-se:
+
+a) A citação da RÉ para contestar;
+
+b) A procedência da ação para:
+   - Declarar indevidos os pagamentos efetuados a título de [TRIBUTO];
+   - Condenar a RÉ à restituição de R$ [VALOR], corrigido pela SELIC desde cada pagamento indevido;
+
+c) Alternativamente, a compensação dos valores com débitos vincendos do mesmo tributo;
+
+d) A condenação da RÉ ao pagamento de honorários advocatícios;
+
+e) A produção de provas.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'repeticao-indebito',
+      legalBasis: [
+        { law: 'CTN', article: 'Art. 165', description: 'Direito à restituição' },
+        { law: 'CTN', article: 'Art. 167', description: 'Juros e correção' },
+        { law: 'CTN', article: 'Art. 168', description: 'Prazo prescricional' },
+        { law: 'CF/88', article: 'Art. 150, §7º', description: 'Restituição de ST' }
+      ],
+      requiredDocuments: [
+        'Guias de recolhimento (DARFs, GAREs, etc.)',
+        'Demonstrativo de cálculo',
+        'Requerimento administrativo e resposta',
+        'Documentos que comprovem o indébito'
+      ],
+      deadlines: [
+        { type: 'prescrição', days: 1825, description: '5 anos para pleitear restituição' }
+      ],
+      courtCompetency: ['justica_estadual', 'justica_federal'],
+      proceduralType: 'ordinario'
+    },
+    visualConfig: {
+      icon: 'Building2',
+      colorScheme: 'green',
+      showTimeline: false,
+      showValueChart: true
+    }
+  },
 
   // ===== TEMPLATES CONSUMIDOR =====
   {
@@ -825,6 +1451,289 @@ Dá-se à causa o valor de R$ [VALOR].
 
 Termos em que,
 Pede deferimento.`
+    }
+  },
+  {
+    id: 'consumidor-praticas-abusivas',
+    templateType: 'consumidor',
+    title: 'Ação por Práticas Abusivas (Art. 39 CDC)',
+    description: 'Template para ação contra práticas abusivas do fornecedor',
+    content: {
+      tribunal: 'Juizado Especial Cível / Vara Cível',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O AUTOR é consumidor dos serviços/produtos oferecidos pelo RÉU, conforme documentos anexos.
+
+Em [DATA], o RÉU praticou conduta abusiva consistente em [DESCREVER A PRÁTICA: venda casada, recusa de atendimento, envio de produto não solicitado, execução de serviço não solicitado, elevação injustificada de preços, etc.].
+
+Especificamente, o RÉU [DETALHAR A CONDUTA ABUSIVA].
+
+O AUTOR tentou resolver a questão administrativamente através de [DESCREVER: reclamação no SAC, PROCON, etc.], sem sucesso.
+
+A conduta causou ao AUTOR prejuízos de R$ [VALOR] e abalo moral pela situação vexatória.`,
+      fundamentosJuridicos: `O artigo 39 do CDC estabelece rol de práticas abusivas vedadas ao fornecedor, incluindo:
+
+I - condicionar o fornecimento de produto ou serviço ao fornecimento de outro (venda casada);
+II - recusar atendimento às demandas dos consumidores;
+III - enviar ou entregar ao consumidor produto ou serviço não solicitado;
+IV - prevalecer-se da fraqueza ou ignorância do consumidor;
+V - exigir do consumidor vantagem manifestamente excessiva.
+
+O artigo 6º, III do CDC garante ao consumidor "a informação adequada e clara sobre os diferentes produtos e serviços".
+
+O artigo 51 do CDC declara nulas de pleno direito as cláusulas contratuais abusivas.
+
+A prática abusiva gera direito à reparação integral dos danos, conforme artigos 6º, VI e 14 do CDC.`,
+      pedidos: `Diante do exposto, requer-se:
+
+a) A declaração de nulidade da prática abusiva;
+
+b) A condenação do RÉU a cessar a conduta abusiva;
+
+c) A condenação ao pagamento de indenização por danos materiais no valor de R$ [VALOR];
+
+d) A condenação ao pagamento de indenização por danos morais no valor de R$ [VALOR];
+
+e) A inversão do ônus da prova, nos termos do art. 6º, VIII do CDC;
+
+f) A produção de todas as provas em direito admitidas.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'praticas-abusivas',
+      legalBasis: [
+        { law: 'CDC', article: 'Art. 39', description: 'Práticas abusivas vedadas' },
+        { law: 'CDC', article: 'Art. 6º, III', description: 'Direito à informação' },
+        { law: 'CDC', article: 'Art. 51', description: 'Cláusulas abusivas' }
+      ],
+      requiredDocuments: [
+        'Contrato ou comprovante de compra',
+        'Comprovantes da prática abusiva',
+        'Protocolo de reclamação (SAC/PROCON)',
+        'Comprovantes de prejuízo'
+      ],
+      courtCompetency: ['juizado_especial_civel', 'justica_estadual'],
+      proceduralType: 'sumarissimo'
+    },
+    visualConfig: {
+      icon: 'ShoppingCart',
+      colorScheme: 'purple',
+      showTimeline: false,
+      showValueChart: true
+    }
+  },
+  {
+    id: 'consumidor-publicidade-enganosa',
+    templateType: 'consumidor',
+    title: 'Ação por Publicidade Enganosa',
+    description: 'Template para ação contra publicidade enganosa ou abusiva',
+    content: {
+      tribunal: 'Juizado Especial Cível / Vara Cível',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O AUTOR adquiriu o produto/serviço [DESCREVER] do RÉU em [DATA], pelo valor de R$ [VALOR], motivado pela publicidade veiculada em [MEIO: TV, internet, redes sociais, etc.].
+
+A publicidade informava que o produto/serviço [DESCREVER PROMESSAS DA PUBLICIDADE].
+
+Contudo, ao receber o produto/utilizar o serviço, o AUTOR constatou que [DESCREVER A DIVERGÊNCIA entre o prometido e o entregue].
+
+A publicidade era manifestamente enganosa, pois [induziu o consumidor a erro quanto às características do produto/omitiu informação essencial/fez afirmação falsa].
+
+O AUTOR anexa prints da publicidade e fotos do produto recebido como prova da divergência.`,
+      fundamentosJuridicos: `O artigo 37 do CDC proíbe toda publicidade enganosa ou abusiva:
+
+§1º É enganosa qualquer modalidade de informação ou comunicação de caráter publicitário, inteira ou parcialmente falsa, ou, por qualquer outro modo, mesmo por omissão, capaz de induzir em erro o consumidor.
+
+§2º É abusiva a publicidade discriminatória, que incite à violência, explore o medo ou a superstição, ou que desrespeite valores ambientais.
+
+O artigo 30 do CDC vincula a oferta: "Toda informação ou publicidade, suficientemente precisa, veiculada por qualquer forma ou meio de comunicação com relação a produtos e serviços oferecidos ou apresentados, obriga o fornecedor que a fizer veicular".
+
+O artigo 35 do CDC confere ao consumidor o direito de exigir o cumprimento forçado da obrigação, aceitar outro produto equivalente, ou rescindir o contrato com direito à restituição e perdas e danos.`,
+      pedidos: `Diante do exposto, requer-se:
+
+a) O cumprimento forçado da oferta publicitária; OU
+b) A rescisão do contrato com restituição integral dos valores pagos;
+
+c) A condenação ao pagamento de indenização por danos materiais;
+
+d) A condenação ao pagamento de indenização por danos morais no valor de R$ [VALOR];
+
+e) A inversão do ônus da prova;
+
+f) Honorários advocatícios.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'publicidade-enganosa',
+      legalBasis: [
+        { law: 'CDC', article: 'Art. 37', description: 'Publicidade enganosa e abusiva' },
+        { law: 'CDC', article: 'Art. 30', description: 'Vinculação da oferta' },
+        { law: 'CDC', article: 'Art. 35', description: 'Descumprimento da oferta' },
+        { law: 'CDC', article: 'Art. 67', description: 'Crime de publicidade enganosa' }
+      ],
+      requiredDocuments: [
+        'Print/captura da publicidade',
+        'Comprovante de compra',
+        'Fotos do produto recebido',
+        'Comparativo entre oferta e produto'
+      ],
+      courtCompetency: ['juizado_especial_civel', 'justica_estadual'],
+      proceduralType: 'sumarissimo'
+    },
+    visualConfig: {
+      icon: 'ShoppingCart',
+      colorScheme: 'purple',
+      showTimeline: false,
+      showValueChart: true
+    }
+  },
+  {
+    id: 'consumidor-clausulas-abusivas',
+    templateType: 'consumidor',
+    title: 'Ação Declaratória de Nulidade de Cláusula Abusiva',
+    description: 'Template para declarar nulidade de cláusulas contratuais abusivas',
+    content: {
+      tribunal: 'Vara Cível',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O AUTOR celebrou contrato de [TIPO DE CONTRATO] com o RÉU em [DATA], conforme documento anexo.
+
+Ao analisar o contrato, o AUTOR identificou a presença de cláusulas manifestamente abusivas, especificamente:
+
+CLÁUSULA [Nº]: "[TRANSCREVER A CLÁUSULA]"
+
+Esta cláusula é abusiva porque [FUNDAMENTAR: estabelece obrigação iníqua, coloca consumidor em desvantagem exagerada, estabelece multa excessiva, permite rescisão unilateral pelo fornecedor, etc.].
+
+O AUTOR não teve oportunidade de negociar os termos do contrato, tratando-se de contrato de adesão.
+
+A aplicação desta cláusula causou/causará ao AUTOR prejuízo de R$ [VALOR].`,
+      fundamentosJuridicos: `O artigo 51 do CDC estabelece rol exemplificativo de cláusulas abusivas, declarando-as nulas de pleno direito:
+
+I - impossibilitem, exonerem ou atenuem a responsabilidade do fornecedor;
+IV - estabeleçam obrigações iníquas, abusivas, que coloquem o consumidor em desvantagem exagerada;
+XI - autorizem o fornecedor a cancelar o contrato unilateralmente;
+XV - estabeleçam a perda total das prestações pagas em benefício do credor.
+
+O artigo 47 do CDC determina que "as cláusulas contratuais serão interpretadas de maneira mais favorável ao consumidor".
+
+O artigo 46 do CDC estabelece que os contratos não obrigarão os consumidores se não lhes for dada a oportunidade de tomar conhecimento prévio de seu conteúdo.
+
+A nulidade é de pleno direito, podendo ser declarada de ofício pelo juiz.`,
+      pedidos: `Diante do exposto, requer-se:
+
+a) A declaração de nulidade da cláusula [Nº] do contrato;
+
+b) A revisão do contrato para adequação aos limites legais;
+
+c) A condenação à restituição de valores cobrados com base na cláusula nula;
+
+d) A condenação ao pagamento de indenização por danos morais;
+
+e) A inversão do ônus da prova;
+
+f) A condenação em honorários advocatícios.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'clausulas-abusivas',
+      legalBasis: [
+        { law: 'CDC', article: 'Art. 51', description: 'Cláusulas abusivas' },
+        { law: 'CDC', article: 'Art. 47', description: 'Interpretação favorável' },
+        { law: 'CDC', article: 'Art. 46', description: 'Conhecimento prévio' },
+        { law: 'CDC', article: 'Art. 6º, V', description: 'Modificação de cláusulas' }
+      ],
+      requiredDocuments: [
+        'Contrato completo',
+        'Comprovantes de pagamento',
+        'Comprovantes de prejuízo',
+        'Comunicações com o fornecedor'
+      ],
+      courtCompetency: ['justica_estadual'],
+      proceduralType: 'ordinario'
+    },
+    visualConfig: {
+      icon: 'ShoppingCart',
+      colorScheme: 'purple',
+      showTimeline: false,
+      showValueChart: true
+    }
+  },
+  {
+    id: 'consumidor-recall-defeito',
+    templateType: 'consumidor',
+    title: 'Ação por Recall / Defeito de Fabricação',
+    description: 'Template para ação por defeito de fabricação ou recall não atendido',
+    content: {
+      tribunal: 'Vara Cível',
+      valorCausa: 'R$ [VALOR]',
+      fatos: `O AUTOR adquiriu o produto [DESCRIÇÃO] do RÉU em [DATA], pelo valor de R$ [VALOR], conforme nota fiscal anexa.
+
+O produto apresentou defeito de fabricação consistente em [DESCREVER O DEFEITO], que compromete sua segurança/funcionalidade.
+
+[SE HOUVER RECALL]: O fabricante convocou recall em [DATA], conforme publicação no Diário Oficial/site do fabricante, para correção do defeito. O AUTOR compareceu à assistência técnica em [DATA], porém [DESCREVER: não havia peças disponíveis, o reparo não resolveu o problema, a empresa recusou atendimento, etc.].
+
+[SE NÃO HOUVER RECALL]: Apesar de o defeito ser conhecido e afetar diversos consumidores, o fabricante não convocou recall, colocando consumidores em risco.
+
+O defeito causou ao AUTOR [DESCREVER: acidente, perda do produto, despesas com reparos, etc.] no valor de R$ [VALOR].`,
+      fundamentosJuridicos: `O artigo 12 do CDC estabelece a responsabilidade objetiva do fabricante: "O fabricante, o produtor, o construtor, nacional ou estrangeiro, e o importador respondem, independentemente da existência de culpa, pela reparação dos danos causados aos consumidores por defeitos decorrentes de projeto, fabricação, construção, montagem, fórmulas, manipulação, apresentação ou acondicionamento de seus produtos".
+
+O artigo 18 do CDC trata dos vícios de qualidade do produto, garantindo ao consumidor a substituição, restituição ou abatimento.
+
+O artigo 26, §3º do CDC determina que "tratando-se de vício oculto, o prazo decadencial inicia-se no momento em que ficar evidenciado o defeito".
+
+A obrigação de recall decorre do dever de segurança previsto nos artigos 10 e 12 do CDC.`,
+      pedidos: `Diante do exposto, requer-se:
+
+a) A substituição do produto defeituoso por outro da mesma espécie, em perfeitas condições; OU
+b) A restituição integral do valor pago, corrigido monetariamente;
+
+c) A condenação ao pagamento de indenização por danos materiais emergentes no valor de R$ [VALOR];
+
+d) A condenação ao pagamento de lucros cessantes;
+
+e) A condenação ao pagamento de indenização por danos morais;
+
+f) A inversão do ônus da prova quanto ao defeito;
+
+g) Honorários advocatícios.
+
+Dá-se à causa o valor de R$ [VALOR].
+
+Termos em que,
+Pede deferimento.`
+    },
+    metadata: {
+      category: 'recall',
+      legalBasis: [
+        { law: 'CDC', article: 'Art. 12', description: 'Responsabilidade pelo fato do produto' },
+        { law: 'CDC', article: 'Art. 18', description: 'Vícios de qualidade' },
+        { law: 'CDC', article: 'Art. 10', description: 'Dever de informar periculosidade' },
+        { law: 'CDC', article: 'Art. 26', description: 'Prazo decadencial' }
+      ],
+      requiredDocuments: [
+        'Nota fiscal do produto',
+        'Laudo técnico comprovando o defeito',
+        'Comprovante de recall (se houver)',
+        'Fotos do defeito',
+        'Comprovantes de despesas decorrentes'
+      ],
+      courtCompetency: ['justica_estadual'],
+      proceduralType: 'ordinario'
+    },
+    visualConfig: {
+      icon: 'ShoppingCart',
+      colorScheme: 'purple',
+      showTimeline: true,
+      showValueChart: true
     }
   },
 
