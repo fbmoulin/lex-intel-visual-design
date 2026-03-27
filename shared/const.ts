@@ -31,6 +31,91 @@ export function isValidTemplateType(value: string): value is PetitionTemplateTyp
 }
 
 /**
+ * Tipos de competência judicial
+ */
+export const COURT_TYPES = [
+  'justica_estadual',
+  'justica_federal',
+  'justica_trabalho',
+  'juizado_especial_civel',
+  'juizado_especial_federal',
+  'juizado_especial_fazenda',
+  'tribunal_juri',
+] as const;
+export type CourtType = typeof COURT_TYPES[number];
+
+/**
+ * Tipos de procedimento
+ */
+export const PROCEDURAL_TYPES = [
+  'ordinario',
+  'sumario',
+  'sumarissimo',
+  'especial',
+  'execucao',
+  'cautelar',
+  'monitoria',
+] as const;
+export type ProceduralType = typeof PROCEDURAL_TYPES[number];
+
+/**
+ * Categorias de templates (sub-tipos por área jurídica)
+ */
+export const TEMPLATE_CATEGORIES = {
+  trabalhista: ['rescisao', 'horas-extras', 'assedio', 'acidente', 'vinculo', 'equiparacao'],
+  consumidor: ['vicio-produto', 'cobranca-indevida', 'praticas-abusivas', 'publicidade-enganosa'],
+  tributario: ['restituicao', 'anulatoria', 'execucao-fiscal', 'mandado-seguranca'],
+  civil: ['indenizacao', 'cobranca', 'obrigacao-fazer', 'despejo'],
+  criminal: ['queixa-crime', 'habeas-corpus', 'defesa', 'revisao'],
+  familia: ['divorcio', 'alimentos', 'guarda', 'inventario'],
+  empresarial: ['recuperacao', 'falencia', 'societario', 'contratos'],
+  administrativo: ['mandado-seguranca', 'acao-popular', 'improbidade'],
+  previdenciario: ['aposentadoria', 'auxilio-doenca', 'pensao', 'revisao'],
+  ambiental: ['acao-civil-publica', 'termo-ajustamento', 'licenciamento'],
+} as const;
+
+/**
+ * Limites de valor para tribunais brasileiros
+ */
+export const VALUE_THRESHOLDS = {
+  JEC_ESTADUAL: 40 * 1412, // 40 salários mínimos (2024)
+  JEC_FEDERAL: 60 * 1412,  // 60 salários mínimos
+  ALCADA_RECURSAL: 1000,   // Para recursos
+} as const;
+
+/**
+ * Mapeamento de ícones para tipos de template
+ */
+export const TEMPLATE_TYPE_ICONS = {
+  civil: 'FileText',
+  trabalhista: 'Briefcase',
+  criminal: 'Gavel',
+  tributario: 'Building2',
+  consumidor: 'ShoppingCart',
+  familia: 'Users',
+  empresarial: 'Building',
+  administrativo: 'Landmark',
+  previdenciario: 'ShieldCheck',
+  ambiental: 'Leaf',
+} as const;
+
+/**
+ * Esquemas de cores para tipos de template
+ */
+export const TEMPLATE_TYPE_COLORS = {
+  civil: 'blue',
+  trabalhista: 'amber',
+  criminal: 'red',
+  tributario: 'green',
+  consumidor: 'purple',
+  familia: 'pink',
+  empresarial: 'slate',
+  administrativo: 'cyan',
+  previdenciario: 'orange',
+  ambiental: 'emerald',
+} as const;
+
+/**
  * Limites de tamanho para campos de texto em petições
  */
 export const PETITION_TEXT_LIMITS = {

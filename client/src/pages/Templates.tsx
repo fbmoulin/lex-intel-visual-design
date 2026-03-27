@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Briefcase, Gavel, Building2, ShoppingCart, Search, LucideIcon } from "lucide-react";
+import { FileText, Briefcase, Gavel, Building2, ShoppingCart, Search, LucideIcon, Users, Building, Landmark, ShieldCheck, Leaf } from "lucide-react";
 import { getAllTemplates, PetitionTemplate } from "@/data/petitionTemplates";
 import { useLocation } from "wouter";
 import { Header } from "@/components/Header";
@@ -16,7 +16,13 @@ const TEMPLATE_ICONS: Record<string, LucideIcon> = {
   trabalhista: Briefcase,
   criminal: Gavel,
   tributaria: Building2,
+  tributario: Building2,
   consumidor: ShoppingCart,
+  familia: Users,
+  empresarial: Building,
+  administrativo: Landmark,
+  previdenciario: ShieldCheck,
+  ambiental: Leaf,
 };
 
 /** Template color mapping - defined outside component */
@@ -25,7 +31,13 @@ const TEMPLATE_COLORS: Record<string, string> = {
   trabalhista: "bg-green-500/10 text-green-500",
   criminal: "bg-red-500/10 text-red-500",
   tributaria: "bg-purple-500/10 text-purple-500",
+  tributario: "bg-purple-500/10 text-purple-500",
   consumidor: "bg-amber-500/10 text-amber-500",
+  familia: "bg-pink-500/10 text-pink-500",
+  empresarial: "bg-indigo-500/10 text-indigo-500",
+  administrativo: "bg-slate-500/10 text-slate-500",
+  previdenciario: "bg-teal-500/10 text-teal-500",
+  ambiental: "bg-emerald-500/10 text-emerald-500",
 };
 
 /** Template type labels - defined outside component */
@@ -34,7 +46,13 @@ const TYPE_LABELS: Record<string, string> = {
   trabalhista: "Trabalhista",
   criminal: "Criminal",
   tributaria: "Tributária",
+  tributario: "Tributário",
   consumidor: "Consumidor",
+  familia: "Família",
+  empresarial: "Empresarial",
+  administrativo: "Administrativo",
+  previdenciario: "Previdenciário",
+  ambiental: "Ambiental",
 };
 
 function getTemplateIcon(type: string): LucideIcon {
@@ -114,7 +132,13 @@ export default function Templates() {
                 <SelectItem value="trabalhista">Trabalhista</SelectItem>
                 <SelectItem value="criminal">Criminal</SelectItem>
                 <SelectItem value="tributaria">Tributária</SelectItem>
+                <SelectItem value="tributario">Tributário</SelectItem>
                 <SelectItem value="consumidor">Consumidor</SelectItem>
+                <SelectItem value="familia">Família</SelectItem>
+                <SelectItem value="empresarial">Empresarial</SelectItem>
+                <SelectItem value="administrativo">Administrativo</SelectItem>
+                <SelectItem value="previdenciario">Previdenciário</SelectItem>
+                <SelectItem value="ambiental">Ambiental</SelectItem>
               </SelectContent>
             </Select>
           </div>

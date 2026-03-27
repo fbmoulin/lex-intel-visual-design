@@ -8,6 +8,103 @@
 
 import { PetitionTemplateType } from "@shared/const";
 
+/**
+ * Reference to a specific legal provision
+ */
+export interface LegalReference {
+  /** Law code identifier (e.g., "CLT", "CDC", "CPC") */
+  law: string;
+  /** Article reference (e.g., "Art. 477") */
+  article: string;
+  /** Optional description of the legal provision */
+  description?: string;
+}
+
+/**
+ * Information about applicable legal deadlines
+ */
+export interface DeadlineInfo {
+  /** Type of deadline (e.g., "prescrição", "decadência", "prazo recursal") */
+  type: string;
+  /** Number of days for the deadline */
+  days: number;
+  /** Human-readable description of the deadline */
+  description: string;
+}
+
+/**
+ * Configuration for a visual section in the petition template
+ */
+export interface SectionConfig {
+  /** Unique identifier for the section */
+  id: string;
+  /** Display title for the section */
+  title: string;
+  /** Icon identifier (e.g., Lucide icon name) */
+  icon?: string;
+  /** CSS color class for styling */
+  colorClass?: string;
+  /** Whether the section can be collapsed */
+  collapsible?: boolean;
+}
+
+/**
+ * Conditional field configuration for dynamic form behavior
+ */
+export interface ConditionalField {
+  /** ID of the field to conditionally show/hide */
+  fieldId: string;
+  /** Condition that determines field visibility */
+  condition: {
+    /** ID of the field this condition depends on */
+    dependsOn: string;
+    /** Comparison operator */
+    operator: 'equals' | 'notEquals' | 'contains' | 'greaterThan' | 'lessThan';
+    /** Value to compare against */
+    value: unknown;
+  };
+}
+
+/**
+ * Metadata for petition template categorization and legal context
+ */
+export interface PetitionTemplateMetadata {
+  /** Category for grouping templates */
+  category?: string;
+  /** Legal provisions that form the basis for this petition type */
+  legalBasis?: LegalReference[];
+  /** List of documents typically required for this petition type */
+  requiredDocuments?: string[];
+  /** Applicable legal deadlines */
+  deadlines?: DeadlineInfo[];
+  /** Competent courts for this petition type */
+  courtCompetency?: string[];
+  /** Procedural type (e.g., "ordinário", "sumário", "sumaríssimo") */
+  proceduralType?: string;
+  /** Value thresholds for court competency */
+  valueThreshold?: { min?: number; max?: number };
+}
+
+/**
+ * Visual configuration for petition template display
+ */
+export interface PetitionTemplateVisualConfig {
+  /** Icon identifier for the template */
+  icon?: string;
+  /** Color scheme identifier */
+  colorScheme?: string;
+  /** Section configurations for visual layout */
+  sections?: SectionConfig[];
+  /** Whether to show a timeline visualization */
+  showTimeline?: boolean;
+  /** Whether to show a value/amount chart */
+  showValueChart?: boolean;
+  /** Field IDs to highlight in the UI */
+  highlightFields?: string[];
+  /** Conditional field configurations */
+  conditionalFields?: ConditionalField[];
+}
+
 export interface PetitionTemplate {
   id: string;
   templateType: PetitionTemplateType;
@@ -23,6 +120,10 @@ export interface PetitionTemplate {
     fundamentosJuridicos?: string;
     pedidos?: string;
   };
+  /** Optional metadata for legal context and categorization */
+  metadata?: PetitionTemplateMetadata;
+  /** Optional visual configuration for UI display */
+  visualConfig?: PetitionTemplateVisualConfig;
 }
 
 export const petitionTemplates: PetitionTemplate[] = [
