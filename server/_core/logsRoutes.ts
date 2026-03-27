@@ -98,7 +98,7 @@ export function registerLogsRoutes(app: Express): void {
       if (!parseResult.success) {
         res.status(400).json({
           error: "Invalid query parameters",
-          details: parseResult.error.errors,
+          details: parseResult.error.issues,
         });
         return;
       }
@@ -271,7 +271,7 @@ export function registerLogsRoutes(app: Express): void {
       if (!parseResult.success) {
         res.status(400).json({
           error: "Invalid request body",
-          details: parseResult.error.errors,
+          details: parseResult.error.issues,
         });
         return;
       }

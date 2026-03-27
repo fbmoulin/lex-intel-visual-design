@@ -15,6 +15,7 @@ import {
 import { saveAs } from 'file-saver';
 import type { ExportConfig } from '@/components/ExportModal';
 import type { PetitionExportData } from './exportTypes';
+import { captureException } from './sentry';
 
 /** @deprecated Use PetitionExportData instead */
 export type PetitionDataDOCX = PetitionExportData;
@@ -397,7 +398,11 @@ export async function generatePetitionDOCX(
     const blob = await Packer.toBlob(doc);
     const filename = `peticao_${data.templateId}_${data.processNumber.replace(/\//g, '-')}.docx`;
     saveAs(blob, filename);
-  } catch {
+  } catch (error) {
+    captureException(error instanceof Error ? error : new Error(String(error)), {
+      tags: { feature: 'docx-export' },
+      extra: { templateId: data.templateId, processNumber: data.processNumber },
+    });
     throw new Error('Falha ao gerar documento DOCX. Por favor, tente novamente.');
   }
 }

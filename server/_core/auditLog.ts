@@ -42,7 +42,7 @@ export type AuditAction =
   | "security.rate_limited"
   | "security.csrf_violation";
 
-export type AuditResult = "success" | "failure" | "blocked";
+export type AuditResult = "success" | "failure" | "blocked" | "sanitized";
 
 export interface AuditContext {
   correlationId?: string;

@@ -2,6 +2,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import type { ExportConfig } from '@/components/ExportModal';
 import type { PetitionExportData } from './exportTypes';
+import { captureException } from './sentry';
 
 /** @deprecated Use PetitionExportData instead */
 export type PetitionData = PetitionExportData;
@@ -60,7 +61,11 @@ export async function generatePDFFromElement(
 
     // Salva o PDF
     pdf.save(filename);
-  } catch {
+  } catch (error) {
+    captureException(error instanceof Error ? error : new Error(String(error)), {
+      tags: { feature: 'pdf-export' },
+      extra: { filename },
+    });
     throw new Error('Falha ao gerar PDF. Por favor, tente novamente.');
   }
 }
