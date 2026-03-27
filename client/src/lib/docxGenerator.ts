@@ -10,7 +10,6 @@ import {
   PageNumber,
   Footer,
   Header,
-  ImageRun,
 } from 'docx';
 import { saveAs } from 'file-saver';
 import type { ExportConfig } from '@/components/ExportModal';
