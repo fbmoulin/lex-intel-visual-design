@@ -11,7 +11,7 @@
 - Install: `pnpm install` (project uses `pnpm@10` – keep lockfile untouched).
 - Dev server: `pnpm run dev` (watches `server/_core/index.ts`; front-end served via Vite).
 - Type checking: `pnpm run check`.
-- Tests: `pnpm run test` or `pnpm run test:coverage` (Vitest).
+- Tests: `pnpm run test` or `pnpm run test:coverage` (Vitest); `pnpm run test:e2e` (Playwright).
 - Build: `pnpm run build` (Vite client + bundled server with esbuild); production mode: `pnpm run build:production`.
 - Start production bundle: `pnpm run start` (after `pnpm run build`).
 - Database: `pnpm run db:push` (generate/apply), `pnpm run db:migrate`, `pnpm run db:studio`.
