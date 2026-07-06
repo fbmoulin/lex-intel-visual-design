@@ -16,7 +16,7 @@ test.describe("Home smoke", () => {
   test("navigates to templates page", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("link", { name: /Templates/i }).click();
+    await page.getByRole("link", { name: /^Templates$/ }).click();
     await expect(page).toHaveURL(/\/templates/);
     await expect(
       page.getByRole("heading", { name: /Templates/i })
