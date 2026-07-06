@@ -7,9 +7,9 @@ test.describe("Home smoke", () => {
     await expect(
       page.getByRole("heading", { name: "Lex Intel Visual Design" })
     ).toBeVisible();
-    await expect(page.getByRole("link", { name: /Templates/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /^Templates$/ })).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /Come/i })
+      page.getByRole("main").getByRole("button", { name: /^Começar Agora$/ })
     ).toBeVisible();
   });
 
