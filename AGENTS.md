@@ -5,7 +5,7 @@
 - `server/`: Node/Express + tRPC backend; core services in `server/_core/` (auth, env, security, LLM, storage) with API surface in `server/routers.ts` and entrypoint `server/_core/index.ts`.
 - `drizzle/`: Database schema/migrations; keep SQL changes here and run via scripts below.
 - `docs/`, `scripts/`, `patches/`, `shared/`: Reference docs, automation, dependency patches, and shared utilities.
-- Tests live alongside code (e.g., `server/petitions.test.ts`, `server/auth.logout.test.ts`) rather than a top-level `tests/` folder.
+- Tests live alongside code (e.g., `server/petitions.test.ts`), while End-to-End (E2E) tests reside in the top-level `tests/` folder.
 
 ## Build, Test, and Development Commands
 - Install: `pnpm install` (project uses `pnpm@10` – keep lockfile untouched).
