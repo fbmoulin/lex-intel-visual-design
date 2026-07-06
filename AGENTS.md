@@ -8,7 +8,7 @@
 - Tests live alongside code (e.g., `server/petitions.test.ts`), while End-to-End (E2E) tests reside in the top-level `tests/` folder.
 
 ## Build, Test, and Development Commands
-- Install: `pnpm install` (project uses `pnpm@10` – keep lockfile untouched).
+- Install: `pnpm install` (project uses `pnpm@10` – don’t hand-edit the lockfile; commit it when dependencies change).
 - Dev server: `pnpm run dev` (watches `server/_core/index.ts`; front-end served via Vite).
 - Type checking: `pnpm run check`.
 - Tests: `pnpm run test` or `pnpm run test:coverage` (Vitest); `pnpm run test:e2e` (Playwright).
